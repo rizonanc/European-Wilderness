@@ -25,4 +25,21 @@ public final class CoastalTerrain {
         if (metres < 120F / scale && coast > 0.79) return 35;
         return original;
     }
+
+    public static float fjordsAndSkerries(long seed, int x, int z, float metres, int scale) {
+        if (metres <= -240 || metres >= 520) return metres;
+        int wavelength = 150 * scale;
+        double province = EuropeanEcology.valueNoise(seed, x, z, 71, 640 * scale);
+        double weight = EuropeanEcology.smoothstep(0.62, 0.82, province)
+            * EuropeanEcology.smoothstep(-240, -50, metres)
+            * (1 - EuropeanEcology.smoothstep(200, 520, metres));
+        if (weight == 0) return metres;
+
+        double bend = EuropeanEcology.valueNoise(seed, x, z, 72, wavelength);
+        double across = (x + 0.44 * z) / wavelength + 0.55 * bend;
+        double channel = 1 - EuropeanEcology.smoothstep(0.04, 0.26, Math.abs(across - Math.rint(across)));
+        double shelf = (1 - EuropeanEcology.smoothstep(-28, 45, metres))
+            * EuropeanEcology.smoothstep(0.65, 0.9, EuropeanEcology.valueNoise(seed, x, z, 73, 34 * scale));
+        return (float)(metres + weight * (165 * shelf * (1 - channel) - 570 * channel));
+    }
 }

@@ -33,7 +33,7 @@ public final class RegionalGeology {
     static MountainSurfaceMaterials.Material glacialSurface(long seed, int x, int z, int y, float temperature, int slope) {
         if (slope > 3 || !glacial(temperature, y)) return MountainSurfaceMaterials.Material.NONE;
         double flow = MountainSurfaceMaterials.valueNoise01(seed ^ 0x7e0195L, x, z, 132);
-        if (flow > 0.66) return MountainSurfaceMaterials.Material.GLACIER;
+        if (flow > 0.66) return MountainSurfaceMaterials.Material.SNOW;
         if (flow >= 0.59 && flow <= 0.62) return MountainSurfaceMaterials.Material.MORAINE;
         return MountainSurfaceMaterials.Material.NONE;
     }

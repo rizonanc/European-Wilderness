@@ -7,6 +7,8 @@
   "mixins": [
     "RoadWeaverSamplingMixin",
     "RoadWeaverPathCostMixin",
+    "RoadWeaverMountainCostMixin",
+    "RoadWeaverPotentialFieldCostMixin",
     "RoadWeaverSpansMixin",
     "RoadWeaverSmoothingMixin",
     "RoadWeaverBridgeMixin"

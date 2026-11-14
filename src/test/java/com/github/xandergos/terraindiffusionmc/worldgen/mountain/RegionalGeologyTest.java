@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class RegionalGeologyTest {
-    @Test void rockProvincesAndColdGlacialFeaturesAreDeterministic() {
+    @Test void coldMountainShelvesGenerateSnowAndMoraines() {
         var rocks = EnumSet.noneOf(RegionalGeology.Rock.class);
         var surfaces = EnumSet.noneOf(MountainSurfaceMaterials.Material.class);
         for (int z = -4096; z < 4096; z += 128) for (int x = -4096; x < 4096; x += 128) {
@@ -15,8 +15,8 @@ class RegionalGeologyTest {
             assertEquals(MountainSurfaceMaterials.Material.NONE, RegionalGeology.glacialSurface(310, x, z, 600, 0, 8));
         }
         assertEquals(EnumSet.allOf(RegionalGeology.Rock.class), rocks);
-        assertTrue(surfaces.contains(MountainSurfaceMaterials.Material.GLACIER));
-        assertTrue(surfaces.contains(MountainSurfaceMaterials.Material.MORAINE));
+        assertEquals(EnumSet.of(MountainSurfaceMaterials.Material.NONE, MountainSurfaceMaterials.Material.SNOW,
+            MountainSurfaceMaterials.Material.MORAINE), surfaces);
         assertFalse(RegionalGeology.glacial(5, 300));
         assertTrue(RegionalGeology.glacial(5, 600));
     }

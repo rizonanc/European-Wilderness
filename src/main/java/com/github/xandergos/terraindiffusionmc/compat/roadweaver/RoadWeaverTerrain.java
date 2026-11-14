@@ -98,6 +98,19 @@ public final class RoadWeaverTerrain {
         return floor - (waterFirstAir - seaLevel);
     }
 
+    public static double mountainGradeCost(int dx, int dy, int dz) {
+        double run = Math.hypot(dx, dz);
+        double excess = Math.max(0, Math.abs(dy) - run * 0.25);
+        return 16 * excess * excess / Math.max(1, run);
+    }
+
+    public static double mountainGradeCost(ServerWorld world, BlockPos from, BlockPos to) {
+        if (Math.max(from.getY(), to.getY()) < 125 || from.getY() == to.getY()) return 0;
+        var session = session(world);
+        return session != null && session.profile().newLandforms()
+            ? mountainGradeCost(to.getX() - from.getX(), to.getY() - from.getY(), to.getZ() - from.getZ()) : 0;
+    }
+
     public static int bridgeComparisonFloor(ServerWorld world, int x, int z, int original) {
         var session = session(world);
         if (session == null) return original;

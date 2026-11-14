@@ -1,6 +1,7 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.mountain;
 
 import com.github.xandergos.terraindiffusionmc.world.TerrainDiffusionBiomeSource;
+import com.github.xandergos.terraindiffusionmc.compat.roadweaver.RoadWeaverTerrain;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.PerformanceProfile;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
 import com.github.xandergos.terraindiffusionmc.worldgen.terrain.PreparedFallback;
@@ -77,7 +78,7 @@ public final class MountainPassCampFeature extends Feature<DefaultFeatureConfig>
             }
 
             List<MountainPassCampPlanning.RouteColumn> route = MountainPassCampPlanning.routeForChunk(
-               seed, tile, scale, world.getTopYInclusive(), plan.pass().orElseThrow(), chunkX, chunkZ
+               seed, tile, scale, world.getTopYInclusive(), plan.pass().orElseThrow(), chunkX, chunkZ, session.profile().newLandforms()
             );
             List<AbandonedCampPlanner.Voxel> camp = plan.camp()
                .filter(c -> !waterChangesCamp(c,session,tile,scale,world.getTopYInclusive()))
@@ -113,59 +114,85 @@ public final class MountainPassCampFeature extends Feature<DefaultFeatureConfig>
    private static boolean writeRoute(StructureWorldAccess world, List<MountainPassCampPlanning.RouteColumn> route) {
       boolean changed = false;
 
+      routeColumn:
       for (MountainPassCampPlanning.RouteColumn placement : route) {
-         if (placement.naturalGroundY() >= world.getBottomY() && placement.groundY() < world.getTopYInclusive()) {
-            BlockPos naturalPos = new BlockPos(placement.x(), placement.naturalGroundY(), placement.z());
-            BlockState natural = world.getBlockState(naturalPos);
-            if (natural.getFluidState().isEmpty() && naturalGround(natural)) {
-               boolean clear = true;
+         if (placement.naturalGroundY() < world.getBottomY() || placement.groundY() >= world.getTopYInclusive()) {
+            continue;
+         }
+         BlockPos naturalPos = new BlockPos(placement.x(), placement.naturalGroundY(), placement.z());
+         if (placement.marked() && RoadWeaverTerrain.isOnRoad(world, naturalPos)) {
+            continue;
+         }
+         BlockState natural = world.getBlockState(naturalPos);
+         if (!natural.getFluidState().isEmpty() || !naturalGround(natural)) {
+            continue;
+         }
 
-               for (int y = placement.naturalGroundY() + 1; y <= placement.groundY() + 1; y++) {
-                  BlockState existing = world.getBlockState(new BlockPos(placement.x(), y, placement.z()));
-                  if (!existing.getFluidState().isEmpty() || !existing.isAir() && !existing.isOf(Blocks.SNOW)) {
-                     clear = false;
-                     break;
-                  }
-               }
-
-               if (clear) {
-                  BlockState next = natural.isOf(Blocks.SNOW_BLOCK)
-                     ? Blocks.SNOW_BLOCK.getDefaultState()
-                     : (
-                        natural.isOf(Blocks.GRAVEL)
-                           ? Blocks.GRAVEL.getDefaultState()
-                           : (
-                              !natural.isOf(Blocks.STONE)
-                                    && !natural.isOf(Blocks.ANDESITE)
-                                    && !natural.isOf(Blocks.DIORITE)
-                                    && !natural.isOf(Blocks.GRANITE)
-                                    && !natural.isOf(Blocks.CALCITE)
-                                    && !natural.isOf(Blocks.TUFF)
-                                 ? Blocks.STONE.getDefaultState()
-                                 : natural
-                           )
-                     );
-
-                  for (int y = placement.naturalGroundY() + 1; y < placement.groundY(); y++) {
-                     changed |= world.setBlockState(new BlockPos(placement.x(), y, placement.z()), Blocks.STONE.getDefaultState(), 2);
-                  }
-
-                  BlockPos groundPos = new BlockPos(placement.x(), placement.groundY(), placement.z());
-                  if (!world.getBlockState(groundPos).equals(next)) {
-                     changed |= world.setBlockState(groundPos, next, 2);
-                  }
-
-                  BlockPos abovePos = groundPos.up();
-                  BlockState above = world.getBlockState(abovePos);
-                  if (above.isOf(Blocks.SNOW)) {
-                     changed |= world.setBlockState(abovePos, Blocks.AIR.getDefaultState(), 2);
-                  }
-               }
+         for (int y = placement.naturalGroundY() + 1; y <= placement.groundY() + 1; y++) {
+            BlockState existing = world.getBlockState(new BlockPos(placement.x(), y, placement.z()));
+            if (!existing.getFluidState().isEmpty() || !existing.isAir() && !existing.isOf(Blocks.SNOW)) {
+               continue routeColumn;
             }
+         }
+
+         BlockState next = routeSurface(natural);
+         for (int y = placement.naturalGroundY() + 1; y < placement.groundY(); y++) {
+            changed |= world.setBlockState(new BlockPos(placement.x(), y, placement.z()), Blocks.STONE.getDefaultState(), 2);
+         }
+
+         BlockPos groundPos = new BlockPos(placement.x(), placement.groundY(), placement.z());
+         if (placement.marked()) {
+            next = Blocks.GRAVEL.getDefaultState();
+            BlockPos support = groundPos.down();
+            if (!world.getBlockState(support).isSolidBlock(world, support)) {
+               continue;
+            }
+         }
+         if (!world.getBlockState(groundPos).equals(next)) {
+            changed |= world.setBlockState(groundPos, next, 2);
+         }
+
+         BlockPos abovePos = groundPos.up();
+         if (world.getBlockState(abovePos).isOf(Blocks.SNOW)) {
+            changed |= world.setBlockState(abovePos, Blocks.AIR.getDefaultState(), 2);
+         }
+         if (placement.sideX() != 0 || placement.sideZ() != 0) {
+            BlockPos marker = abovePos.add(placement.sideX() * 2, 0, placement.sideZ() * 2);
+            changed |= writeCairn(world, groundPos, marker);
          }
       }
 
       return changed;
+   }
+
+   private static BlockState routeSurface(BlockState natural) {
+      if (natural.isOf(Blocks.SNOW_BLOCK)) {
+         return Blocks.SNOW_BLOCK.getDefaultState();
+      }
+      if (natural.isOf(Blocks.GRAVEL)) {
+         return Blocks.GRAVEL.getDefaultState();
+      }
+      if (natural.isOf(Blocks.STONE) || natural.isOf(Blocks.ANDESITE) || natural.isOf(Blocks.DIORITE)
+         || natural.isOf(Blocks.GRANITE) || natural.isOf(Blocks.CALCITE) || natural.isOf(Blocks.TUFF)) {
+         return natural;
+      }
+      return Blocks.STONE.getDefaultState();
+   }
+
+   private static boolean writeCairn(StructureWorldAccess world, BlockPos groundPos, BlockPos marker) {
+      if ((marker.getX() >> 4) != (groundPos.getX() >> 4)
+         || (marker.getZ() >> 4) != (groundPos.getZ() >> 4)
+         || marker.getY() >= world.getTopYInclusive()
+         || !world.getBlockState(marker).isAir() || !world.getBlockState(marker.up()).isAir()
+         || !naturalGround(world.getBlockState(marker.down()))
+         || RoadWeaverTerrain.isOnRoad(world, marker)) {
+         return false;
+      }
+      if (!world.setBlockState(marker, Blocks.COBBLESTONE.getDefaultState(), 2)) {
+         return false;
+      }
+      world.setBlockState(marker.up(), Blocks.COBBLESTONE_WALL.getDefaultState(), 2);
+      return true;
    }
 
    private static boolean writeCamp(StructureWorldAccess world, List<AbandonedCampPlanner.Voxel> voxels) {

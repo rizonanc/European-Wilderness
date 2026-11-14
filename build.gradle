@@ -2,7 +2,7 @@ plugins {
     id 'fabric-loom' version '1.13.6'
 }
 
-version = '2.12.46-road-tree-compat-windows+1.21.11'
+version = '2.12.48-mountain-trails-and-coasts-windows+1.21.11'
 group = 'com.github.xandergos'
 base { archivesName = 'terrain-diffusion-mc' }
 

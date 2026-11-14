@@ -7,8 +7,15 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class RoadWeaverTerrainTest {
+    @Test void mountainRoadCostPrefersGradualClimbsInBothDirections() {
+        assertEquals(0d, RoadWeaverTerrain.mountainGradeCost(8, 2, 0));
+        double steep = RoadWeaverTerrain.mountainGradeCost(8, 6, 0);
+        assertTrue(steep > RoadWeaverTerrain.mountainGradeCost(8, 6, 8));
+        assertEquals(steep, RoadWeaverTerrain.mountainGradeCost(-8, -6, 0));
+    }
     @Test
     void bridgeDepthUsesTheLocalWaterSurface() {
         var session = WorldSession.activate(GenerationProfile.defaultsFor(2, "road-test", "cpu", "cpu"));

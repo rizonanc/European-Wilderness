@@ -6,6 +6,16 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class GenerationWaterModeTest {
+    @Test void newLandformsArePinnedToTheWorldProfile() {
+        var json = GenerationProfileState.CODEC.encodeStart(JsonOps.INSTANCE,
+            GenerationProfileState.createDefault()).getOrThrow().getAsJsonObject();
+        var current = GenerationProfileState.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow().toProfile();
+        json.remove("new_landforms");
+        var previous = GenerationProfileState.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow().toProfile();
+        assertTrue(current.newLandforms());
+        assertFalse(previous.newLandforms());
+        assertNotEquals(current.fingerprint(), previous.fingerprint());
+    }
     @Test void newWorldEnablesAutomaticWaterAndRoundTripsTheMode() {
         var state=GenerationProfileState.createDefault();assertTrue(state.automaticWater());
         var encoded=GenerationProfileState.CODEC.encodeStart(JsonOps.INSTANCE,state).getOrThrow();
@@ -54,6 +64,7 @@ class GenerationWaterModeTest {
         assertTrue(fresh.remove("large_islands").getAsBoolean());
         assertEquals(0, fresh.remove("climate_shift").getAsInt());
         assertTrue(fresh.remove("slope_climate").getAsBoolean());
+        assertTrue(fresh.remove("new_landforms").getAsBoolean());
         var previous = GenerationProfileState.CODEC.parse(JsonOps.INSTANCE, fresh).getOrThrow().toProfile();
         assertTrue(previous.tropicalLandforms());
         assertFalse(previous.largeIslands());

@@ -101,7 +101,6 @@ public final class MountainSurfaceMaterials {
       SCREE,
       SNOW,
       THIN_SNOW,
-      GLACIER,
       MORAINE;
    }
 }

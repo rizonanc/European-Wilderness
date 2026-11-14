@@ -55,7 +55,8 @@ public final class MountainSurfaceFeature extends Feature<DefaultFeatureConfig> 
          boolean surfaceChanged = MountainSurfacePlanning.planAndWrite(
             mode, () -> MountainSurfacePlanning.planChunk(terrain, seed, chunkX, chunkZ, MountainSurfaceFeature::classify), plan -> {
                WorldSession.requireActive(session);
-               boolean changed = write(world, plan, seed) | MountainLandforms.generate(world, terrain, seed, chunkX, chunkZ, session.riverOverlay());
+               boolean changed = write(world, plan, seed) | MountainLandforms.generate(world, terrain, seed, chunkX, chunkZ,
+                  session.riverOverlay(), session.profile().newLandforms());
                return session.profile().climateShift().isPresent()
                   ? changed | StoneLandmark.generate(world, terrain, seed, chunkX, chunkZ) : changed;
             }
@@ -113,10 +114,8 @@ public final class MountainSurfaceFeature extends Feature<DefaultFeatureConfig> 
             changed |= world.setBlockState(abovePos, write.aboveReplacement(), 2);
          }
 
-         if (placement.material() == MountainSurfaceMaterials.Material.ROCK
-               || placement.material() == MountainSurfaceMaterials.Material.GLACIER) {
-            Block backing = placement.material() == MountainSurfaceMaterials.Material.GLACIER
-               ? Blocks.PACKED_ICE : RegionalGeology.rock(seed, placement.x(), placement.z());
+         if (placement.material() == MountainSurfaceMaterials.Material.ROCK) {
+            Block backing = RegionalGeology.rock(seed, placement.x(), placement.z());
             final int surfaceY = groundY;
             final MountainSurfacePlanning.Placement surfacePlacement = placement;
             int depth = MountainSurfacePlanning.rockSubsurfaceDepth(offsetx -> {
@@ -148,7 +147,6 @@ public final class MountainSurfaceFeature extends Feature<DefaultFeatureConfig> 
 
       Block replacement = switch (material) {
          case ROCK -> rock;
-         case GLACIER -> Blocks.PACKED_ICE;
          case MORAINE -> Blocks.GRAVEL;
          case SCREE -> Blocks.GRAVEL;
          case SNOW -> Blocks.SNOW_BLOCK;

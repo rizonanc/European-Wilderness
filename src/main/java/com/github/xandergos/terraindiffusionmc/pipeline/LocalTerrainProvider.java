@@ -483,10 +483,12 @@ public final class LocalTerrainProvider {
    private static void adjustElevation(float[] heights, GenerationProfile profile, int x, int z, int width) {
       BiomeBalance balance = profile.biomeBalance();
       boolean regional = profile.climateShift().isPresent();
-      if (!regional && balance.mountains() == 100 && balance.oceans() == 100) return;
+      if (!regional && !profile.newLandforms() && balance.mountains() == 100 && balance.oceans() == 100) return;
       for (int i = 0; i < heights.length; i++) {
          float height = balance.adjustElevation(heights[i]);
-         heights[i] = regional ? CoastalTerrain.height(instanceSeed, x + i % width, z + i / width, height) : height;
+         int wx = x + i % width, wz = z + i / width;
+         if (regional) height = CoastalTerrain.height(instanceSeed, wx, wz, height);
+         heights[i] = profile.newLandforms() ? CoastalTerrain.fjordsAndSkerries(instanceSeed, wx, wz, height, profile.worldScale()) : height;
       }
    }
 

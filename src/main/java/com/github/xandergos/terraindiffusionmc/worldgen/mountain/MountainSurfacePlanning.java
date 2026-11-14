@@ -43,7 +43,6 @@ final class MountainSurfacePlanning {
             material == MountainSurfaceMaterials.Material.ROCK
                || material == MountainSurfaceMaterials.Material.SCREE
                || material == MountainSurfaceMaterials.Material.SNOW
-               || material == MountainSurfaceMaterials.Material.GLACIER
                || material == MountainSurfaceMaterials.Material.MORAINE
          );
       if (!aboveAir && !clearCap) {

@@ -30,6 +30,7 @@ public final class GenerationProfile {
    private final boolean largeIslands;
    private final Optional<Integer> climateShift;
    private final boolean slopeClimate;
+   private final boolean newLandforms;
 
    private GenerationProfile(
       int realismLevel,
@@ -48,7 +49,8 @@ public final class GenerationProfile {
       boolean tropicalLandforms,
       boolean largeIslands,
       Optional<Integer> climateShift,
-      boolean slopeClimate
+      boolean slopeClimate,
+      boolean newLandforms
    ) {
       if (mountainRelief < 0 || mountainRelief > 200 || biomeVariety < 0 || biomeVariety > 100)
          throw new IllegalArgumentException("Invalid terrain preferences");
@@ -61,6 +63,7 @@ public final class GenerationProfile {
       this.largeIslands = largeIslands;
       this.climateShift = climateShift;
       this.slopeClimate = slopeClimate;
+      this.newLandforms = newLandforms;
       if (realismLevel < 0 || realismLevel > 7) {
          throw new IllegalArgumentException("realismLevel must be 0..7, got " + realismLevel);
       }
@@ -114,19 +117,20 @@ public final class GenerationProfile {
       String createdBackend
    ) {
       return new GenerationProfile(realismLevel, worldScale, region, formatVersion, generatorVersion,
-         modelFingerprint, inferenceDevice, createdBackend, 100, 0, WaterGenerationOptions.DEFAULT, false, BiomeBalance.DEFAULT, false, false, Optional.empty(), false);
+         modelFingerprint, inferenceDevice, createdBackend, 100, 0, WaterGenerationOptions.DEFAULT, false, BiomeBalance.DEFAULT, false, false, Optional.empty(), false, false);
    }
 
    public static GenerationProfile defaultsFor(int worldScale, String modelFingerprint, String inferenceDevice, String createdBackend) {
       return of(7, worldScale, "europe", 2, 8, modelFingerprint, inferenceDevice, createdBackend);
    }
 
-   GenerationProfile withTerrainPreferences(int mountainRelief, int biomeVariety, WaterGenerationOptions water, boolean largerLandscapes, BiomeBalance biomeBalance, boolean tropicalLandforms, boolean largeIslands, Optional<Integer> climateShift, boolean slopeClimate) {
+   GenerationProfile withTerrainPreferences(int mountainRelief, int biomeVariety, WaterGenerationOptions water, boolean largerLandscapes, BiomeBalance biomeBalance, boolean tropicalLandforms, boolean largeIslands, Optional<Integer> climateShift, boolean slopeClimate, boolean newLandforms) {
       return new GenerationProfile(realismLevel, worldScale, region, formatVersion, generatorVersion,
-         modelFingerprint, inferenceDevice, createdBackend, mountainRelief, biomeVariety, water, largerLandscapes, biomeBalance, tropicalLandforms, largeIslands, climateShift, slopeClimate);
+         modelFingerprint, inferenceDevice, createdBackend, mountainRelief, biomeVariety, water, largerLandscapes, biomeBalance, tropicalLandforms, largeIslands, climateShift, slopeClimate, newLandforms);
    }
 
    public boolean slopeClimate() { return slopeClimate; }
+   public boolean newLandforms() { return newLandforms; }
    public Optional<Integer> climateShift() { return climateShift; }
    public boolean largeIslands() { return largeIslands; }
    public boolean tropicalLandforms() { return tropicalLandforms; }
@@ -192,6 +196,7 @@ public final class GenerationProfile {
          + (biomeBalance.equals(BiomeBalance.DEFAULT) ? "" : "/biomes:" + biomeBalance.mountains() + "," + biomeBalance.oceans()
             + "," + biomeBalance.deserts() + "," + biomeBalance.forests() + "," + biomeBalance.fields())
          + (slopeClimate ? "/slope-climate:1" : "")
+         + (newLandforms ? "/landforms:1" : "")
          + climateShift.map(shift -> "/regional-terrain:1:" + shift).orElse("")
          + (largeIslands ? "/large-islands:1" : "")
          + (tropicalLandforms ? "/tropical:1" : "")
@@ -215,7 +220,7 @@ public final class GenerationProfile {
                && this.inferenceDevice.equals(other.inferenceDevice)
                && this.createdBackend.equals(other.createdBackend)
                && mountainRelief == other.mountainRelief && biomeVariety == other.biomeVariety && water.equals(other.water)
-               && largerLandscapes == other.largerLandscapes && biomeBalance.equals(other.biomeBalance) && tropicalLandforms == other.tropicalLandforms && largeIslands == other.largeIslands && climateShift.equals(other.climateShift) && slopeClimate == other.slopeClimate;
+               && largerLandscapes == other.largerLandscapes && biomeBalance.equals(other.biomeBalance) && tropicalLandforms == other.tropicalLandforms && largeIslands == other.largeIslands && climateShift.equals(other.climateShift) && slopeClimate == other.slopeClimate && newLandforms == other.newLandforms;
       }
    }
 
@@ -229,7 +234,7 @@ public final class GenerationProfile {
          this.generatorVersion,
          this.modelFingerprint,
          this.inferenceDevice,
-         this.createdBackend, mountainRelief, biomeVariety, water, largerLandscapes, biomeBalance, tropicalLandforms, largeIslands, climateShift, slopeClimate
+         this.createdBackend, mountainRelief, biomeVariety, water, largerLandscapes, biomeBalance, tropicalLandforms, largeIslands, climateShift, slopeClimate, newLandforms
       );
    }
 

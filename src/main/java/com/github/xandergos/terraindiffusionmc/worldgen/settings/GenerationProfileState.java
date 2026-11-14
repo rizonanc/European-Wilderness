@@ -7,11 +7,12 @@ import net.minecraft.world.PersistentState;
 import net.minecraft.world.PersistentStateType;
 
 public final class GenerationProfileState extends PersistentState {
-   private record RegionalOptions(boolean largeIslands, Optional<Integer> climateShift, boolean slopeClimate) {
+   private record RegionalOptions(boolean largeIslands, Optional<Integer> climateShift, boolean slopeClimate, boolean newLandforms) {
       static final com.mojang.serialization.MapCodec<RegionalOptions> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
          Codec.BOOL.optionalFieldOf("large_islands", false).forGetter(RegionalOptions::largeIslands),
          Codec.intRange(-8, 8).optionalFieldOf("climate_shift").forGetter(RegionalOptions::climateShift),
-         Codec.BOOL.optionalFieldOf("slope_climate", false).forGetter(RegionalOptions::slopeClimate)
+         Codec.BOOL.optionalFieldOf("slope_climate", false).forGetter(RegionalOptions::slopeClimate),
+         Codec.BOOL.optionalFieldOf("new_landforms", false).forGetter(RegionalOptions::newLandforms)
       ).apply(instance, RegionalOptions::new));
    }
 
@@ -32,7 +33,7 @@ public final class GenerationProfileState extends PersistentState {
             Codec.BOOL.optionalFieldOf("larger_landscapes", false).forGetter(s -> s.largerLandscapes),
             BiomeBalance.CODEC.optionalFieldOf("biome_balance", BiomeBalance.DEFAULT).forGetter(s -> s.biomeBalance),
             Codec.BOOL.optionalFieldOf("tropical_landforms", false).forGetter(s -> s.tropicalLandforms),
-            RegionalOptions.CODEC.forGetter(s -> new RegionalOptions(s.largeIslands, s.climateShift, s.slopeClimate))
+            RegionalOptions.CODEC.forGetter(s -> s.regional)
          )
          .apply(instance, GenerationProfileState::new)
    );
@@ -55,9 +56,7 @@ public final class GenerationProfileState extends PersistentState {
    private final boolean largerLandscapes;
    private final BiomeBalance biomeBalance;
    private final boolean tropicalLandforms;
-   private final boolean largeIslands;
-   private final Optional<Integer> climateShift;
-   private final boolean slopeClimate;
+   private final RegionalOptions regional;
 
    public boolean automaticWater() { return automaticWater; }
 
@@ -75,7 +74,7 @@ public final class GenerationProfileState extends PersistentState {
       String backend = offered != null ? offered.createdBackend() : "unknown";
       var options = offered != null ? offered.options() : WorldGenerationOptions.configured();
       return new GenerationProfileState(2, 8, 7, scale, "europe", model, device, backend, true,
-         options.mountainRelief(), options.biomeVariety(), Optional.of(options.water()), true, options.biomeBalance(), true, new RegionalOptions(true, Optional.of(options.climateShift()), true));
+         options.mountainRelief(), options.biomeVariety(), Optional.of(options.water()), true, options.biomeBalance(), true, new RegionalOptions(true, Optional.of(options.climateShift()), true, true));
    }
 
    private GenerationProfileState(
@@ -111,9 +110,7 @@ public final class GenerationProfileState extends PersistentState {
       this.largerLandscapes = largerLandscapes;
       this.biomeBalance = biomeBalance;
       this.tropicalLandforms = tropicalLandforms;
-      this.largeIslands = regional.largeIslands();
-      this.climateShift = regional.climateShift();
-      this.slopeClimate = regional.slopeClimate();
+      this.regional = regional;
    }
 
    public void bindLegacyWaterOptions(WaterGenerationOptions options) {
@@ -141,7 +138,8 @@ public final class GenerationProfileState extends PersistentState {
             this.modelFingerprint,
             this.inferenceDevice,
             this.createdBackend
-         ).withTerrainPreferences(mountainRelief, biomeVariety, water.orElse(WaterGenerationOptions.DEFAULT), largerLandscapes, biomeBalance, tropicalLandforms, largeIslands, climateShift, slopeClimate);
+         ).withTerrainPreferences(mountainRelief, biomeVariety, water.orElse(WaterGenerationOptions.DEFAULT), largerLandscapes,
+            biomeBalance, tropicalLandforms, regional.largeIslands(), regional.climateShift(), regional.slopeClimate(), regional.newLandforms());
       }
    }
 
