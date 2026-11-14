@@ -1,0 +1,8 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.github.xandergos.terraindiffusionmc.mixin.compat",
+  "compatibilityLevel": "JAVA_21",
+  "client": ["CoarseRenderSectionMixin", "CoarseMeshRevisionMixin", "CoarseNeighborMixin", "CoarseChildMixin"],
+  "injectors": {"defaultRequire": 1}
+}

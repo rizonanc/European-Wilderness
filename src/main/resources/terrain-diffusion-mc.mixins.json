@@ -1,0 +1,25 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.github.xandergos.terraindiffusionmc.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "BiomeMixin",
+    "MinecraftServerMixin",
+    "VillageWaterMixin",
+    "SpawnHelperMixin",
+    "AnimalHabitatMixin",
+    "BoatCurrentMixin",
+    "ItemCurrentMixin",
+    "decoration.BiomeSelectionRegistries",
+    "decoration.DecorationFrequencyMixin",
+    "decoration.GeophilicResourcePackMixin",
+    "decoration.WilderWildBiomeModificationMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

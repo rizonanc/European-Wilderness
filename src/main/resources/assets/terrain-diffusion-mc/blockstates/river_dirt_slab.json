@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "terrain-diffusion-mc:block/river_dirt_slab"
+    },
+    "type=top": {
+      "model": "terrain-diffusion-mc:block/river_dirt_slab_top"
+    },
+    "type=double": {
+      "model": "terrain-diffusion-mc:block/river_dirt_slab_double"
+    }
+  }
+}

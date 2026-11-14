@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "terrain-diffusion-mc:european_coniferous",
+    "terrain-diffusion-mc:european_deciduous",
+    "terrain-diffusion-mc:european_meadow",
+    "terrain-diffusion-mc:european_mixed",
+    "terrain-diffusion-mc:forest_sparse",
+    "terrain-diffusion-mc:grove",
+    "terrain-diffusion-mc:snowy_taiga_sparse",
+    "terrain-diffusion-mc:taiga_sparse"
+  ]
+}

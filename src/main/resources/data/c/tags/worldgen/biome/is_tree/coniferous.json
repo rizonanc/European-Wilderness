@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "terrain-diffusion-mc:european_coniferous",
+    "terrain-diffusion-mc:snowy_taiga_sparse",
+    "terrain-diffusion-mc:taiga_sparse"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "terrain-diffusion-mc:european_coniferous",
+    "terrain-diffusion-mc:european_deciduous",
+    "terrain-diffusion-mc:european_mixed"
+  ]
+}

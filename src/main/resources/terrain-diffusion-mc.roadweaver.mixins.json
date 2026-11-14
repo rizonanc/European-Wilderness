@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.github.xandergos.terraindiffusionmc.mixin.compat",
+  "plugin": "com.github.xandergos.terraindiffusionmc.mixin.compat.RoadWeaverMixinPlugin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "RoadWeaverSamplingMixin",
+    "RoadWeaverPathCostMixin",
+    "RoadWeaverSpansMixin",
+    "RoadWeaverSmoothingMixin",
+    "RoadWeaverBridgeMixin"
+  ],
+  "injectors": {"defaultRequire": 1}
+}

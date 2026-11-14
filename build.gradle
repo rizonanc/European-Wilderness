@@ -1,0 +1,61 @@
+plugins {
+    id 'fabric-loom' version '1.13.6'
+}
+
+version = '2.12.46-road-tree-compat-windows+1.21.11'
+group = 'com.github.xandergos'
+base { archivesName = 'terrain-diffusion-mc' }
+
+repositories {
+    flatDir { dirs 'libs' }
+    maven { url = 'https://maven.terraformersmc.com/releases/' }
+}
+
+dependencies {
+    minecraft 'com.mojang:minecraft:1.21.11'
+    mappings 'net.fabricmc:yarn:1.21.11+build.4:v2'
+    modImplementation 'net.fabricmc:fabric-loader:0.18.1'
+    // Provided at runtime by Fabric Loader.
+    compileOnly 'io.github.llamalad7:mixinextras-fabric:0.5.0'
+    modImplementation 'net.fabricmc.fabric-api:fabric-api:0.141.2+1.21.11'
+    modCompileOnly 'com.terraformersmc:modmenu:17.0.0'
+    implementation 'com.microsoft.onnxruntime:onnxruntime-dml:1.0'
+    include 'com.microsoft.onnxruntime:onnxruntime-dml:1.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    // Optional Voxy ABI only: never included in the released mod.
+    compileOnly files('libs/voxy-0.2.16-beta+1.21.11.jar')
+    testImplementation files('libs/voxy-0.2.16-beta+1.21.11.jar')
+}
+
+tasks.named('test') { useJUnitPlatform()
+    test.systemProperty("td.coarse.trace", System.getProperty("td.coarse.trace", "")) }
+tasks.register('exportQaRuntime') {
+    doLast { file('build/qa-runtime.txt').text = sourceSets.test.runtimeClasspath.asPath }
+}
+processResources {
+    inputs.property('version',project.version)
+    filesMatching('fabric.mod.json') { expand(version:project.version) }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
+}
+
+// Optional recovery task; ordinary builds need only the files in this project.
+if (file('../recovery-evidence/original-mod.jar').exists()) {
+tasks.register('remapRecovered', net.fabricmc.loom.task.RemapJarTask) {
+    inputFile = file('../recovery-evidence/original-mod.jar')
+    archiveFileName = 'recovered-named.jar'
+    destinationDirectory = file('../recovery-evidence')
+    sourceNamespace = 'intermediary'
+    targetNamespace = 'named'
+    classpath.setFrom(fileTree(new File(gradle.gradleUserHomeDir, 'caches/fabric-loom/minecraftMaven/net/minecraft/minecraft-merged-intermediary')) { include '**/*.jar' })
+    addNestedDependencies = false
+}
+}

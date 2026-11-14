@@ -1,0 +1,9 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "com.github.xandergos.terraindiffusionmc.mixin.compat",
+  "plugin": "com.github.xandergos.terraindiffusionmc.mixin.compat.VoxyWaterMixinPlugin",
+  "compatibilityLevel": "JAVA_21",
+  "client": ["VoxyWaterFrameMixin", "VoxyWaterMapperMixin", "VoxyWaterMipMixin", "VoxyGrassMapperMixin", "VoxyGrassMipMixin", "VoxyIngestSnapshotMixin"],
+  "injectors": {"defaultRequire": 1}
+}

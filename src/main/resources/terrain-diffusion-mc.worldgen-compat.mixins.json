@@ -1,0 +1,9 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.github.xandergos.terraindiffusionmc.mixin.compat",
+  "plugin": "com.github.xandergos.terraindiffusionmc.mixin.compat.WorldGenMixinPlugin",
+  "compatibilityLevel": "JAVA_21",
+  "client": ["WorldGenPauseMixin","WorldGenLoadedChunkMixin"],
+  "injectors": {"defaultRequire": 1}
+}

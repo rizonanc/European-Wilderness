@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "terrain-diffusion-mc",
+  "version": "${version}",
+  "name": "terrain-diffusion-mc",
+  "description": "Terrain Diffusion in Minecraft",
+  "authors": [],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/terrain-diffusion-mc/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "modmenu": [
+      "com.github.xandergos.terraindiffusionmc.client.TerrainDiffusionModMenuApi"
+    ],
+    "fabric-datagen": [
+      "com.github.xandergos.terraindiffusionmc.client.TerrainDiffusionMcDataGenerator"
+    ],
+    "client": [
+      "com.github.xandergos.terraindiffusionmc.client.TerrainDiffusionMcClient"
+    ],
+    "main": [
+      "com.github.xandergos.terraindiffusionmc.TerrainDiffusionMc"
+    ]
+  },
+  "mixins": [
+    {"config":"terrain-diffusion-mc.water-voxy.mixins.json","environment":"client"},
+    {"config":"terrain-diffusion-mc.coarse-voxy.mixins.json","environment":"client"},
+    {"config":"terrain-diffusion-mc.worldgen-compat.mixins.json","environment":"client"},
+    "terrain-diffusion-mc.roadweaver.mixins.json",
+    "terrain-diffusion-mc.mixins.json",
+    {
+      "config": "terrain-diffusion-mc.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "suggests": { "voxy": "0.2.16-beta" },
+  "depends": {
+    "fabricloader": ">=0.18.1",
+    "fabric": "*",
+    "minecraft": "1.21.11"
+  }
+}
