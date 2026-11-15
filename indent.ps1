@@ -1,7 +1,7 @@
 $rows = @(Get-ChildItem src -Recurse -Filter '*.java' | ForEach-Object {
     foreach ($line in Get-Content -Encoding UTF8 -LiteralPath $_.FullName) {
         if ($line.Trim().Length -gt 0) {
-            [pscustomobject]@{ Indent = [regex]::Match($line, '^[ `t]*').Length; Length = $line.Length }
+            [pscustomobject]@{ Indent = [regex]::Match($line, '^[ \t]*').Length; Length = $line.Length }
         }
     }
 })
