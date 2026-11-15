@@ -56,7 +56,7 @@ public final class PreparedWaterCommands {
     private static WorldSession session(ServerCommandSource source) {
         if(!WorldSessionBinding.ownsSession(source.getWorld().getRegistryKey())
             || !(source.getWorld().getChunkManager().getChunkGenerator().getBiomeSource() instanceof TerrainDiffusionBiomeSource))
-            throw new IllegalStateException("Команда работает только в обычном измерении мира Terrain Diffusion");
+            throw new IllegalStateException("Команда работает только в обычном измерении мира European Wilderness");
         var session=WorldSession.current();
         if(session==null||!session.isActive()||(session.preparedWater()==null&&session.automaticWater()==null)) throw new IllegalStateException("Нет активной сессии воды");
         return session;

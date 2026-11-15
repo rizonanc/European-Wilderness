@@ -14,7 +14,7 @@ public final class ChunkyCommands {
             var client=MinecraftClient.getInstance();var server=client.getServer();
             if(server==null||client.player==null||client.world==null||!client.world.getRegistryKey().equals(World.OVERWORLD)
                 ||!(server.getOverworld().getChunkManager().getChunkGenerator().getBiomeSource() instanceof TerrainDiffusionBiomeSource)){
-                c.getSource().sendError(Text.literal("Нужен встроенный мир Terrain Diffusion, измерение overworld"));return 0;}
+                c.getSource().sendError(Text.literal("Нужен встроенный мир European Wilderness, измерение overworld"));return 0;}
             int x=client.player.getBlockX(),z=client.player.getBlockZ(),radius=IntegerArgumentType.getInteger(c,"radiusChunks");
             server.execute(()->{String result;
                 try {result=ChunkyApiAdapter.installed().startChunks("minecraft:overworld",x,z,radius)

@@ -20,7 +20,7 @@ public final class ClientPerformance {
     }
     public static boolean mayPublish(){return measuring&&!paused&&FRAMES.mayPublish();}
     public static void install(){
-        PerformanceDiagnostics.install(MinecraftClient.getInstance().runDirectory.toPath().resolve("logs/terrain-diffusion-performance.jsonl"));
+        PerformanceDiagnostics.install(MinecraftClient.getInstance().runDirectory.toPath().resolve("logs/european-wilderness-performance.jsonl"));
         ClientCommandRegistrationCallback.EVENT.register((dispatcher,access)->dispatcher.register(literal("td-perf")
             .then(literal("status").executes(c->{c.getSource().sendFeedback(Text.literal(FRAMES.statistics()));c.getSource().sendFeedback(Text.literal(PerformanceDiagnostics.status()));return 1;}))
             .then(literal("reset-frames").executes(c->{FRAMES.resetMeasurements();c.getSource().sendFeedback(Text.literal("Выборка кадров очищена; управление нагрузкой не изменено"));return 1;}))
@@ -35,7 +35,7 @@ public final class ClientPerformance {
                     if(ticket!=null&&ticket.automaticWater()!=null)report.put("water",ticket.automaticWater().measurements());
                     return report;
                 });
-                c.getSource().sendFeedback(Text.literal(accepted?"Снимок производительности заказан: logs/terrain-diffusion-performance.jsonl":"Предыдущий снимок ещё ожидает записи"));return accepted?1:0;
+                c.getSource().sendFeedback(Text.literal(accepted?"Снимок производительности заказан: logs/european-wilderness-performance.jsonl":"Предыдущий снимок ещё ожидает записи"));return accepted?1:0;
             }))
             .then(literal("recent").executes(c->{c.getSource().sendFeedback(Text.literal(PerformanceDiagnostics.recent()));return 1;}))));
         ClientTickEvents.END_CLIENT_TICK.register(client->{

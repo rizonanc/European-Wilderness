@@ -2,14 +2,21 @@ plugins {
     id 'fabric-loom' version '1.13.6'
 }
 
-version = '2.12.48-mountain-trails-and-coasts-windows+1.21.11'
+version = "${mod_version}+${minecraft_version}"
 group = 'com.github.xandergos'
-base { archivesName = 'terrain-diffusion-mc' }
+base { archivesName = 'european-wilderness' }
 
 repositories {
     flatDir { dirs 'libs' }
     maven { url = 'https://maven.terraformersmc.com/releases/' }
+    maven {
+        url = 'https://api.modrinth.com/maven'
+        content { includeGroup('maven.modrinth') }
+    }
 }
+
+def localVoxy = file("libs/voxy-0.2.16-beta+${minecraft_version}.jar")
+def voxyAbi = localVoxy.isFile() ? files(localVoxy) : 'maven.modrinth:fxxUqruK:H3w2nVdU'
 
 dependencies {
     minecraft 'com.mojang:minecraft:1.21.11'
@@ -24,8 +31,8 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     // Optional Voxy ABI only: never included in the released mod.
-    compileOnly files('libs/voxy-0.2.16-beta+1.21.11.jar')
-    testImplementation files('libs/voxy-0.2.16-beta+1.21.11.jar')
+    compileOnly voxyAbi
+    testImplementation voxyAbi
 }
 
 tasks.named('test') { useJUnitPlatform()
@@ -37,6 +44,10 @@ processResources {
     inputs.property('version',project.version)
     filesMatching('fabric.mod.json') { expand(version:project.version) }
 }
+jar {
+    from('LICENSE.txt') { into('META-INF') }
+    from('licenses') { into('META-INF/licenses') }
+}
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
@@ -45,17 +56,4 @@ java {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.release = 21
-}
-
-// Optional recovery task; ordinary builds need only the files in this project.
-if (file('../recovery-evidence/original-mod.jar').exists()) {
-tasks.register('remapRecovered', net.fabricmc.loom.task.RemapJarTask) {
-    inputFile = file('../recovery-evidence/original-mod.jar')
-    archiveFileName = 'recovered-named.jar'
-    destinationDirectory = file('../recovery-evidence')
-    sourceNamespace = 'intermediary'
-    targetNamespace = 'named'
-    classpath.setFrom(fileTree(new File(gradle.gradleUserHomeDir, 'caches/fabric-loom/minecraftMaven/net/minecraft/minecraft-merged-intermediary')) { include '**/*.jar' })
-    addNestedDependencies = false
-}
 }

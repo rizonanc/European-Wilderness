@@ -353,7 +353,7 @@ public final class LocalTerrainProvider {
                int regionWidth = j2 - j1;
                int regionHeight = i2 - i1;
                if(LOG.isDebugEnabled())LOG.debug(
-                  "Terrain Diffusion ({}) finished generating region {}x{} ({} newly computed windows)",
+                  "European Wilderness ({}) finished generating region {}x{} ({} newly computed windows)",
                   new Object[]{OnnxModel.getResolvedInferenceProvider(), regionWidth, regionHeight, computedWindowCountAfter - computedWindowCountBefore}
                );
                GenerationMetrics.countInferenceRegion();
@@ -377,6 +377,7 @@ public final class LocalTerrainProvider {
       float[][] out = this.pipeline.get(i1, j1, i2, j2, true);
       float[] elevFlat = out[0];
       float[] climate = java.util.Arrays.copyOf(out[1], 4 * H * W);
+      clampPrecipitation(climate, H * W);
       adjustElevation(elevFlat, profile, j1, i1, W);
       adjustElevation(elevPadded, profile, j1 - 1, i1 - 1, W + 2);
       int shift = profile.climateShift().orElse(0);
@@ -428,6 +429,7 @@ public final class LocalTerrainProvider {
          elevPadded=cropFlat(elevUp,cropI1-1,cropJ1-1,H+2,W+2,nH*scale,nW*scale);
       }
       float[] climate = upsampleClimate(climateNativeFlat, nH, nW, cropI1, cropJ1, H, W, scale, nH * scale, nW * scale);
+      clampPrecipitation(climate, H * W);
       adjustElevation(elevSmooth, profile, j1, i1, W);
       adjustElevation(elevPadded, profile, j1 - 1, i1 - 1, W + 2);
       int shift = profile.climateShift().orElse(0);
@@ -477,6 +479,13 @@ public final class LocalTerrainProvider {
          int cell = z * width + x;
          climate[cell] += SlopeClimate.temperature(exposure);
          climate[rain + cell] *= SlopeClimate.precipitation(exposure);
+      }
+   }
+
+   static void clampPrecipitation(float[] climate, int cells) {
+      // Clamp after resampling so valid precipitation values retain their original interpolation.
+      for (int i = 2 * cells; i < 3 * cells; i++) {
+         if (climate[i] < 0 && Float.isFinite(climate[i])) climate[i] = 0;
       }
    }
 

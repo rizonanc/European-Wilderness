@@ -3,7 +3,6 @@ package com.github.xandergos.terraindiffusionmc.world;
 import com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfig;
 import com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfigEditor;
 import java.io.IOException;
-import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.LoggerFactory;
 import com.github.xandergos.terraindiffusionmc.pipeline.ModelAssetManager;
 import com.github.xandergos.terraindiffusionmc.pipeline.OnnxModel;
@@ -43,7 +42,7 @@ public final class WorldScaleManager {
    }
 
    private static WorldGenerationOptions currentWorldOptions() {
-      var config = FabricLoader.getInstance().getConfigDir().resolve("terrain-diffusion-mc.properties");
+      var config = TerrainDiffusionConfig.configPath();
       try {
          return WorldGenerationOptions.fromSettings(TerrainDiffusionConfigEditor.load(config));
       } catch (IOException | IllegalArgumentException failure) {

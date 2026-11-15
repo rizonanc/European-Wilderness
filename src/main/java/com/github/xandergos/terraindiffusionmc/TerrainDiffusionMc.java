@@ -81,12 +81,12 @@ public class TerrainDiffusionMc implements ModInitializer {
    private static volatile TerrainDiffusionMc.PrefetchRuntime PREFETCH;
 
    public void onInitialize() {
-      LOG.info("Initializing terrain-diffusion-mc");
+      LOG.info("Initializing European Wilderness");
       net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry.playS2C().register(
          com.github.xandergos.terraindiffusionmc.worldgen.hydrology.BoatCurrentPayload.ID,
          com.github.xandergos.terraindiffusionmc.worldgen.hydrology.BoatCurrentPayload.CODEC);
       com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.PerformanceDiagnostics.install(
-         net.fabricmc.loader.api.FabricLoader.getInstance().getGameDir().resolve("logs/terrain-diffusion-performance.jsonl"));
+         net.fabricmc.loader.api.FabricLoader.getInstance().getGameDir().resolve("logs/european-wilderness-performance.jsonl"));
       var diagnosticVersions=new java.util.LinkedHashMap<String,String>();
       for(String id:new String[]{"terrain-diffusion-mc","minecraft","fabricloader","fabric-api","c2me","lithium","voxy","voxyworldgenv2","chunky"})
          net.fabricmc.loader.api.FabricLoader.getInstance().getModContainer(id).ifPresent(mod->diagnosticVersions.put(id,mod.getMetadata().getVersion().getFriendlyString()));
@@ -153,7 +153,7 @@ public class TerrainDiffusionMc implements ModInitializer {
                   ProfileCompatibility.checkCompatibleOrThrow(
                      profile, ModelAssetManager.getModelRevision(), TerrainDiffusionConfig.inferenceDevice(), OnnxModel.getResolvedInferenceProvider()
                   );
-                  LOG.info("Terrain Diffusion world session: {}", profile.fingerprint());
+                  LOG.info("European Wilderness world session: {}", profile.fingerprint());
                   LocalTerrainProvider.init(world.getSeed(), profile);
                   SESSION_LIFETIME.bind(server);
                   Path storeDir = server.getSavePath(WorldSavePath.ROOT).resolve("terrain-data");

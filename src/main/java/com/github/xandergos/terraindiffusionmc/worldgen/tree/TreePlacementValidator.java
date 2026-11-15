@@ -8,11 +8,11 @@ final class TreePlacementValidator {
    }
 
    @FunctionalInterface
-   interface ColumnTest {
+   interface BlockedColumn {
       boolean test(int x, int z);
    }
 
-   static boolean rootsAvoid(TreeShapeGenerator.Shape shape, int originX, int originZ, ColumnTest blocked) {
+   static boolean rootsAvoid(TreeShapeGenerator.Shape shape, int originX, int originZ, BlockedColumn blocked) {
       for (var voxel : shape.voxels()) {
          if (voxel.log() && voxel.y() == 0 && blocked.test(originX + voxel.x(), originZ + voxel.z())) return false;
       }

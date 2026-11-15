@@ -53,7 +53,7 @@ public final class ModelAssetManager {
                   ModelAssetManager.ModelAssetManifest manifest = loadManifest();
                   String offlineHelpUrl = buildOfflineHelpUrl(manifest);
                   boolean shouldValidatePreExistingModels = TerrainDiffusionConfig.validateModel();
-                  LOG.info("Preparing terrain diffusion model assets in {}", modelDirectory);
+                  LOG.info("Preparing European Wilderness model assets in {}", modelDirectory);
 
                   for (Entry<String, ModelAssetManager.ManifestAsset> assetEntry : manifest.assets.entrySet()) {
                      String fileName = assetEntry.getKey();
@@ -62,7 +62,7 @@ public final class ModelAssetManager {
                      ensureSingleAsset(localAssetPath, assetMetadata, manifest.revision, offlineHelpUrl, shouldValidatePreExistingModels);
                   }
 
-                  LOG.info("Terrain diffusion model assets ready");
+                  LOG.info("European Wilderness model assets ready");
                   READY.set(true);
                } catch (RuntimeException runtimeException) {
                   DiagnosticErrors.failed(DiagnosticErrors.Code.MOD_INVALID,"MODEL_ASSETS",runtimeException);
@@ -77,7 +77,10 @@ public final class ModelAssetManager {
    }
 
    public static Path resolveAssetPath(String fileName) {
-      return FabricLoader.getInstance().getGameDir().resolve("terrain-diffusion-models").resolve(fileName);
+      Path game = FabricLoader.getInstance().getGameDir();
+      Path current = game.resolve("european-wilderness-models");
+      Path legacy = game.resolve("terrain-diffusion-models");
+      return (Files.isDirectory(current) || !Files.isDirectory(legacy) ? current : legacy).resolve(fileName);
    }
 
    public static synchronized String getModelRevision() {
@@ -129,7 +132,7 @@ public final class ModelAssetManager {
          }
          if (isOfflineError(exception)) {
             throw new IllegalStateException(
-               "Terrain Diffusion models are missing and must be downloaded while online. Connect to the internet and restart Minecraft. Direct download: "
+               "European Wilderness models are missing and must be downloaded while online. Connect to the internet and restart Minecraft. Direct download: "
                   + offlineHelpUrl
                   + " (revision "
                   + revision

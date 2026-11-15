@@ -10,8 +10,8 @@ import java.util.Properties;
 import net.fabricmc.loader.api.FabricLoader;
 
 public final class TerrainDiffusionConfig {
-   private static final String FILE_NAME = "terrain-diffusion-mc.properties";
-   private static final String RESOURCE_PATH = "/terrain-diffusion-mc.properties";
+   private static final String FILE_NAME = "european-wilderness.properties";
+   static final String RESOURCE_PATH = "/" + FILE_NAME;
    private static final Properties PROPERTIES = new Properties();
    private static final String BUILD_VARIANT = readBuildVariant();
    private static final boolean DEFAULT_OFFLOAD_MODELS = true;
@@ -150,7 +150,7 @@ public final class TerrainDiffusionConfig {
    private static void loadDefaults() {
       boolean loadedFromResource = false;
 
-      try (InputStream in = TerrainDiffusionConfig.class.getResourceAsStream("/terrain-diffusion-mc.properties")) {
+      try (InputStream in = TerrainDiffusionConfig.class.getResourceAsStream(RESOURCE_PATH)) {
          if (in != null) {
             PROPERTIES.load(in);
             loadedFromResource = true;
@@ -171,12 +171,32 @@ public final class TerrainDiffusionConfig {
       return value != null ? value.trim().toLowerCase() : defaultValue;
    }
 
-   private static Path resolveConfigPath() {
+   public static Path configPath() {
+      return migrateConfig(FabricLoader.getInstance().getConfigDir(), FILE_NAME, "terrain-diffusion-mc.properties");
+   }
+
+   public static Path menuPath() {
+      return migrateConfig(FabricLoader.getInstance().getConfigDir(), "european-wilderness-menu.json", "terrain-diffusion-menu.json");
+   }
+
+   static synchronized Path migrateConfig(Path directory, String name, String legacyName) {
+      Path current = directory.resolve(name);
+      Path legacy = directory.resolve(legacyName);
+      if (Files.exists(current) || !Files.exists(legacy)) return current;
       try {
-         return FabricLoader.getInstance().getConfigDir().resolve("terrain-diffusion-mc.properties");
-      } catch (RuntimeException e) {
-         System.err.println("Fabric Loader config directory unavailable: " + e.getMessage());
-         return null;
+         Path staged = Files.createTempFile(directory, "european-wilderness-", ".tmp");
+         try {
+            Files.copy(legacy, staged, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            Files.move(staged, current);
+         } finally {
+            Files.deleteIfExists(staged);
+         }
+         return current;
+      } catch (java.nio.file.FileAlreadyExistsException otherWriter) {
+         return current;
+      } catch (IOException failure) {
+         System.err.println("European Wilderness could not migrate " + legacy + ": " + failure.getMessage());
+         return legacy;
       }
    }
 
@@ -198,9 +218,9 @@ public final class TerrainDiffusionConfig {
    }
 
    private static void writeConfig(Path configPath) {
-      try (InputStream defaultConfigInputStream = TerrainDiffusionConfig.class.getResourceAsStream("/terrain-diffusion-mc.properties")) {
+      try (InputStream defaultConfigInputStream = TerrainDiffusionConfig.class.getResourceAsStream(RESOURCE_PATH)) {
          if (defaultConfigInputStream == null) {
-            System.err.println("Default config resource not found: /terrain-diffusion-mc.properties");
+            System.err.println("Default config resource not found: " + RESOURCE_PATH);
          } else {
             Files.copy(defaultConfigInputStream, configPath);
          }
@@ -248,9 +268,10 @@ public final class TerrainDiffusionConfig {
 
    static {
       loadDefaults();
-      Path configPath = resolveConfigPath();
-      if (configPath != null) {
-         loadOverrides(configPath);
+      try {
+         loadOverrides(configPath());
+      } catch (RuntimeException failure) {
+         System.err.println("Fabric Loader config directory unavailable: " + failure.getMessage());
       }
    }
 

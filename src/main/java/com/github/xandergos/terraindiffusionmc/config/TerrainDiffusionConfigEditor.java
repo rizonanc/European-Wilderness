@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 public final class TerrainDiffusionConfigEditor {
    public static final List<String> KEYS = TerrainSettingsCatalog.KEYS;
    private static final Pattern ASSIGNMENT = Pattern.compile("^(\\s*)([a-zA-Z0-9._-]+)\\s*[=:].*$");
-   private static final String RESOURCE = "/terrain-diffusion-mc.properties";
+   private static final String RESOURCE = TerrainDiffusionConfig.RESOURCE_PATH;
 
    private TerrainDiffusionConfigEditor() {
    }
@@ -28,9 +28,9 @@ public final class TerrainDiffusionConfigEditor {
    public static Map<String, String> load(Path path) throws IOException {
       Properties properties = new Properties();
 
-      try (InputStream resource = TerrainDiffusionConfigEditor.class.getResourceAsStream("/terrain-diffusion-mc.properties")) {
+      try (InputStream resource = TerrainDiffusionConfigEditor.class.getResourceAsStream(TerrainDiffusionConfig.RESOURCE_PATH)) {
          if (resource == null) {
-            throw new IOException("Missing bundled config /terrain-diffusion-mc.properties");
+            throw new IOException("Missing bundled config " + TerrainDiffusionConfig.RESOURCE_PATH);
          }
 
          properties.load(resource);
@@ -173,9 +173,9 @@ public final class TerrainDiffusionConfigEditor {
    }
 
    private static String bundledTemplate() throws IOException {
-      try (InputStream resource = TerrainDiffusionConfigEditor.class.getResourceAsStream("/terrain-diffusion-mc.properties")) {
+      try (InputStream resource = TerrainDiffusionConfigEditor.class.getResourceAsStream(TerrainDiffusionConfig.RESOURCE_PATH)) {
          if (resource == null) {
-            throw new IOException("Missing bundled config /terrain-diffusion-mc.properties");
+            throw new IOException("Missing bundled config " + TerrainDiffusionConfig.RESOURCE_PATH);
          } else {
             return new String(resource.readAllBytes(), StandardCharsets.ISO_8859_1);
          }

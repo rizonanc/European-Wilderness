@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.loader.api.FabricLoader;
+import com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfig;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.world.CreateWorldScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -122,10 +122,9 @@ public final class WorldScaleSettingsScreen extends Screen {
    }
 
    private void openProfiles() {
-      var dir = FabricLoader.getInstance().getConfigDir();
       try {
-         var settings = TerrainDiffusionConfigEditor.load(dir.resolve("terrain-diffusion-mc.properties"));
-         var prefs = SettingsPreferences.load(dir.resolve("terrain-diffusion-menu.json"));
+         var settings = TerrainDiffusionConfigEditor.load(TerrainDiffusionConfig.configPath());
+         var prefs = SettingsPreferences.load(TerrainDiffusionConfig.menuPath());
          client.setScreen(new SettingsProfileScreen(this, prefs, null, (label, values) -> {
             var merged = new HashMap<>(settings);
             merged.putAll(values);

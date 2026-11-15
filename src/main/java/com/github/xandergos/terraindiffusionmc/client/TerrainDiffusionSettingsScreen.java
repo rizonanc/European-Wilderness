@@ -1,6 +1,7 @@
 package com.github.xandergos.terraindiffusionmc.client;
 
 import com.github.xandergos.terraindiffusionmc.compat.roadweaver.RoadWeaverTerrain;
+import com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfig;
 import com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfigEditor;
 import com.github.xandergos.terraindiffusionmc.config.TerrainSettingsCatalog;
 import com.github.xandergos.terraindiffusionmc.world.TerrainDiffusionBiomeSource;
@@ -86,8 +87,7 @@ public final class TerrainDiffusionSettingsScreen extends Screen {
    public TerrainDiffusionSettingsScreen(Screen parent) {
       super(label("title"));
       this.parent = parent;
-      Path configDir = FabricLoader.getInstance().getConfigDir();
-      configPath = configDir.resolve("terrain-diffusion-mc.properties");
+      configPath = TerrainDiffusionConfig.configPath();
       SettingsDraft loaded = null;
       SettingsPreferences stored = null;
       try {
@@ -96,7 +96,7 @@ public final class TerrainDiffusionSettingsScreen extends Screen {
          message = label("load_error", failure.getMessage()).formatted(Formatting.RED);
       }
       try {
-         stored = SettingsPreferences.load(configDir.resolve("terrain-diffusion-menu.json"));
+         stored = SettingsPreferences.load(TerrainDiffusionConfig.menuPath());
       } catch (IOException failure) {
          if (loaded != null) message = label("preferences_error").formatted(Formatting.RED);
       }
@@ -181,7 +181,7 @@ public final class TerrainDiffusionSettingsScreen extends Screen {
          ColorHelper.lerp(opening, 0x48101820, 0xB0101820), ColorHelper.lerp(opening, 0xC0101820, 0xE8101820));
       panel(context, frameLeft - 1, frameTop - 1, frameRight - frameLeft + 2, frameBottom - frameTop + 2, 0x70101820, 0x344D5865);
       panel(context, frameLeft, frameTop + 29, sidebarWidth, frameBottom - frameTop - 29, SIDEBAR, LINE);
-      context.drawText(textRenderer, Text.literal("Terrain Diffusion").formatted(Formatting.BOLD), frameLeft + 8, frameTop + 6, LIGHT, false);
+      context.drawText(textRenderer, Text.literal("European Wilderness").formatted(Formatting.BOLD), frameLeft + 8, frameTop + 6, LIGHT, false);
       context.drawText(textRenderer, label("subtitle"), frameLeft + 8, frameTop + 19, MUTED, false);
       context.fillGradient(paneX, frameTop + 28, frameRight, frameBottom, 0x18101820, 0x70101820);
       context.fill(paneX + 8, frameBottom - 48, frameRight - 8, frameBottom - 47, LINE);

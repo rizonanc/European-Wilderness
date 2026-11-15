@@ -28,7 +28,7 @@ public final class WaterMipRebuild {
     public static String startAt(Voxy016Api api,MinecraftClient client,int centerX,int centerZ,int radiusChunks) throws ReflectiveOperationException {
         if(radiusChunks<1||radiusChunks>256)throw new IllegalArgumentException("Radius must be 1..256 chunks");
         var ticket=WorldSession.current();var world=client.world;var player=client.player;
-        if(ticket==null||!ticket.isActive()||world==null||player==null)return "Нет активного мира Terrain Diffusion.";
+        if(ticket==null||!ticket.isActive()||world==null||player==null)return "Нет активного мира European Wilderness.";
         if(!RUNNING.compareAndSet(false,true))return "Пересчёт уже выполняется. /td-voxy water-rebuild-stop";
         Voxy016Api.Bound bound;
         try {bound=api.acquire(world);}catch(ReflectiveOperationException|RuntimeException failure){RUNNING.set(false);throw failure;}

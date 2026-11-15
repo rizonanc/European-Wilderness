@@ -12,7 +12,7 @@ class SettingsEditorTest {
     @TempDir Path temp;
     private Map<String,String> defaults() throws Exception{return TerrainDiffusionConfigEditor.load(temp.resolve("missing.properties"));}
     @Test void catalogueExposesEveryBundledPropertyExactlyOnceIncludingLegacyConfigDefaults() throws Exception {
-        var bundled=new Properties();try(var input=getClass().getResourceAsStream("/terrain-diffusion-mc.properties")){bundled.load(input);}
+        var bundled=new Properties();try(var input=getClass().getResourceAsStream("/european-wilderness.properties")){bundled.load(input);}
         assertEquals(bundled.stringPropertyNames(),new HashSet<>(TerrainSettingsCatalog.KEYS));
         assertEquals(TerrainSettingsCatalog.KEYS.size(),new HashSet<>(TerrainSettingsCatalog.KEYS).size());
         var legacy=temp.resolve("legacy.properties");Files.writeString(legacy,"inference.device=auto\nperformance.prefetch=off\n");

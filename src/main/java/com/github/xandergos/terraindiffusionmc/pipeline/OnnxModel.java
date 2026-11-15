@@ -172,7 +172,7 @@ public final class OnnxModel implements AutoCloseable {
       }
 
       if (providerLoggedOnce.compareAndSet(false, true)) {
-         LOG.info("Terrain diffusion inference: {}", provider);
+         LOG.info("European Wilderness inference: {}", provider);
       }
    }
 
@@ -192,7 +192,7 @@ public final class OnnxModel implements AutoCloseable {
                addGpuProvider(sessionOptions);
                if ("CoreML".equals(resolvedInferenceProvider)) {
                   throw new OrtException(
-                     "inference.offload_models=false is not supported with CoreML. Set inference.offload_models=true in terrain-diffusion-mc.properties."
+                     "inference.offload_models=false is not supported with CoreML. Set inference.offload_models=true in european-wilderness.properties."
                   );
                } else {
                   return createSession(modelBytes, sessionOptions);

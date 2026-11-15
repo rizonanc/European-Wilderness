@@ -5,6 +5,11 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class RoiUpsamplingTest {
+    @Test void precipitationCannotBeNegativeAfterModelSampling() {
+        float[] climate = {-5, 0, 1, 2, -1, 12, -24.7f, 20, Float.NaN, -2, -3, -4};
+        LocalTerrainProvider.clampPrecipitation(climate, 3);
+        same(new float[]{-5, 0, 1, 2, -1, 12, 0, 20, Float.NaN, -2, -3, -4}, climate);
+    }
     static void same(float[] expected,float[] actual){
         assertEquals(expected.length,actual.length);for(int i=0;i<expected.length;i++)
             assertEquals(Float.floatToIntBits(expected[i]),Float.floatToIntBits(actual[i]),"float bits at "+i);

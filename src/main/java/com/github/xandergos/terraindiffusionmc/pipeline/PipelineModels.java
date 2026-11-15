@@ -28,11 +28,11 @@ public final class PipelineModels implements AutoCloseable {
             loadDone = new CountDownLatch(1);
             Thread t = new Thread(() -> {
                try {
-                  LOG.info("Loading terrain-diffusion ML models (background)...");
+                  LOG.info("Loading European Wilderness ML models (background)...");
                   long start = System.currentTimeMillis();
                   INSTANCE = new PipelineModels();
                   long elapsed = System.currentTimeMillis() - start;
-                  LOG.info("Terrain-diffusion ML models loaded in {} ms", elapsed);
+                  LOG.info("European Wilderness ML models loaded in {} ms", elapsed);
                } catch (Throwable e) {
                   loadFailure = e;
                   loadStarted = false;
@@ -106,7 +106,7 @@ public final class PipelineModels implements AutoCloseable {
    @Override
    public synchronized void close() {
       if (INSTANCE == this) {
-         LOG.info("Closing terrain-diffusion ML models");
+         LOG.info("Closing European Wilderness ML models");
 
          try {
             this.coarseModel.close();

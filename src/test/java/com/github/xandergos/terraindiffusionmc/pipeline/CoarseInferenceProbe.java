@@ -17,7 +17,7 @@ public final class CoarseInferenceProbe {
         Path source=Path.of(args[0]),out=Path.of(args[1]).toAbsolutePath();Files.createDirectories(out);
         Path models=out.resolve("terrain-diffusion-models"),config=out.resolve("config");Files.createDirectories(models);Files.createDirectories(config);
         for(String file:List.of("world_pipeline_config.json","pipeline_data.json"))Files.copy(source.resolve(file),models.resolve(file),StandardCopyOption.REPLACE_EXISTING);
-        Files.writeString(config.resolve("terrain-diffusion-mc.properties"),"inference.device=cpu\n");
+        Files.writeString(config.resolve("european-wilderness.properties"),"inference.device=cpu\n");
         var provider=(GameProvider)Proxy.newProxyInstance(CoarseInferenceProbe.class.getClassLoader(),new Class[]{GameProvider.class},(p,m,a)->{
             if(m.getName().equals("getLaunchDirectory"))return out;
             if(m.getName().equals("getGameId"))return "coarse-probe";

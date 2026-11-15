@@ -108,7 +108,7 @@ public final class VoxyCompat {
                 if(TerrainDiffusionConfig.voxyNativeChunks()) {enabled=true;c.getSource().sendFeedback(Text.literal("Voxy получает реальные чанки. Для явной предгенерации: /td-voxy chunky <радиус в чанках>. /chunky progress"));return 1;}
                 if(api==null){c.getSource().sendError(Text.literal(unavailable));return 0;}
                 radius=IntegerArgumentType.getInteger(c,"radius");manualRadius=true;enabled=true;generate=true;if(context!=null&&context.closed) retire();
-                c.getSource().sendFeedback(Text.literal("Voxy: фоновый расчёт Terrain Diffusion и LOD включён, радиус "+radius+" блоков. /td-voxy status; /td-voxy stop"));return 1;
+                c.getSource().sendFeedback(Text.literal("Voxy: фоновый расчёт European Wilderness и LOD включён, радиус "+radius+" блоков. /td-voxy status; /td-voxy stop"));return 1;
             })))
             .then(literal("stop").executes(c->{enabled=false;generate=false;retire();retireChunksCoarse();c.getSource().sendFeedback(Text.literal("Мост Voxy остановлен; сохранённые данные оставлены."));return 1;}))));
         if(api!=null) LOG.info("Optional Voxy 0.2.16 continuous streaming available; VoxyWorldGen 2.2.4 coordination: {}",WorldGenCompat.present());
