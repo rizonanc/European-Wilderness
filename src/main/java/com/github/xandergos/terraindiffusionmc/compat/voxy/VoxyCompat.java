@@ -13,10 +13,12 @@ import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.PerformanceD
 import com.github.xandergos.terraindiffusionmc.worldgen.preparation.PreparationProgress;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import java.util.Locale;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
@@ -128,160 +130,206 @@ public final class VoxyCompat {
             if (cs != null && cs.world == world) cs.controller.realChunk(chunk);
         });
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, access) -> dispatcher.register(literal("td-voxy")
-                .then(literal("status").executes(c -> {
-                    c.getSource().sendFeedback(Text.literal(status()));
-                    c.getSource()
-                            .sendFeedback(Text.literal("frames="
-                                    + ClientPerformance.FRAMES.statistics()
-                                    + (api == null ? "" : " transfer=" + api.statistics())));
-                    if (api != null) {
-                        String water = VoxyWaterDiagnostics.snapshot();
-                        c.getSource().sendFeedback(Text.literal(water));
-                        c.getSource().sendFeedback(Text.literal(WaterMipRebuild.status()));
-                        c.getSource().sendFeedback(Text.literal(VegetationMipRebuild.status()));
-                        LOG.info("{}", water);
-                        LOG.info("{}", VoxyWaterFrameDiagnostics.status());
-                    }
-                    return 1;
-                }))
-                .then(literal("census")
-                        .executes(c -> {
-                            c.getSource().sendFeedback(Text.literal(census(8)));
-                            return 1;
-                        })
-                        .then(argument("radiusChunks", IntegerArgumentType.integer(1, 32))
-                                .executes(c -> {
-                                    c.getSource()
-                                            .sendFeedback(Text.literal(
-                                                    census(IntegerArgumentType.getInteger(c, "radiusChunks"))));
-                                    return 1;
-                                })))
-                .then(literal("inspect")
-                        .then(argument("level", IntegerArgumentType.integer(0, 4))
-                                .then(argument("sx", IntegerArgumentType.integer(-1000000, 1000000))
-                                        .then(argument("sy", IntegerArgumentType.integer(-128, 127))
-                                                .then(argument("sz", IntegerArgumentType.integer(-1000000, 1000000))
-                                                        .executes(c -> {
-                                                            c.getSource()
-                                                                    .sendFeedback(Text.literal(census(0, new int[] {
-                                                                        IntegerArgumentType.getInteger(c, "level"),
-                                                                        IntegerArgumentType.getInteger(c, "sx"),
-                                                                        IntegerArgumentType.getInteger(c, "sy"),
-                                                                        IntegerArgumentType.getInteger(c, "sz")
-                                                                    })));
-                                                            return 1;
-                                                        }))))))
-                .then(literal("inspect-at")
-                        .then(argument("x", IntegerArgumentType.integer(-29999984, 29999984))
-                                .then(argument("y", IntegerArgumentType.integer(-4096, 4096))
-                                        .then(argument("z", IntegerArgumentType.integer(-29999984, 29999984))
-                                                .then(argument("level", IntegerArgumentType.integer(0, 4))
-                                                        .executes(c -> {
-                                                            int l = IntegerArgumentType.getInteger(c, "level"),
-                                                                    x = IntegerArgumentType.getInteger(c, "x"),
-                                                                    y = IntegerArgumentType.getInteger(c, "y"),
-                                                                    z = IntegerArgumentType.getInteger(c, "z"),
-                                                                    side = 32 << l;
-                                                            c.getSource()
-                                                                    .sendFeedback(Text.literal(census(
-                                                                            0,
-                                                                            new int[] {
-                                                                                l,
-                                                                                Math.floorDiv(x, side),
-                                                                                Math.floorDiv(y, side),
-                                                                                Math.floorDiv(z, side)
-                                                                            },
-                                                                            new int[] {x, y, z})));
-                                                            return 1;
-                                                        }))))))
-                .then(literal("vegetation-rebuild")
-                        .executes(c -> {
-                            c.getSource().sendFeedback(Text.literal(rebuildVegetation(32)));
-                            return 1;
-                        })
-                        .then(argument("radiusChunks", IntegerArgumentType.integer(1, 64))
-                                .executes(c -> {
-                                    c.getSource()
-                                            .sendFeedback(Text.literal(rebuildVegetation(
-                                                    IntegerArgumentType.getInteger(c, "radiusChunks"))));
-                                    return 1;
-                                })))
-                .then(literal("vegetation-rebuild-stop").executes(c -> {
-                    c.getSource().sendFeedback(Text.literal(VegetationMipRebuild.stop()));
-                    return 1;
-                }))
-                .then(literal("water-trace").executes(c -> {
-                    c.getSource().sendFeedback(Text.literal(VoxyWaterFrameDiagnostics.request()));
-                    return 1;
-                }))
-                .then(literal("water-rebuild")
-                        .executes(c -> {
-                            c.getSource().sendFeedback(Text.literal(rebuildWater(16)));
-                            return 1;
-                        })
-                        .then(argument("radiusChunks", IntegerArgumentType.integer(1, 256))
-                                .executes(c -> {
-                                    c.getSource()
-                                            .sendFeedback(Text.literal(
-                                                    rebuildWater(IntegerArgumentType.getInteger(c, "radiusChunks"))));
-                                    return 1;
-                                })))
-                .then(literal("water-rebuild-stop").executes(c -> {
-                    c.getSource().sendFeedback(Text.literal(WaterMipRebuild.stop()));
-                    return 1;
-                }))
-                .then(literal("water-rebuild-at")
-                        .then(argument("x", IntegerArgumentType.integer(-30000000, 30000000))
-                                .then(argument("z", IntegerArgumentType.integer(-30000000, 30000000))
-                                        .then(argument("radiusChunks", IntegerArgumentType.integer(1, 256))
-                                                .executes(c -> {
-                                                    c.getSource()
-                                                            .sendFeedback(Text.literal(rebuildWaterAt(
-                                                                    IntegerArgumentType.getInteger(c, "x"),
-                                                                    IntegerArgumentType.getInteger(c, "z"),
-                                                                    IntegerArgumentType.getInteger(
-                                                                            c, "radiusChunks"))));
-                                                    return 1;
-                                                })))))
-                .then(literal("start")
-                        .then(argument("radius", IntegerArgumentType.integer(64, LodScan.MAX_RADIUS_BLOCKS))
-                                .executes(c -> {
-                                    if (TerrainDiffusionConfig.voxyNativeChunks()) {
-                                        enabled = true;
-                                        c.getSource()
-                                                .sendFeedback(
-                                                        Text.literal(
-                                                                "Voxy получает реальные чанки. Для явной предгенерации: /td-voxy chunky <радиус в чанках>. /chunky progress"));
-                                        return 1;
-                                    }
-                                    if (api == null) {
-                                        c.getSource().sendError(Text.literal(unavailable));
-                                        return 0;
-                                    }
-                                    radius = IntegerArgumentType.getInteger(c, "radius");
-                                    manualRadius = true;
-                                    enabled = true;
-                                    generate = true;
-                                    if (context != null && context.closed) retire();
-                                    c.getSource()
-                                            .sendFeedback(Text.literal(
-                                                    "Voxy: фоновый расчёт European Wilderness и LOD включён, радиус "
-                                                            + radius
-                                                            + " блоков. /td-voxy status; /td-voxy stop"));
-                                    return 1;
-                                })))
-                .then(literal("stop").executes(c -> {
-                    enabled = false;
-                    generate = false;
-                    retire();
-                    retireChunksCoarse();
-                    c.getSource().sendFeedback(Text.literal("Мост Voxy остановлен; сохранённые данные оставлены."));
-                    return 1;
-                }))));
+                .then(statusCommand())
+                .then(censusCommand())
+                .then(inspectCommand())
+                .then(inspectAtCommand())
+                .then(vegetationRebuildCommand())
+                .then(vegetationRebuildStopCommand())
+                .then(waterTraceCommand())
+                .then(waterRebuildCommand())
+                .then(waterRebuildStopCommand())
+                .then(waterRebuildAtCommand())
+                .then(startCommand())
+                .then(stopCommand())));
         if (api != null)
             LOG.info(
                     "Optional Voxy 0.2.16 continuous streaming available; VoxyWorldGen 2.2.4 coordination: {}",
                     WorldGenCompat.present());
+    }
+
+    private static LiteralArgumentBuilder<FabricClientCommandSource> statusCommand() {
+        return literal("status").executes(c -> {
+            c.getSource().sendFeedback(Text.literal(status()));
+            c.getSource()
+                    .sendFeedback(Text.literal("frames="
+                            + ClientPerformance.FRAMES.statistics()
+                            + (api == null ? "" : " transfer=" + api.statistics())));
+            if (api != null) {
+                String water = VoxyWaterDiagnostics.snapshot();
+                c.getSource().sendFeedback(Text.literal(water));
+                c.getSource().sendFeedback(Text.literal(WaterMipRebuild.status()));
+                c.getSource().sendFeedback(Text.literal(VegetationMipRebuild.status()));
+                LOG.info("{}", water);
+                LOG.info("{}", VoxyWaterFrameDiagnostics.status());
+            }
+            return 1;
+        });
+    }
+
+    private static LiteralArgumentBuilder<FabricClientCommandSource> censusCommand() {
+        return literal("census")
+                .executes(c -> {
+                    c.getSource().sendFeedback(Text.literal(census(8)));
+                    return 1;
+                })
+                .then(argument("radiusChunks", IntegerArgumentType.integer(1, 32))
+                        .executes(c -> {
+                            c.getSource()
+                                    .sendFeedback(
+                                            Text.literal(census(IntegerArgumentType.getInteger(c, "radiusChunks"))));
+                            return 1;
+                        }));
+    }
+
+    private static LiteralArgumentBuilder<FabricClientCommandSource> inspectCommand() {
+        return literal("inspect")
+                .then(argument("level", IntegerArgumentType.integer(0, 4))
+                        .then(argument("sx", IntegerArgumentType.integer(-1000000, 1000000))
+                                .then(argument("sy", IntegerArgumentType.integer(-128, 127))
+                                        .then(argument("sz", IntegerArgumentType.integer(-1000000, 1000000))
+                                                .executes(c -> {
+                                                    c.getSource().sendFeedback(Text.literal(census(0, new int[] {
+                                                        IntegerArgumentType.getInteger(c, "level"),
+                                                        IntegerArgumentType.getInteger(c, "sx"),
+                                                        IntegerArgumentType.getInteger(c, "sy"),
+                                                        IntegerArgumentType.getInteger(c, "sz")
+                                                    })));
+                                                    return 1;
+                                                })))));
+    }
+
+    private static LiteralArgumentBuilder<FabricClientCommandSource> inspectAtCommand() {
+        return literal("inspect-at")
+                .then(argument("x", IntegerArgumentType.integer(-29999984, 29999984))
+                        .then(argument("y", IntegerArgumentType.integer(-4096, 4096))
+                                .then(argument("z", IntegerArgumentType.integer(-29999984, 29999984))
+                                        .then(argument("level", IntegerArgumentType.integer(0, 4))
+                                                .executes(c -> {
+                                                    int l = IntegerArgumentType.getInteger(c, "level"),
+                                                            x = IntegerArgumentType.getInteger(c, "x"),
+                                                            y = IntegerArgumentType.getInteger(c, "y"),
+                                                            z = IntegerArgumentType.getInteger(c, "z"),
+                                                            side = 32 << l;
+                                                    c.getSource()
+                                                            .sendFeedback(Text.literal(census(
+                                                                    0,
+                                                                    new int[] {
+                                                                        l,
+                                                                        Math.floorDiv(x, side),
+                                                                        Math.floorDiv(y, side),
+                                                                        Math.floorDiv(z, side)
+                                                                    },
+                                                                    new int[] {x, y, z})));
+                                                    return 1;
+                                                })))));
+    }
+
+    private static LiteralArgumentBuilder<FabricClientCommandSource> vegetationRebuildCommand() {
+        return literal("vegetation-rebuild")
+                .executes(c -> {
+                    c.getSource().sendFeedback(Text.literal(rebuildVegetation(32)));
+                    return 1;
+                })
+                .then(argument("radiusChunks", IntegerArgumentType.integer(1, 64))
+                        .executes(c -> {
+                            c.getSource()
+                                    .sendFeedback(Text.literal(
+                                            rebuildVegetation(IntegerArgumentType.getInteger(c, "radiusChunks"))));
+                            return 1;
+                        }));
+    }
+
+    private static LiteralArgumentBuilder<FabricClientCommandSource> vegetationRebuildStopCommand() {
+        return literal("vegetation-rebuild-stop").executes(c -> {
+            c.getSource().sendFeedback(Text.literal(VegetationMipRebuild.stop()));
+            return 1;
+        });
+    }
+
+    private static LiteralArgumentBuilder<FabricClientCommandSource> waterTraceCommand() {
+        return literal("water-trace").executes(c -> {
+            c.getSource().sendFeedback(Text.literal(VoxyWaterFrameDiagnostics.request()));
+            return 1;
+        });
+    }
+
+    private static LiteralArgumentBuilder<FabricClientCommandSource> waterRebuildCommand() {
+        return literal("water-rebuild")
+                .executes(c -> {
+                    c.getSource().sendFeedback(Text.literal(rebuildWater(16)));
+                    return 1;
+                })
+                .then(argument("radiusChunks", IntegerArgumentType.integer(1, 256))
+                        .executes(c -> {
+                            c.getSource()
+                                    .sendFeedback(Text.literal(
+                                            rebuildWater(IntegerArgumentType.getInteger(c, "radiusChunks"))));
+                            return 1;
+                        }));
+    }
+
+    private static LiteralArgumentBuilder<FabricClientCommandSource> waterRebuildStopCommand() {
+        return literal("water-rebuild-stop").executes(c -> {
+            c.getSource().sendFeedback(Text.literal(WaterMipRebuild.stop()));
+            return 1;
+        });
+    }
+
+    private static LiteralArgumentBuilder<FabricClientCommandSource> waterRebuildAtCommand() {
+        return literal("water-rebuild-at")
+                .then(argument("x", IntegerArgumentType.integer(-30000000, 30000000))
+                        .then(argument("z", IntegerArgumentType.integer(-30000000, 30000000))
+                                .then(argument("radiusChunks", IntegerArgumentType.integer(1, 256))
+                                        .executes(c -> {
+                                            c.getSource()
+                                                    .sendFeedback(Text.literal(rebuildWaterAt(
+                                                            IntegerArgumentType.getInteger(c, "x"),
+                                                            IntegerArgumentType.getInteger(c, "z"),
+                                                            IntegerArgumentType.getInteger(c, "radiusChunks"))));
+                                            return 1;
+                                        }))));
+    }
+
+    private static LiteralArgumentBuilder<FabricClientCommandSource> startCommand() {
+        return literal("start")
+                .then(argument("radius", IntegerArgumentType.integer(64, LodScan.MAX_RADIUS_BLOCKS))
+                        .executes(c -> {
+                            if (TerrainDiffusionConfig.voxyNativeChunks()) {
+                                enabled = true;
+                                c.getSource()
+                                        .sendFeedback(
+                                                Text.literal(
+                                                        "Voxy получает реальные чанки. Для явной предгенерации: /td-voxy chunky <радиус в чанках>. /chunky progress"));
+                                return 1;
+                            }
+                            if (api == null) {
+                                c.getSource().sendError(Text.literal(unavailable));
+                                return 0;
+                            }
+                            radius = IntegerArgumentType.getInteger(c, "radius");
+                            manualRadius = true;
+                            enabled = true;
+                            generate = true;
+                            if (context != null && context.closed) retire();
+                            c.getSource()
+                                    .sendFeedback(Text.literal(
+                                            "Voxy: фоновый расчёт European Wilderness и LOD включён, радиус "
+                                                    + radius
+                                                    + " блоков. /td-voxy status; /td-voxy stop"));
+                            return 1;
+                        }));
+    }
+
+    private static LiteralArgumentBuilder<FabricClientCommandSource> stopCommand() {
+        return literal("stop").executes(c -> {
+            enabled = false;
+            generate = false;
+            retire();
+            retireChunksCoarse();
+            c.getSource().sendFeedback(Text.literal("Мост Voxy остановлен; сохранённые данные оставлены."));
+            return 1;
+        });
     }
 
     public static boolean usable() {
