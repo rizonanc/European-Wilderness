@@ -179,10 +179,7 @@ public final class TerrainDiffusionSettingsScreen extends Screen {
                         frameTop + 36,
                         sideButtonWidth,
                         () -> {
-                            draft.reset(
-                                    section().keys().stream()
-                                            .filter(TerrainDiffusionSettingsScreen::visibleSetting)
-                                            .toList());
+                            draft.reset(section().keys());
                             refreshRows();
                         },
                         false);
@@ -362,9 +359,7 @@ public final class TerrainDiffusionSettingsScreen extends Screen {
                         case FAVORITES -> TerrainSettingsCatalog.KEYS.stream().filter(preferences::favorite).toList();
                         case RECENT -> recentKeys();
                     };
-            for (String key : keys) {
-                if (visibleSetting(key) && matches(key)) rows.add(setting(key));
-            }
+            for (String key : keys) if (matches(key)) rows.add(setting(key));
         }
         if (view == View.SECTION && query.isBlank()) addSectionInfo(rows);
         if (rows.isEmpty() && draft != null) rows.add(info(label("no_results")));
@@ -379,10 +374,6 @@ public final class TerrainDiffusionSettingsScreen extends Screen {
         return List.copyOf(keys);
     }
 
-    private static boolean visibleSetting(String key) {
-        return !key.equals("compat.voxy.coarse_experimental") && !key.equals("performance.water_write_behind");
-    }
-
     private boolean matches(String key) {
         if (query.isBlank()) return true;
         String text =
@@ -394,16 +385,9 @@ public final class TerrainDiffusionSettingsScreen extends Screen {
 
     private void updateButtons() {
         undoButton.active = draft != null && draft.canUndo();
-        resetButton.active =
-                draft != null
-                        && view == View.SECTION
-                        && section().keys().stream().anyMatch(TerrainDiffusionSettingsScreen::visibleSetting);
+        resetButton.active = draft != null && view == View.SECTION && !section().keys().isEmpty();
         changedButton.active = draft != null;
-        long changedCount =
-                draft == null
-                        ? 0
-                        : draft.changedKeys().stream().filter(TerrainDiffusionSettingsScreen::visibleSetting).count();
-        Text changed = label("changed", changedCount);
+        Text changed = label("changed", draft == null ? 0 : draft.changedKeys().size());
         changedButton.setMessage(changed);
         changedButton.accent = view == View.CHANGED;
         changedButton.setTooltip(Tooltip.of(changed));
