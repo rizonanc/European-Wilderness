@@ -1,6 +1,6 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
-/** coarse ownership requires stored voxel data. */
+/** Coarse ownership requires stored voxel data. */
 public final class CoarseOwnership {
     public enum Decision {
         OPEN,

@@ -64,7 +64,7 @@ public final class CoarseSectionComposer {
         return fill(level, sx, sy, sz, bottom, top, field, original, target, exact, palette, isAir, adjustment, null);
     }
 
-    /** preserve both blocks and air from a loaded chunk awaiting ingest. */
+    /** Preserve both blocks and air from a loaded chunk awaiting ingest. */
     public static Result fill(
             int level,
             int sx,

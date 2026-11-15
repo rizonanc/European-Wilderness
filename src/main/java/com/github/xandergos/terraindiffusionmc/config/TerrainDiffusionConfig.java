@@ -63,7 +63,7 @@ public final class TerrainDiffusionConfig {
         return parsePrefetchMode(value) == PrefetchMode.ADAPTIVE;
     }
 
-    /** enables bounded background writes for frozen water plans. */
+    /** Enables bounded background writes for frozen water plans. */
     public static boolean waterWriteBehind() {
         return readBoolean("performance.water_write_behind", false);
     }
@@ -126,7 +126,7 @@ public final class TerrainDiffusionConfig {
         return "manual".equals(readString("compat.voxy.radius_mode", "auto"));
     }
 
-    /** enables a renderer-only coarse horizon without Voxy storage writes. */
+    /** Enables a renderer-only coarse horizon without Voxy storage writes. */
     public static boolean voxyCoarseExperimental() {
         return readBoolean("compat.voxy.coarse_experimental", false);
     }

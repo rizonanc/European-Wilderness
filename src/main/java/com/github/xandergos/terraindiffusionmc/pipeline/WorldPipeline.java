@@ -46,7 +46,7 @@ public final class WorldPipeline implements AutoCloseable {
     final InfiniteTensor latents;
     final InfiniteTensor residual;
 
-    // access inference scratch buffers on the owner thread.
+    // Access inference scratch buffers on the owner thread.
     private float[] scratchCondImg;
     private float[] scratchCondNoise;
     private float[] scratchCondMixed;
@@ -522,7 +522,7 @@ public final class WorldPipeline implements AutoCloseable {
         return coarse.prepareIndependentSliceStep(start, end) ? coarse.getSlice(start, end) : null;
     }
 
-    /** prepares one coarse window. Returns 1 for progress or 0 when complete. */
+    /** Prepares one coarse window. Returns 1 for progress or 0 when complete. */
     public int prepareCoarseLodWindow(int ci0, int cj0, int ci1, int cj1) {
         int[] start = {0, ci0, cj0}, end = {7, ci1, cj1};
         return coarse.prepareIndependentWindowStep(start, end);

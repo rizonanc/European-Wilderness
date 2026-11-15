@@ -2,7 +2,7 @@ package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
 import java.util.function.LongSupplier;
 
-/** expire gate samples using monotonic time, including across pauses. */
+/** Expire gate samples using monotonic time, including across pauses. */
 public final class GateTracker {
     private static final int BUCKETS = 1280; // ≈21 minutes of history
     private final LongSupplier clock;

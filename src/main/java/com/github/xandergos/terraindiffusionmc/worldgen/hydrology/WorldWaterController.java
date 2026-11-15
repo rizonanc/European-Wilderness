@@ -29,11 +29,11 @@ public final class WorldWaterController implements WorldSession.RiverOverlay, Au
     private final WaterPlanCache<WorldWaterGrid.Cell, WorldWaterTile> tiles;
     private final WaterPlanCache<WorldWaterGrid.Cell, WorldWaterUnit> units;
 
-    /** a null writer persists each plan synchronously. */
+    /** A null writer persists each plan synchronously. */
     private final WaterWriteBehind writer;
 
     private final Semaphore planning = new Semaphore(1, true);
-    // hold scratch space for one water unit through persistence.
+    // Hold scratch space for one water unit through persistence.
     private final Semaphore unitMemory = new Semaphore(1, true);
     private volatile long unitMemorySince;
 

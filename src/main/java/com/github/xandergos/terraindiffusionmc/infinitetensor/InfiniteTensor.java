@@ -103,7 +103,7 @@ public class InfiniteTensor {
         return !computed[0];
     }
 
-    /** prepares one independent window. Returns 1 for progress or 0 when complete. */
+    /** Prepares one independent window. Returns 1 for progress or 0 when complete. */
     public int prepareIndependentWindowStep(int[] start, int[] end) {
         if (deps.length != 0) throw new IllegalStateException("Incremental preparation requires an independent stage");
         int[][] range = buildRange(start, end);

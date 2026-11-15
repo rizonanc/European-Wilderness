@@ -6,7 +6,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-/** queue regenerable water plans. Full or closed queues write synchronously. */
+/** Queue regenerable water plans. Full or closed queues write synchronously. */
 final class WaterWriteBehind implements AutoCloseable {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WaterWriteBehind.class);
 
@@ -146,7 +146,7 @@ final class WaterWriteBehind implements AutoCloseable {
         synchronized (admission) {
             closed = true;
         }
-        // queued water plans can be recomputed after shutdown.
+        // Queued water plans can be recomputed after shutdown.
         try {
             worker.join(5_000);
         } catch (InterruptedException e) {

@@ -335,7 +335,7 @@ public final class Voxy016Api {
                                         changed++;
                                     }
                                     // Voxy tracks nonempty block counts only for L0. Derived child
-                                    // masks describe the existing fine children, not these voxels.
+                                    // Masks describe the existing fine children, not these voxels.
                                 } finally {
                                     sectionRelease.invoke(parent);
                                 }
@@ -367,7 +367,7 @@ public final class Voxy016Api {
             return true;
         }
 
-        /** census access acquires sections without marking them dirty. */
+        /** Census access acquires sections without marking them dirty. */
         public boolean exists(int level, int x, int y, int z) throws ReflectiveOperationException {
             Object value = exists.invoke(engine, level, x, y, z);
             if (value == null) return false;

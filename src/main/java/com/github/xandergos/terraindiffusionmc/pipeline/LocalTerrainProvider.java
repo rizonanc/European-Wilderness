@@ -209,7 +209,7 @@ public final class LocalTerrainProvider {
         }
     }
 
-    /** prepares one preemptible window. Returns 1 for progress, 0 when complete, or -1 when deferred. */
+    /** Prepares one preemptible window. Returns 1 for progress, 0 when complete, or -1 when deferred. */
     public static int prepareCoarseLodWindowStep(
             int ci0, int cj0, int ci1, int cj1, WorldSession ticket, java.util.function.BooleanSupplier allowed)
             throws Exception {

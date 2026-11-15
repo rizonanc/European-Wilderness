@@ -42,7 +42,7 @@ final class CoarseStoredColumns {
         return (ready.size() >= 4096 || ready.containsKey(key(x, z))) && contains(x, z);
     }
 
-    /** invalidate stored-column probes when a region changes. */
+    /** Invalidate stored-column probes when a region changes. */
     void invalidate(int x, int z) {
         long key = key(x, z);
         synchronized (pending) {

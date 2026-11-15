@@ -1,11 +1,11 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
-/** adjust coarse publication to frame pressure and Voxy mesh capacity. */
+/** Adjust coarse publication to frame pressure and Voxy mesh capacity. */
 public final class CoarseUpdateBudget {
     private int allowance = 16;
     private long adjustments;
 
-    /** apply the mesh queue cap to the current batch. */
+    /** Apply the mesh queue cap to the current batch. */
     public synchronized int quota(int pressure, int meshQueue) {
         adjustments++;
         if (meshQueue >= 512) {

@@ -88,7 +88,7 @@ public final class ClientPerformance {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             boolean nextPaused = client.isPaused();
             var ticket = WorldSession.current();
-            // frame pacing gates publication while the game is running.
+            // Frame pacing gates publication while the game is running.
             boolean active = !nextPaused && client.world != null && ticket != null && ticket.isActive();
             if (ticket != observedTicket
                     || client.world != observedWorld
@@ -109,7 +109,7 @@ public final class ClientPerformance {
         });
     }
 
-    /** reports the reason coarse publication is paused. */
+    /** Reports the reason coarse publication is paused. */
     public static String publishGateReason() {
         var client = MinecraftClient.getInstance();
         var ticket = WorldSession.current();

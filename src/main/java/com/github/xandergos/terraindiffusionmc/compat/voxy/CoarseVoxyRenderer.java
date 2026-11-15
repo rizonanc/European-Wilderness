@@ -30,12 +30,12 @@ public final class CoarseVoxyRenderer implements CoarseRenderHooks.Provider {
     final CoarseUpdateQueue waiting = new CoarseUpdateQueue(MAX_WAITING, 8192);
     private volatile RenderGenerationService service;
     final LongAdder built = new LongAdder(), errors = new LongAdder(), dropped = new LongAdder();
-    // counts of deferred coarse sections by cause.
+    // Counts of deferred coarse sections by cause.
     final LongAdder deferredNoField = new LongAdder(),
             deferredRegion = new LongAdder(),
             protectedExact = new LongAdder(),
             outsideRadius = new LongAdder();
-    // counts of ready and deferred sections.
+    // Counts of ready and deferred sections.
     final LongAdder readyProbes = new LongAdder(), readyHits = new LongAdder();
     private final java.util.concurrent.ConcurrentHashMap<String, Long> exactReasons =
             new java.util.concurrent.ConcurrentHashMap<>();
@@ -330,7 +330,7 @@ public final class CoarseVoxyRenderer implements CoarseRenderHooks.Provider {
         }
     }
 
-    /** only stored voxels establish coarse ownership. */
+    /** Only stored voxels establish coarse ownership. */
     private boolean exact(int x, int z) {
         var decision = CoarseOwnership.decide(storedColumns.knownContains(x, z));
         if (decision != CoarseOwnership.Decision.OPEN) exactReasons.merge(decision.name(), 1L, Long::sum);
@@ -378,7 +378,7 @@ public final class CoarseVoxyRenderer implements CoarseRenderHooks.Provider {
                 Mapper::isAir);
     }
 
-    /** invalidate the chunk storage region probe after ingest. */
+    /** Invalidate the chunk storage region probe after ingest. */
     void invalidateStoredColumns(int chunkX, int chunkZ) {
         storedColumns.invalidate(chunkX * 16, chunkZ * 16);
     }
@@ -462,7 +462,7 @@ public final class CoarseVoxyRenderer implements CoarseRenderHooks.Provider {
             defer(position);
             return original;
         }
-        // keep loaded chunks intact while Voxy ingest is pending.
+        // Keep loaded chunks intact while Voxy ingest is pending.
         CoarseSectionComposer.Protected preserveOriginal = null;
         if (original != null
                 && (guard.knownRealColumn(x * side + 8, z * side + 8)

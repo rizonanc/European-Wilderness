@@ -1,6 +1,6 @@
 package com.github.xandergos.terraindiffusionmc.pipeline;
 
-/** cache ONNX input arrays by exact length because tensor shapes forbid spare capacity. */
+/** Cache ONNX input arrays by exact length because tensor shapes forbid spare capacity. */
 final class BatchBuffers {
     private BatchBuffers() {}
 

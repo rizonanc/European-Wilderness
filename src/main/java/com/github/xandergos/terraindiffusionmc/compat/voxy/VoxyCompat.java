@@ -336,7 +336,7 @@ public final class VoxyCompat {
         return api != null;
     }
 
-    /** native ingest can run alongside the renderer-only preview. */
+    /** Native ingest can run alongside the renderer-only preview. */
     static boolean chunksCoarseGate(boolean voxyEnabled, boolean nativeChunks, boolean experimental) {
         return voxyEnabled && nativeChunks && experimental;
     }
@@ -349,7 +349,7 @@ public final class VoxyCompat {
         return preparedGate(enabled && TerrainDiffusionConfig.voxyEnabled(), TerrainDiffusionConfig.voxyNativeChunks());
     }
 
-    /** inspect stored sections without writing or meshing. */
+    /** Inspect stored sections without writing or meshing. */
     private static String census(int radiusChunks) {
         return census(radiusChunks, null);
     }
@@ -451,7 +451,7 @@ public final class VoxyCompat {
 
     private static volatile ChunksCoarse chunksState;
 
-    /** coarse previews stay in the renderer and native chunks own storage. */
+    /** Coarse previews stay in the renderer and native chunks own storage. */
     private static void tickChunksCoarse(
             MinecraftClient client,
             WorldSession ticket,
@@ -871,7 +871,7 @@ public final class VoxyCompat {
             preparer.start();
         }
 
-        /** preview failures leave exact LOD export active. */
+        /** Preview failures leave exact LOD export active. */
         private CoarseLodController buildCoarse() {
             try {
                 return new CoarseLodController(

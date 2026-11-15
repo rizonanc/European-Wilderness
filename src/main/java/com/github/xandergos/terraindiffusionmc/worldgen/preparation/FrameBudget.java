@@ -78,7 +78,7 @@ public final class FrameBudget {
         return last != 0 && now - last < 2_000_000_000L && now >= blockedUntil;
     }
 
-    /** reports frame samples as fresh, stale after two seconds, or silent before the first frame. */
+    /** Reports frame samples as fresh, stale after two seconds, or silent before the first frame. */
     public synchronized String heartbeatState() {
         long now = clock.getAsLong();
         if (last == 0) return "silent";
