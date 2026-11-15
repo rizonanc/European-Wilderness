@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BiomeColumnCacheTest {
     @Test
-    void repeatedVerticalQueriesOnlyReadSixteenColumnsAndPreserveIds() {
+    void testRepeatedVerticalQueriesOnlyReadSixteenColumns() {
         var cache = new BiomeColumnCache();
         var session = UUID.randomUUID();
         int reads = 0;
@@ -27,7 +27,7 @@ class BiomeColumnCacheTest {
     }
 
     @Test
-    void negativeBoundariesEvictionAndWorldChangesCannotReturnForeignIds() {
+    void testNegativeBoundariesEviction() {
         var cache = new BiomeColumnCache();
         var first = UUID.randomUUID();
         cache.put(first, -1, -1, (short) -1);

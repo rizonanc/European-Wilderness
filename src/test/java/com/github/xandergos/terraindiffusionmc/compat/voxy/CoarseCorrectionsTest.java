@@ -24,7 +24,7 @@ class CoarseCorrectionsTest {
     }
 
     @Test
-    void overlappingAnchorsInterpolateWithoutOvershootingAndRemainBounded() {
+    void testOverlappingAnchorsInterpolate() {
         var correction = new CoarseLodCorrections(4096);
         correction.add(
                 List.of(new CoarseLodCorrections.Anchor(0, 0, 40), new CoarseLodCorrections.Anchor(128, 0, -40)));
@@ -49,7 +49,7 @@ class CoarseCorrectionsTest {
     }
 
     @Test
-    void correctionOnlyAffectsUnknownPreviewAndNeverMutatesProtectedAirOrInputHeights() {
+    void testCorrectionOnlyAffectsUnknownPreview() {
         var field = CoarseSectionComposerTest.flat(64);
         long[] output = new long[32768];
         var calls = new AtomicInteger();

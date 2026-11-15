@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class RegionalGeologyTest {
     @Test
-    void coldMountainShelvesGenerateSnowAndMoraines() {
+    void testColdShelvesGenerateSnow() {
         var rocks = EnumSet.noneOf(RegionalGeology.Rock.class);
         var surfaces = EnumSet.noneOf(MountainSurfaceMaterials.Material.class);
         for (int z = -4096; z < 4096; z += 128)

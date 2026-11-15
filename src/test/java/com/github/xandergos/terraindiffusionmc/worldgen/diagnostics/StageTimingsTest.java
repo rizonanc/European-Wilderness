@@ -28,7 +28,7 @@ class StageTimingsTest {
     }
 
     @Test
-    void recentPercentileIsBoundedWhileTotalsAndMaximumAreRetained() {
+    void testRecentPercentileIsBoundedWhileTotals() {
         var timings = new StageTimings();
         timings.record("stage", 10000);
         for (int i = 0; i < 300; i++) timings.record("stage", 10);

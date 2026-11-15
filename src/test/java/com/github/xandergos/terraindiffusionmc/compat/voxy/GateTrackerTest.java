@@ -25,7 +25,7 @@ class GateTrackerTest {
     }
 
     @Test
-    void longPauseExpiresHistoryAndWindowWithoutSamplesIsEmpty() {
+    void testLongPauseExpiresHistoryAndWindow() {
         var clock = new AtomicLong(0L);
         var tracker = new GateTracker(clock::get);
         for (int s = 0; s < 5; s++) {
@@ -41,7 +41,7 @@ class GateTrackerTest {
     }
 
     @Test
-    void closedCyclesAreCountedEvenWhenTheExternalForkSkipsWork() {
+    void testClosedCyclesAreCounted() {
         var clock = new AtomicLong(0L);
         var tracker = new GateTracker(clock::get);
         for (int s = 0; s < 6; s++) { // 6 fully closed seconds: sampled before the fork, no work done

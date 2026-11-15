@@ -24,7 +24,7 @@ class VoxyModeLifecycleTest {
     }
 
     @Test
-    void modesAreMutuallyExclusiveAndStopImmediatelyInvalidatesWorkerGates() {
+    void testModesAreMutuallyExclusive() {
         for (boolean enabled : new boolean[] {false, true})
             for (boolean chunks : new boolean[] {false, true})
                 for (boolean experimental : new boolean[] {false, true})
@@ -50,7 +50,7 @@ class VoxyModeLifecycleTest {
     }
 
     @Test
-    void retiredProviderCannotDetachReplacementAndLifecycleChangesAreSerialized() throws Exception {
+    void testRetiredProviderCannotDetachReplacement() throws Exception {
         var old =
                 new CoarseRenderHooks.Provider() {
                     public Object render(Object engine, long p, Object original) {

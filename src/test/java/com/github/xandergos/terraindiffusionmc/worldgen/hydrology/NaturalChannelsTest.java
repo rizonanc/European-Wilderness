@@ -32,7 +32,7 @@ class NaturalChannelsTest {
     }
 
     @Test
-    void parallelArtificialDrainsAreRemovedAndKeptValleyPathsHaveContinuousDownstreamRoutes() {
+    void testParallelArtificialDrainsAreRemoved() {
         int[] counts = new int[2];
         for (int mode = 0; mode < 2; mode++) {
             int[][] raw = terrain(256, mode == 1);
@@ -87,7 +87,7 @@ class NaturalChannelsTest {
     }
 
     @Test
-    void productionRevisionFourStillReachesTheSeaThroughAValley() {
+    void testProductionRevisionFourReachesTheSeaThroughAValley() {
         int side = 256;
         int[][] raw = terrain(side, true);
         for (int z = 0; z < side; z++)

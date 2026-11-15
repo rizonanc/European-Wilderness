@@ -15,7 +15,7 @@ class RiverNaturalBanksTest {
     }
 
     @Test
-    void exposedBankIsMostlySoilInCoherentRepeatablePatches() {
+    void testExposedBankIsMostlySoilInCoherentRepeatablePatches() {
         int sand = 0, soil = 0, same = 0;
         for (int z = -128; z < 0; z++)
             for (int x = -128; x < 0; x++) {
@@ -31,7 +31,7 @@ class RiverNaturalBanksTest {
     }
 
     @Test
-    void submergedHalfBlocksLowerTheUpperStepInsteadOfRaisingPlatforms() {
+    void testSubmergedHalfBlocksLowerTheUpperStep() {
         var a = area();
         int wet = 0, rocks = 0, dry = 0;
         for (int cz = 0; cz < 4; cz++)

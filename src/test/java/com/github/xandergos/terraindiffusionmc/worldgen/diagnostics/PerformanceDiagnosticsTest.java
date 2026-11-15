@@ -24,7 +24,7 @@ class PerformanceDiagnosticsTest {
     @TempDir Path temp;
 
     @Test
-    void timelineCapturesCompletedAndInFlightWorkOverlappingTheActualFrameWindow() {
+    void testTimelineCapturesCompleted() {
         var clock = new AtomicLong(100);
         var trace = new WorkTimeline(8, clock::get);
         trace.enabled(true);
@@ -45,7 +45,7 @@ class PerformanceDiagnosticsTest {
     }
 
     @Test
-    void evictedOrRetiredTokensCannotCloseANewerSpanAndDisabledWorkStaysUnrecorded() {
+    void testEvictedOrRetiredTokensCannotCloseANewerSpan() {
         var clock = new AtomicLong(100);
         var trace = new WorkTimeline(1, clock::get);
         assertEquals(0, trace.begin(WATER_PLAN));
@@ -115,7 +115,7 @@ class PerformanceDiagnosticsTest {
     }
 
     @Test
-    void logsRotateOnlyTheirOwnBackupAndRemainValidJsonLines() throws Exception {
+    void testLogsRotateOnlyTheirOwnBackup() throws Exception {
         Path log = temp.resolve("performance.jsonl"), unrelated = temp.resolve("world.dat");
         Files.writeString(unrelated, "untouched");
         var writer = new RotatingPerformanceLog(log, 100);
@@ -134,7 +134,7 @@ class PerformanceDiagnosticsTest {
     }
 
     @Test
-    void reportRetainsUnknownCausesAndGcSamplingWindowUncertainty() {
+    void testReportRetainsUnknownCauses() {
         var spike =
                 new PerformanceDiagnostics.Spike(
                         1, 0, 100, 120, 20_000_000, 6_000_000, new FrameBudget.Decision(7_000_000, 12_000_000, 2));
@@ -153,7 +153,7 @@ class PerformanceDiagnosticsTest {
     }
 
     @Test
-    void longRunningInferenceSurvivesManyShortLodEventsAndOverflowNeverEvictsActiveWork() {
+    void testLongRunningInferenceSurvivesManyShortLodEvents() {
         var clock = new AtomicLong(100);
         var trace = new WorkTimeline(8, clock::get);
         trace.enabled(true);

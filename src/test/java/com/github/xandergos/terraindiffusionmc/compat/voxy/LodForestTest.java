@@ -14,7 +14,7 @@ class LodForestTest {
     }
 
     @Test
-    void foliageAndTrunksEncodeWithTheirOwnPalettesAndCanopyExtendsPublicationHeight() throws Exception {
+    void testFoliageAndTrunksEncodeWithTheirOwnPalettes() throws Exception {
         var builder = new LodColumn.ForestBuilder(ground());
         builder.set(-17, 130, -16, TreeSpecies.BIRCH, true);
         builder.set(-17, 130, -16, TreeSpecies.OAK, false);
@@ -42,7 +42,7 @@ class LodForestTest {
     }
 
     @Test
-    void cursorPublishesCanopyAndSurfaceBeforeUndergroundAndResumesWithoutGaps() throws Exception {
+    void testCursorPublishesCanopy() throws Exception {
         var builder = new LodColumn.ForestBuilder(ground());
         builder.set(-20, 140, -20, TreeSpecies.OAK, false);
         var column = builder.build();
@@ -71,7 +71,7 @@ class LodForestTest {
     }
 
     @Test
-    void staleHighLodIsClearedOnlyWhereDataAlreadyExistsWithoutAllocatingEmptySky() throws Exception {
+    void testStaleHighLodIsClearedOnlyWhereDataExists() throws Exception {
         var column = ground();
         var cursor = new LodPublisher.Cursor(column, true);
         List<Integer> writes = new ArrayList<>();

@@ -31,7 +31,7 @@ class WorldWaterTest {
     }
 
     @Test
-    void aLakeCrossingAnOwnershipBoundaryIsWholeAndHasOnlyOneOwner() {
+    void testBoundaryLakeHasOneOwner() {
         var a = WorldWaterUnit.plan(7, SMALL, new WorldWaterGrid.Cell(0, 0), raw(-32, -32, 128));
         var b = WorldWaterUnit.plan(7, SMALL, new WorldWaterGrid.Cell(1, 0), raw(32, -32, 128));
         assertTrue(a.indices.length > 0);
@@ -145,7 +145,7 @@ class WorldWaterTest {
     }
 
     @Test
-    void plannedCurrentReachesFrozenCoreAndAcceleratesBoatsDownstream() throws Exception {
+    void testPlannedCurrentReachesFrozenCore() throws Exception {
         var cell = new WorldWaterGrid.Cell(0, 0);
         int side = SMALL.unitSide();
         int[][] valley = new int[side][side];
@@ -175,7 +175,7 @@ class WorldWaterTest {
     }
 
     @Test
-    void legacyCatchmentRecoversDownstreamCurrentWithoutChangingItsFootprint() throws Exception {
+    void testLegacyCatchmentRecoversDownstreamCurrent() throws Exception {
         var cell = new WorldWaterGrid.Cell(0, 0);
         int side = SMALL.unitSide();
         int[][] valley = new int[side][side];
@@ -195,7 +195,7 @@ class WorldWaterTest {
     }
 
     @Test
-    void mountainRiverLimitLeavesTheValleyDownstreamConnected() {
+    void testMountainRiverLimitLeavesTheValleyDownstreamConnected() {
         int side = 256;
         int[][] valley = new int[side][side];
         for (int z = 0; z < side; z++)
@@ -252,7 +252,7 @@ class WorldWaterTest {
     }
 
     @Test
-    void changingCurrentStrengthKeepsTheDownstreamDirection() {
+    void testChangingCurrentStrengthKeepsTheDownstreamDirection() {
         short current = (short) ((40 << 8) | (-20 & 255));
         assertEquals(0, RiverCurrent.scale(current, 0));
         assertEquals(current, RiverCurrent.scale(current, 100));
@@ -296,7 +296,7 @@ class WorldWaterTest {
     }
 
     @Test
-    void automaticPlanningPersistsAcrossEvictionAndReloadWithoutInference() throws Exception {
+    void testAutomaticPlanningPersistsAcrossEviction() throws Exception {
         var calls = new AtomicInteger();
         var s = session(calls, null);
         int[] xs = {63, 64, -1, 128, 64, 63};
@@ -347,7 +347,7 @@ class WorldWaterTest {
     }
 
     @Test
-    void concurrentFirstReadersShareOnePlanAndSeeNoTemporaryDryFallback() throws Exception {
+    void testConcurrentFirstReadersShareOnePlan() throws Exception {
         var s = session(new AtomicInteger(), null);
         var barrier = new CyclicBarrier(6);
         try (var c = controller(s, 2);
@@ -396,7 +396,7 @@ class WorldWaterTest {
     }
 
     @Test
-    void neighbouringCoresCanBeGeneratedConcurrentlyWithoutDependencyCycles() throws Exception {
+    void testNeighbouringCoresCanBeGeneratedConcurrently() throws Exception {
         var s = session(new AtomicInteger(), null);
         var barrier = new CyclicBarrier(2);
         try (var c = controller(s, 2);
@@ -418,7 +418,7 @@ class WorldWaterTest {
     }
 
     @Test
-    void realTerrainReplayExercisesOwnedWatershedsWhenSnapshotIsAvailable() throws Exception {
+    void testWatershedReplay() throws Exception {
         Path snapshot = Path.of("../recovery-evidence/g3-invalid-column/terrain");
         Assumptions.assumeTrue(Files.isDirectory(snapshot));
         var source = new DiskTerrainStore(snapshot);
@@ -544,7 +544,7 @@ class WorldWaterTest {
     }
 
     @Test
-    void missingFrozenTerrainFailsInsteadOfSilentlyRecomputingAnExistingWaterCore() throws Exception {
+    void testMissingFrozenTerrainFails() throws Exception {
         var s = session(new AtomicInteger(), null);
         int[] air = new int[4096], water = new int[4096];
         Arrays.fill(air, 103);
@@ -557,7 +557,7 @@ class WorldWaterTest {
     }
 
     @Test
-    void incrementalPreparationBoundsSourceWorkAndProducesTheSameFrozenCore() throws Exception {
+    void testIncrementalPreparationBoundsSourceWork() throws Exception {
         var calls = new AtomicInteger();
         var s = session(calls, null);
         try (var ahead = controller(s, 2);
@@ -593,7 +593,7 @@ class WorldWaterTest {
     }
 
     @Test
-    void foregroundCanJoinAnActiveBackgroundSourceWithoutADeferredSharedFuture() throws Exception {
+    void testForegroundCanJoinAnActiveBackgroundSource() throws Exception {
         var entered = new CountDownLatch(1);
         var release = new CountDownLatch(1);
         var calls = new AtomicInteger();
@@ -661,7 +661,7 @@ class WorldWaterTest {
     }
 
     @Test
-    void lodExportReadsOnlyFrozenPlansAndDoesNotInvokeInference() throws Exception {
+    void testLodExportReadsOnlyFrozenPlans() throws Exception {
         var calls = new AtomicInteger();
         var s = session(calls, null);
         try (var c = controller(s, 2)) {
@@ -687,7 +687,7 @@ class WorldWaterTest {
     }
 
     @Test
-    void frozenViewClonesItsArraysAndCarriesNoLiveGenerator() {
+    void testFrozenViewClonesItsArrays() {
         int[] air = new int[1024], water = new int[1024];
         Arrays.fill(air, 100);
         Arrays.fill(water, 102);
@@ -701,7 +701,7 @@ class WorldWaterTest {
     }
 
     @Test
-    void frozenExportsReuseOneImmutableViewInsteadOfCopyingMegabytes() throws Exception {
+    void testFrozenExportsReuseOneImmutableView() throws Exception {
         var s = session(new AtomicInteger(), null);
         try (var c = controller(s, 2)) {
             c.ensureColumn(0, 0);
@@ -726,7 +726,7 @@ class WorldWaterTest {
     }
 
     @Test
-    void newerAlgorithmKeepsEveryAlreadyFrozenFileAndUsesNewRevisionOnlyForMissingPlans() throws Exception {
+    void testExistingWaterPlansStayFrozen() throws Exception {
         var s = session(new AtomicInteger(), null);
         try (var legacy = controller(s, 2)) {
             legacy.ensureColumn(0, 0);
@@ -804,7 +804,7 @@ class WorldWaterTest {
     }
 
     @Test
-    void lodForestReadsFrozenHaloOnlyAndDoesNotGenerateMissingNeighbours() throws Exception {
+    void testLodForestReadsFrozenHaloOnly() throws Exception {
         var calls = new AtomicInteger();
         var s = WorldSession.activate(GenerationProfile.defaultsFor(2, "forest-probe", "cpu", "cpu"), 7);
         s.attachRepository(

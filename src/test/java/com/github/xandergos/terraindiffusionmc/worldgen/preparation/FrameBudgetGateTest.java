@@ -26,7 +26,7 @@ class FrameBudgetGateTest {
     }
 
     @Test
-    void staleHeartbeatExplainsTheAltTabStallAndRecovers() {
+    void testStaleHeartbeatRecovers() {
         frames(8_000_000L, 50);
         assertTrue(budget.mayPublish());
         now += 2_100_000_000L; // window silent for over two seconds

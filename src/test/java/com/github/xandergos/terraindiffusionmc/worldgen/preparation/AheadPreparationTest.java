@@ -14,7 +14,7 @@ class AheadPreparationTest {
     }
 
     @Test
-    void stationaryPlayerPreparesCurrentAndTwoNearestNeighboursIncludingNegativeCoordinates() {
+    void testStationaryPlayerPreparesCurrent() {
         var values = WaterPrefetchPolicy.candidates(-1, -1, 0, 0, 512);
         assertEquals(3, values.size());
         assertEquals(new TilePrefetchPolicy.TileCoord(-1, -1), values.getFirst());
@@ -23,7 +23,7 @@ class AheadPreparationTest {
     }
 
     @Test
-    void motionIsBoundedAndChangesDirectionWithoutRetainingOldCandidates() {
+    void testMotionIsBoundedAndChangesDirection() {
         var east = WaterPrefetchPolicy.candidates(500, 250, 80, 0, 512);
         var west = WaterPrefetchPolicy.candidates(500, 250, -80, 0, 512);
         assertTrue(east.size() <= 3);
@@ -47,7 +47,7 @@ class AheadPreparationTest {
     }
 
     @Test
-    void samplerIncludesCurrentWhileStationaryAndImmediatelyStopsOnAnOverloadedTick() {
+    void testSamplerIncludesCurrentWhileStationary() {
         var desired = new AtomicReference<List<TerrainTileKey>>(List.of());
         var healthy = new AtomicBoolean();
         var sampler =
@@ -74,7 +74,7 @@ class AheadPreparationTest {
     }
 
     @Test
-    void incrementalServiceDefersToForegroundAndResumesTheSameTask() throws Exception {
+    void testIncrementalServiceDefersToForeground() throws Exception {
         var first = new CountDownLatch(1);
         var release = new CountDownLatch(1);
         var second = new CountDownLatch(1);
@@ -122,7 +122,7 @@ class AheadPreparationTest {
     }
 
     @Test
-    void replacementCancelsUnstartedStagesAndRevokesAnOldStagesPermit() throws Exception {
+    void testReplacementCancelsUnstartedStages() throws Exception {
         var first = new CountDownLatch(1);
         var release = new CountDownLatch(1);
         var next = new CountDownLatch(1);
@@ -167,7 +167,7 @@ class AheadPreparationTest {
     }
 
     @Test
-    void manualPreparationAndUnhealthyTicksPreventAdmission() throws Exception {
+    void testManualPreparationAndUnhealthyTicksPreventAdmission() throws Exception {
         var manual = new AtomicBoolean(true);
         var started = new CountDownLatch(1);
         var service =

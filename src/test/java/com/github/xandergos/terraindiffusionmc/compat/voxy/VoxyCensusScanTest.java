@@ -80,7 +80,7 @@ class VoxyCensusScanTest {
     }
 
     @Test
-    void targetedInspectionReportsSignedWorldBoundsAndDoesNotClaimPersistence() throws Exception {
+    void testTargetedInspectionReportsSignedWorldBounds() throws Exception {
         var f = new Fixture();
         var raw = new long[32768];
         raw[7 * 1024] = 4L << 27;

@@ -145,7 +145,7 @@ class WorldPipelineScratchParityTest {
     }
 
     @Test
-    void schedulerPredBuffersStayCorrectAcrossConsecutiveChains() {
+    void testSchedulerPredBuffersStayCorrectAcrossConsecutiveChains() {
         Random random = new Random(29);
         int n = 6 * 64 * 64;
         float[] predA = new float[n], predB = new float[n];
@@ -173,7 +173,7 @@ class WorldPipelineScratchParityTest {
     }
 
     @Test
-    void reusedUpsampleDestinationWithGarbageIsFullyOverwritten() {
+    void testReusedUpsampleDestinationWithGarbageIsFullyOverwritten() {
         Random random = new Random(31);
         float[] src = new float[4 * 64 * 64];
         for (int i = 0; i < src.length; i++) src[i] = random.nextFloat();

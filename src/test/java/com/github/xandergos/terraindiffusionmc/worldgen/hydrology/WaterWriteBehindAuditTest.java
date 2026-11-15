@@ -24,7 +24,7 @@ class WaterWriteBehindAuditTest {
     }
 
     @Test
-    void closeCannotLeaveAnOfferQueuedAfterTheWorkerHasExited() throws Exception {
+    void testCloseCannotLeaveAnOfferQueuedAfterTheWorkerHasExited() throws Exception {
         var store = new WorldWaterStore(temp, 7, "fixture", 256, GRID);
         var writer = new WaterWriteBehind(store, 2);
         var entered = new CountDownLatch(1);
@@ -84,7 +84,7 @@ class WaterWriteBehindAuditTest {
     }
 
     @Test
-    void differentValidPlanCannotBeReportedAsTheSameFrozenData() throws Exception {
+    void testDifferentValidPlanCannotBeReportedAsTheSameFrozenData() throws Exception {
         var store = new WorldWaterStore(temp, 7, "fixture", 256, GRID);
         store.save(unit((short) 63));
         Path file = temp.resolve("units/2_3.eww");
@@ -109,7 +109,7 @@ class WaterWriteBehindAuditTest {
     }
 
     @Test
-    void failedWorkerClosesAdmissionAndLaterOffersFallBackToSynchronous() throws Exception {
+    void testFailedWorkerClosesAdmission() throws Exception {
         var store = new WorldWaterStore(temp, 7, "fixture", 256, GRID);
         var writer = new WaterWriteBehind(store, 2);
         var failing =

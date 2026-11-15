@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CoarseCoordinateAuditTest {
     @Test
-    void signedSectionCoordinatesVerticalClippingAndOwnershipAgreeAtEveryNativeLevel() {
+    void testSignedSectionCoordinatesVerticalClipping() {
         long[] palette = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
         for (int level = 0; level <= 4; level++)
             for (int sx : new int[] {-65, -1, 0, 63, 64})

@@ -21,7 +21,7 @@ class CoarseSeamParityTest {
     }
 
     @Test
-    void adjacentGlobalSamplesAgreeAcrossPositiveAndNegativePatchBoundaries() {
+    void testGlobalSamplesMatchAtPatchBorders() {
         for (int k : new int[] {-2, -1, 0, 1}) {
             var a = patch(k, 0);
             var b = patch(k + 1, 0);

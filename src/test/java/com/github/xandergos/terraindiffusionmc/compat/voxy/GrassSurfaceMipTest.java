@@ -60,7 +60,7 @@ class GrassSurfaceMipTest {
     }
 
     @Test
-    void sparseGrassDensityIsStableAcrossVerticalGridPhases() throws Exception {
+    void testSparseGrassDensityIsStableAcrossVerticalGridPhases() throws Exception {
         long[] reference = null;
         for (int root = 2; root <= 5; root++) {
             long[] d = field(root, false);
@@ -81,7 +81,7 @@ class GrassSurfaceMipTest {
     }
 
     @Test
-    void edgeOfFineSectionDoesNotWriteIntoAnotherSectionOrFarMip() throws Exception {
+    void testEdgeOfFineSectionDoesNotWriteIntoAnotherSectionOrFarMip() throws Exception {
         long[] d = field(14, true);
         stock(d);
         long[] before = d.clone();
@@ -123,7 +123,7 @@ class GrassSurfaceMipTest {
     }
 
     @Test
-    void repeatedScanDoesNotRetainPreviousFieldAndAllocatesNoArrays() throws Exception {
+    void testRepeatedScanDoesNotRetainPreviousField() throws Exception {
         long[] wet = field(2, true);
         stock(wet);
         GrassSurfaceMip.correct(wet, 0, 0, M);
@@ -140,7 +140,7 @@ class GrassSurfaceMipTest {
     }
 
     @Test
-    void migrationMatchesPinnedWriterAndLeavesDerivedCountsAndChildMasksAlone() throws Exception {
+    void testMigrationMatchesPinnedWriter() throws Exception {
         var f = new WaterMipPolicyTest.Fixture();
         Class<?> ws = f.loadClass("me.cortex.voxy.common.world.WorldSection"),
                 vs = f.loadClass("me.cortex.voxy.common.voxelization.VoxelizedSection");

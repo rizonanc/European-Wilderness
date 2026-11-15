@@ -14,7 +14,7 @@ class CoarseUpdateBudgetTest {
     }
 
     @Test
-    void pressure4NoLongerCollapsesTo1LikeTheOldStepFunction() {
+    void testPressure4NoLongerCollapsesTo1LikeTheOldStepFunction() {
         var budget = new CoarseUpdateBudget();
         for (int i = 0; i < 8; i++) budget.quota(4, 0); // old behavior: 1
         assertTrue(budget.allowance() >= 2, "adaptive floor must beat the old step collapse");

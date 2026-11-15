@@ -5,13 +5,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CoarseOwnershipTest {
     @Test
-    void loadedButNotIngestedChunkIsNoLongerProtectedAir() {
+    void testLoadedChunkWithoutDataIsNotProtected() {
         assertFalse(CoarseOwnership.exact(CoarseOwnership.decide(false)));
         assertTrue(CoarseOwnership.exact(CoarseOwnership.decide(true)));
     }
 
     @Test
-    void composerPreservesLoadedChunkVoxelsAndAirWhileNeuralFillsUnowned() {
+    void testComposerKeepsOwnedColumns() {
         var field = new CoarseLodPatch.Surface[1024];
         for (int z = 0; z < 32; z++)
             for (int x = 0; x < 32; x++) field[z * 32 + x] = new CoarseLodPatch.Surface(80, (short) 229, (short) 0);

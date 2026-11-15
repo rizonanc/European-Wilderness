@@ -16,7 +16,7 @@ class LodBridgeTest {
     }
 
     @Test
-    void verticalProfileHasStoneSoilSurfaceAndAirWithoutCreatingAChunk() {
+    void testVerticalProfileHasStoneSoilSurfaceAndAir() {
         var c = column();
         assertEquals(LodColumn.Kind.STONE, c.kind(0, 96, 0));
         assertEquals(LodColumn.Kind.DIRT, c.kind(0, 99, 0));
@@ -27,7 +27,7 @@ class LodBridgeTest {
     }
 
     @Test
-    void oceanRiverSnowAndDesertRemainDistinctAndInputsAreDetached() {
+    void testOceanRiverSnowAndDesertRemainDistinct() {
         int[] air = new int[1024], water = new int[1024];
         short[] biome = new short[1024];
         Arrays.fill(air, 61);
@@ -54,7 +54,7 @@ class LodBridgeTest {
     }
 
     @Test
-    void existingVoxyCubesAreNeverWrittenAndRepeatedExportIsIdempotent() throws Exception {
+    void testExistingVoxyCubesAreNeverWritten() throws Exception {
         var occupied = new HashSet<Integer>(Set.of(0));
         var written = new ArrayList<Integer>();
         var sink =
@@ -85,7 +85,7 @@ class LodBridgeTest {
     }
 
     @Test
-    void cancellationOrWorldRetirementStopsBetweenWholeCubes() throws Exception {
+    void testCancellationOrWorldRetirementStopsBetweenWholeCubes() throws Exception {
         var valid = new AtomicBoolean(true);
         var writes = new AtomicInteger();
         var sink =
@@ -135,7 +135,7 @@ class LodBridgeTest {
     }
 
     @Test
-    void scanIsBoundedUsesNegativeCoordinatesAndReprioritizesAfterMotion() {
+    void testScanIsBoundedUsesNegativeCoordinates() {
         var scan = new LodScan();
         scan.move(-1, -1, 64);
         var first = scan.next();
@@ -150,7 +150,7 @@ class LodBridgeTest {
     }
 
     @Test
-    void unsupportedVersionsAndCompetingSeedGeneratorFailClosed() {
+    void testUnsupportedVersionsAndCompetingSeedGeneratorFailClosed() {
         assertNull(VoxySupport.problem("0.2.16-beta", false));
         assertNotNull(VoxySupport.problem("0.2.18-beta", false));
         assertNotNull(VoxySupport.problem("0.2.16-beta", true));
@@ -158,7 +158,7 @@ class LodBridgeTest {
     }
 
     @Test
-    void cursorWritesAtMostOneCubeAndResumesAfterBudgetPause() throws Exception {
+    void testCursorWritesAtMostOneCube() throws Exception {
         var writes = new AtomicInteger();
         var sink =
                 new LodPublisher.Sink() {
@@ -186,7 +186,7 @@ class LodBridgeTest {
     }
 
     @Test
-    void reusableEncoderPreservesAxesWaterAndLightWithoutOverwritingMipSpace() throws Exception {
+    void testReusableEncoderPreservesAxesWaterAndLight() throws Exception {
         int[] air = new int[1024], water = new int[1024];
         short[] biomes = new short[1024];
         Arrays.fill(air, 101);
@@ -224,7 +224,7 @@ class LodBridgeTest {
     }
 
     @Test
-    void worldGenCompatibilityIsVersionPinnedAndRadiusIsClampedInBlocks() {
+    void testWorldGenCompatibilityIsVersionPinned() {
         assertTrue(WorldGenCompat.supports("2.2.4"));
         assertFalse(WorldGenCompat.supports("2.2.3"));
         assertEquals(1024, WorldGenCompat.radiusBlocks(64));

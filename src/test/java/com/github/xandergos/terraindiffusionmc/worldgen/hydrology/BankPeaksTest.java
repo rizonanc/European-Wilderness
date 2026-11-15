@@ -46,7 +46,7 @@ class BankPeaksTest {
     }
 
     @Test
-    void extraThinningRemovesSevenPercentOfPreviouslyKeptBasins() {
+    void testExtraThinningRemovesSevenPercentOfPreviouslyKeptBasins() {
         for (boolean lake : new boolean[] {false, true}) {
             int oldKept = 0, extraRemoved = 0;
             for (int i = 0; i < 20000; i++) {
@@ -90,7 +90,7 @@ class BankPeaksTest {
     }
 
     @Test
-    void isolatedCapsBecomeEmbeddedHalfBlocksAtTheWaterline() {
+    void testIsolatedCapsBecomeEmbeddedHalfBlocksAtTheWaterline() {
         int[] water = new int[4096], air = new int[4096];
         Arrays.fill(water, 100);
         Arrays.fill(air, 99);

@@ -68,7 +68,7 @@ class DiskQuotaTest {
     }
 
     @Test
-    void reopenReconcilesExternalChangesAndCountsCrashTemporaryFiles() throws Exception {
+    void testReopenReconcilesExternalChanges() throws Exception {
         var store = new DiskTerrainStore(temp);
         var key = key(0);
         store.store(key, tile(key, false));
@@ -83,7 +83,7 @@ class DiskQuotaTest {
     }
 
     @Test
-    void twoStoresShareReservationsAndCommitReleasesAtomically() throws Exception {
+    void testTwoStoresShareReservations() throws Exception {
         var first = new DiskTerrainStore(temp);
         var second = new DiskTerrainStore(temp.resolve("."));
         var key = key(1);
@@ -138,7 +138,7 @@ class DiskQuotaTest {
     }
 
     @Test
-    void repositoryRejectsBeforeInferenceAndReleasesFailedCompute() throws Exception {
+    void testRepositoryRejectsBeforeInference() throws Exception {
         var store = new DiskTerrainStore(temp);
         var calls = new AtomicInteger();
         var key = key(0);
@@ -171,7 +171,7 @@ class DiskQuotaTest {
     }
 
     @Test
-    void unreadableAccountDoesNotPublishZeroAfterScanFailure() throws Exception {
+    void testUnreadableAccountDoesNotPublishZeroAfterScanFailure() throws Exception {
         Path notDirectory = temp.resolve("file");
         Files.write(notDirectory, new byte[1]);
         var store = new DiskTerrainStore(notDirectory);

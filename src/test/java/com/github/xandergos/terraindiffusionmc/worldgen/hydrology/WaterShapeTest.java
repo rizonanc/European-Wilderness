@@ -46,7 +46,7 @@ class WaterShapeTest {
     }
 
     @Test
-    void doesNotConnectWaterAtDifferentElevationsThroughAnIsland() {
+    void testDoesNotConnectWaterAtDifferentElevationsThroughAnIsland() {
         int[] water = lake(), air = new int[64 * 64];
         Arrays.fill(air, 103);
         island(water, 28, 4);
@@ -65,7 +65,7 @@ class WaterShapeTest {
     }
 
     @Test
-    void smoothingKeepsBoundariesAndRemovesASingleBlockDrainagePit() {
+    void testSmoothingKeepsBoundaries() {
         int[][] terrain = new int[9][9];
         for (int[] row : terrain) Arrays.fill(row, 100);
         terrain[4][4] = 99;
@@ -84,7 +84,7 @@ class WaterShapeTest {
     }
 
     @Test
-    void retainExisting231LakeInsteadOfRemovingItsWholeCatchment() {
+    void testRetainExisting231Lake() {
         int[][] terrain = new int[64][64];
         for (int[] row : terrain) Arrays.fill(row, 101);
         for (int z = 28; z < 34; z++) for (int x = 28; x < 34; x++) terrain[z][x] = 80;

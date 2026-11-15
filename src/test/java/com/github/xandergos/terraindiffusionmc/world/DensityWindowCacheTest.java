@@ -73,7 +73,7 @@ class DensityWindowCacheTest {
     }
 
     @Test
-    void cacheIsBoundedAndInvalidatesOnSessionAndResolverChanges() {
+    void testCacheIsBoundedAndInvalidatesOnSession() {
         var cache = new DensityWindowCache();
         var id = UUID.randomUUID();
         var source = new Object();
@@ -116,7 +116,7 @@ class DensityWindowCacheTest {
     }
 
     @Test
-    void dynamicWaterOverlayIsEvaluatedOnEverySampleInsteadOfFreezingItsResult() {
+    void testDynamicWaterOverlayIsEvaluatedOnEverySample() {
         DensitySampler.Lookup lookup = (z, x, ez, ex) -> ready(x, z, 0);
         AtomicInteger waterHeight = new AtomicInteger(180);
         WorldSession.current()
@@ -150,7 +150,7 @@ class DensityWindowCacheTest {
     }
 
     @Test
-    void parallelGenerationThreadsCannotReplaceEachOthersWindows() throws Exception {
+    void testParallelGenerationThreadsCannotReplaceEachOthersWindows() throws Exception {
         var density = new DensitySampler();
         var barrier = new CyclicBarrier(2);
         AtomicInteger calls = new AtomicInteger();

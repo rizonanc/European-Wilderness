@@ -21,7 +21,7 @@ class DensitySurfaceCacheTest {
     }
 
     @Test
-    void distinguishesEveryColumnAtNegativeEdgesAndAcceptsAllIntegerHeights() {
+    void testDistinguishesEveryColumnAtNegativeEdges() {
         var cache = new DensitySurfaceCache();
         var world = UUID.randomUUID();
         var water = UUID.randomUUID();
@@ -37,7 +37,7 @@ class DensitySurfaceCacheTest {
     }
 
     @Test
-    void boundedWindowsAreInvalidatedByWorldWaterAndLookupIdentity() {
+    void testBoundedWindowsAreInvalidatedByWorldWater() {
         var cache = new DensitySurfaceCache();
         var world = UUID.randomUUID();
         var water = UUID.randomUUID();
@@ -72,7 +72,7 @@ class DensitySurfaceCacheTest {
     }
 
     @Test
-    void automaticSurfaceMatchesUncachedSamplingAndManualOverlayStillChangesImmediately() throws Exception {
+    void testAutomaticSurfaceMatchesUncachedSampling() throws Exception {
         var session = automatic();
         var sampler = new DensitySampler();
         AtomicInteger fetches = new AtomicInteger();

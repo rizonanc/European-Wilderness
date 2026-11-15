@@ -7,7 +7,7 @@ import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticEr
 
 class InferenceDiagnosticsTest {
     @Test
-    void failedFutureRetainsExceptionAndCrossThreadRequestIdentity() throws Exception {
+    void testFailedFutureRetainsException() throws Exception {
         var context =
                 new DiagnosticErrors.Context("td-correlation", "region", "test:dimension", "opaque", "tile=(-4,7)");
         var original = new IllegalArgumentException("fixture inference failed");

@@ -38,7 +38,7 @@ class TreeLodPreviewTest {
     }
 
     @Test
-    void forestHasTrunksAndCrownsAndWetRootsCannotSpawnFloatingTrees() throws Exception {
+    void testForestHasTrunksAndCrowns() throws Exception {
         var forest = paint(0, 0, 32, flat(false));
         assertTrue(forest.size() > 100);
         assertTrue(forest.stream().anyMatch(Voxel::log));
@@ -48,7 +48,7 @@ class TreeLodPreviewTest {
     }
 
     @Test
-    void croppedCanopiesMatchAcrossNegativeChunkAndCellBoundaries() throws Exception {
+    void testCroppedCanopiesMatchAtChunkBorders() throws Exception {
         var field = flat(false);
         Set<Voxel> large = paint(-32, -32, 64, field), parts = new HashSet<>();
         for (int z = -32; z < 32; z += 32) for (int x = -32; x < 32; x += 32) parts.addAll(paint(x, z, 32, field));
@@ -57,7 +57,7 @@ class TreeLodPreviewTest {
     }
 
     @Test
-    void cheapDimensionsReuseExactSeededHeightAndBaseSelection() {
+    void testCheapDimensionsReuseExactSeededHeight() {
         for (var species : TreeSpecies.values())
             for (var age : TreeAge.values())
                 for (int seed = 0; seed < 12; seed++) {
@@ -70,7 +70,7 @@ class TreeLodPreviewTest {
     }
 
     @Test
-    void isolatedBirchPreviewUsesRealBranchTrunkAndLeafVoxelsInsteadOfAnEllipsoid() throws Exception {
+    void testIsolatedBirchPreviewUsesRealBranchTrunk() throws Exception {
         for (long seed = 0; seed < 100; seed++)
             for (var candidate : TreeCandidates.rawAdultRootsForChunk(seed, 0, 0)) {
                 if (candidate.x() < 8 || candidate.x() > 23 || candidate.z() < 8 || candidate.z() > 23) continue;

@@ -14,7 +14,7 @@ class WholeTreeWriteTest {
     }
 
     @Test
-    void rootWritesTheCompleteCanopyAtPositiveAndNegativeChunkCorners() {
+    void testRootWritesWholeCanopyAtChunkCorners() {
         for (int origin : new int[] {15, -1, -16, 16}) {
             var t = tree(origin, origin);
             int root = Math.floorDiv(origin, 16);
@@ -45,7 +45,7 @@ class WholeTreeWriteTest {
     }
 
     @Test
-    void changingDecorationBetweenChunkPassesUsedToLeaveASeveredCanopy() {
+    void testRootChunkWritesWholeCanopy() {
         var t = tree(15, 15);
         var first = EuropeanTreePlanner.planChunk(List.of(t), 0, 0, v -> true);
         assertFalse(first.voxels().isEmpty());
@@ -59,7 +59,7 @@ class WholeTreeWriteTest {
     }
 
     @Test
-    void obstructionOrUnwritablePositionRejectsTheWholeTreeBeforeAnyWrite() {
+    void testObstructionRejectsWholeTree() {
         var t = tree(15, 15);
         for (var blocked : List.of(t.shape().voxels().getFirst(), t.shape().voxels().getLast())) {
             var plan =

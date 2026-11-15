@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class LodPreparationFrontierTest {
     @Test
-    void preparesMissingCoresWithoutAnyVoxelExporterRequestAndSkipsReadyCores() {
+    void testPreparesMissingCores() {
         var frontier = new LodPreparationFrontier(512);
         Set<LodPreparationFrontier.Point> ready = new HashSet<>();
         for (int i = 0; i < 12; i++) {
@@ -22,14 +22,14 @@ class LodPreparationFrontierTest {
     }
 
     @Test
-    void movementReprioritizesAndNegativeCoordinatesSelectTheCorrectCore() {
+    void testMovementReprioritizes() {
         var frontier = new LodPreparationFrontier(512);
         assertEquals(new LodPreparationFrontier.Point(-512, -512), frontier.next(-1, -1, 32768, (x, z) -> false));
         assertEquals(new LodPreparationFrontier.Point(4096, -4608), frontier.next(4100, -4100, 32768, (x, z) -> false));
     }
 
     @Test
-    void fullyPreparedSmallDiskEventuallyIdlesAndAllLookupsStayInsideTheRequestMargin() {
+    void testFullyPreparedSmallDiskEventuallyIdles() {
         var frontier = new LodPreparationFrontier(512);
         int[] lookups = {0};
         for (int i = 0; i < 20; i++)

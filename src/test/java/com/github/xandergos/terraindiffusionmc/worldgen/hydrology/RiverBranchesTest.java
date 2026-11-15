@@ -34,7 +34,7 @@ class RiverBranchesTest {
     }
 
     @Test
-    void confluencesHaveMainStemAndAtMostTwoSideTributaries() {
+    void testConfluencesHaveMainStem() {
         var p = terrain();
         boolean[] eligible = new boolean[4096];
         Arrays.fill(eligible, true);
@@ -49,7 +49,7 @@ class RiverBranchesTest {
     }
 
     @Test
-    void branchingIsRepeatableForTheSameWorldAndCoordinates() {
+    void testBranchingIsRepeatableForTheSameWorld() {
         var p = terrain();
         boolean[] eligible = new boolean[4096];
         Arrays.fill(eligible, true);
@@ -60,7 +60,7 @@ class RiverBranchesTest {
     }
 
     @Test
-    void repeatedParallelFeedsDoNotBecomeACombAlongTheMainRiver() {
+    void testRepeatedParallelFeedsDoNotBecomeACombAlongTheMainRiver() {
         int[][] ground = new int[64][64];
         for (int[] row : ground) Arrays.fill(row, 500);
         boolean[] eligible = new boolean[4096];

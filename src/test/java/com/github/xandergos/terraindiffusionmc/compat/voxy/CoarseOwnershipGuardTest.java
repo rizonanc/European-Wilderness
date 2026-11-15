@@ -16,7 +16,7 @@ class CoarseOwnershipGuardTest {
     }
 
     @Test
-    void renderRequestsNeverReadFilesAndUnknownOwnershipDefersInsteadOfAssumingPreview() throws Exception {
+    void testRenderRequestsNeverReadFiles() throws Exception {
         var guard = new LodChunkGuard(temp);
         Files.write(temp.resolve("r.0.0.mca"), new byte[1]);
         for (int i = 0; i < 100; i++) assertFalse(guard.renderRegionReady(0, 0));
@@ -56,7 +56,7 @@ class CoarseOwnershipGuardTest {
     }
 
     @Test
-    void ownershipReadsAreBatchedAndPublishOnlyTheProcessedRegions() {
+    void testOwnershipReadsAreBatched() {
         var guard = new LodChunkGuard(temp);
         for (int i = 0; i < 5; i++) assertFalse(guard.renderRegionReady(i * 512, 0));
         assertEquals(2, guard.prepareRenderRegions(2));
@@ -88,7 +88,7 @@ class CoarseOwnershipGuardTest {
     }
 
     @Test
-    void renderRequestQueueHasABoundAndRetriesTheOverflowAfterDraining() {
+    void testRenderRequestQueueHasABound() {
         var guard = new LodChunkGuard(temp);
         for (int i = 0; i < 10000; i++) assertFalse(guard.renderRegionReady(i * 512, 0));
         assertTrue(guard.renderStatistics().contains("pending=8192"));
@@ -99,7 +99,7 @@ class CoarseOwnershipGuardTest {
     }
 
     @Test
-    void backgroundDiskCacheLockNeverBlocksLoadedChunkProtection() throws Exception {
+    void testBackgroundDiskCacheLockNeverBlocksLoadedChunkProtection() throws Exception {
         var entered = new java.util.concurrent.CountDownLatch(1);
         var release = new java.util.concurrent.CountDownLatch(1);
         var guard =

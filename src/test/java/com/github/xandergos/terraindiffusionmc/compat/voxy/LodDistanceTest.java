@@ -61,7 +61,7 @@ class LodDistanceTest {
     }
 
     @Test
-    void readyNotificationRevisitsMissingRingWithoutRestartingAtTheCenter() {
+    void testReadyNotificationRevisitsMissingRing() {
         var scan = new LodScan();
         scan.move(0, 0, 8192);
         LodScan.Cell missing = null;

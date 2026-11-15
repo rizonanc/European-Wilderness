@@ -36,7 +36,7 @@ class CoarseMeshLifecycleTest {
     }
 
     @Test
-    void retainedVoxyModelBakeSnapshotCannotPublishAfterRetirementOrProviderReplacement() {
+    void testStaleVoxyBakeCannotPublish() {
         var tracker = new CoarseMeshTracker(4);
         long version = tracker.request(1);
         Object snapshot = new Object();
@@ -83,7 +83,7 @@ class CoarseMeshLifecycleTest {
     }
 
     @Test
-    void trackingIsBoundedWithoutEvictingAlreadyBuiltCleanupEntries() {
+    void testTrackingIsBoundedWithoutEvictingBuiltCleanupEntries() {
         var tracker = new CoarseMeshTracker(1);
         assertEquals(1, tracker.request(1));
         tracker.built(1);
@@ -93,7 +93,7 @@ class CoarseMeshLifecycleTest {
     }
 
     @Test
-    void secondForcedInvalidationCannotBeLostWhileTheFirstIsSelected() {
+    void testSecondForcedInvalidationCannotBeLost() {
         var queue = new CoarseUpdateQueue(8, 8);
         long key = 4L << 60;
         queue.offer(key, true);

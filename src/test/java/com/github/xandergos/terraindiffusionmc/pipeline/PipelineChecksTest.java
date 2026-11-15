@@ -6,7 +6,7 @@ import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticEr
 
 class PipelineChecksTest {
     @Test
-    void invalidShapeIsExplicitAndNeverConvertedToEmptyTerrain() {
+    void testInvalidShapeIsExplicit() {
         var failure =
                 assertThrows(
                         PipelineChecks.Invalid.class,
@@ -47,7 +47,7 @@ class PipelineChecksTest {
     }
 
     @Test
-    void wrongOutputAndNonFiniteCriticalValuesHaveDifferentCodes() {
+    void testWrongOutputAndNonFiniteCriticalValuesHaveDifferentCodes() {
         assertEquals(
                 DiagnosticErrors.Code.INF_OUTPUT,
                 assertThrows(PipelineChecks.Invalid.class, () -> PipelineChecks.output(new float[3], 4, "decoder"))

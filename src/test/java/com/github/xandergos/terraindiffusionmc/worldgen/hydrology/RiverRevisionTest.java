@@ -13,7 +13,7 @@ class RiverRevisionTest {
     private static final int NONE = PreparedWaterArea.NONE;
 
     @Test
-    void frequencyUsesWholeStableBasinsAndApproximatesTenPercentAcrossCoordinates() {
+    void testFrequencyUsesWholeStableBasins() {
         for (boolean lake : new boolean[] {false, true}) {
             int removed = 0;
             for (int i = 0; i < 20000; i++) {
@@ -27,7 +27,7 @@ class RiverRevisionTest {
     }
 
     @Test
-    void rejectedLakeDisappearsAsAWholeWhileKeptLakeRetainsItsGeometry() {
+    void testRejectedLakeDisappearsAsAWhole() {
         int[][] raw = new int[64][64];
         for (int z = 0; z < 64; z++)
             for (int x = 0; x < 64; x++) raw[z][x] = x >= 12 && x < 52 && z >= 12 && z < 52 ? 83 : 103;
@@ -48,7 +48,7 @@ class RiverRevisionTest {
     }
 
     @Test
-    void coastalConnectionCutsTheSandBarAndDoesNotRaiseADamInTheSea() {
+    void testCoastalConnectionCutsTheSandBar() {
         int side = 128;
         int[][] raw = new int[side][side];
         int[] air = new int[side * side], water = new int[air.length];
@@ -121,7 +121,7 @@ class RiverRevisionTest {
     }
 
     @Test
-    void riverTraversesAWideDryBeachBeforeEndingAtTheActualSea() {
+    void testRiverTraversesAWideDryBeachBeforeEndingAtTheActualSea() {
         int side = 128;
         int[][] raw = new int[side][side];
         for (int z = 0; z < side; z++)
@@ -189,7 +189,7 @@ class RiverRevisionTest {
     }
 
     @Test
-    void revisionFourRoundTripsAndExistingFrozenRevisionThreeIsNeverReplaced() throws Exception {
+    void testRevisionFourRoundTrips() throws Exception {
         var grid = new WorldWaterGrid(64, 32, 128);
         var cell = new WorldWaterGrid.Cell(0, 0);
         var store = new WorldWaterStore(temp, 7, "fp", 256, grid);

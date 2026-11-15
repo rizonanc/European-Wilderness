@@ -30,7 +30,7 @@ class GenerationWaterModeTest {
     }
 
     @Test
-    void worldsFromThePreparedAreaBuildKeepTheirExistingModeAndTerrainIdentity() {
+    void testLegacyWaterProfile() {
         var old =
                 JsonParser.parseString(
                         """
@@ -44,7 +44,7 @@ class GenerationWaterModeTest {
     }
 
     @Test
-    void terrainPreferencesRoundTripAndKeepTheirOwnCacheIdentity() {
+    void testTerrainPreferencesRoundTrip() {
         var json =
                 GenerationProfileState.CODEC
                         .encodeStart(JsonOps.INSTANCE, GenerationProfileState.createDefault())
@@ -63,7 +63,7 @@ class GenerationWaterModeTest {
     }
 
     @Test
-    void legacyWaterOptionsAreFrozenOnceAndKeepTheExistingTerrainCacheIdentity() {
+    void testLegacyWaterOptionsAreFrozenOnce() {
         var json =
                 GenerationProfileState.CODEC
                         .encodeStart(JsonOps.INSTANCE, GenerationProfileState.createDefault())
@@ -82,7 +82,7 @@ class GenerationWaterModeTest {
     }
 
     @Test
-    void newWorldStoresItsBiomeLayoutAndLegacyWorldKeepsItsCache() {
+    void testLegacyBiomeCacheIdentity() {
         var fresh =
                 GenerationProfileState.CODEC
                         .encodeStart(JsonOps.INSTANCE, GenerationProfileState.createDefault())
@@ -112,7 +112,7 @@ class GenerationWaterModeTest {
     }
 
     @Test
-    void biomeBalanceIsStoredPerWorldAndSeparatesTerrainCaches() {
+    void testBiomeBalanceIsStoredPerWorld() {
         var neutral = GenerationProfileState.createDefault().toProfile();
         var settings =
                 WorldGenerationOptions.fromSettings(
@@ -136,7 +136,7 @@ class GenerationWaterModeTest {
     }
 
     @Test
-    void mountainRiversDefaultOffForNewWorldsAndStayEnabledInLegacyProfiles() throws Exception {
+    void testMountainRiversDefaultOffForNewWorlds() throws Exception {
         var defaults = com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfigEditor.loadDefaults();
         var options = WorldGenerationOptions.fromSettings(defaults);
         assertFalse(options.water().mountainRivers());
@@ -153,7 +153,7 @@ class GenerationWaterModeTest {
     }
 
     @Test
-    void regionalPresetClimatePersistsAndChangesTheTerrainIdentity() {
+    void testRegionalPresetClimatePersists() {
         var preset =
                 com.github.xandergos.terraindiffusionmc.config.SettingsPresets.ALL.stream()
                         .filter(candidate -> candidate.id().equals("scandinavia"))

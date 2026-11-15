@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class VoxyFramePointTest {
     @Test
-    void depthPixelUsesOpenGlBottomOriginAndCameraRelativeProjection() {
+    void testDepthPixelUsesOpenGlBottomOrigin() {
         assertEquals(
                 "10.00,20.00,30.00", VoxyWaterFrameDiagnostics.worldPoint(new Matrix4f(), 0, 0, 1, 1, .5f, 10, 20, 30));
         assertEquals(

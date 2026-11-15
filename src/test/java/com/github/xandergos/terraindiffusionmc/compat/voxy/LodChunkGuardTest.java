@@ -23,7 +23,7 @@ class LodChunkGuardTest {
     }
 
     @Test
-    void oneRealSixteenChunkProtectsOnlyItsQuadrantAndFilesStayUntouched() throws Exception {
+    void testOneRealSixteenChunkProtectsOnlyItsQuadrant() throws Exception {
         save(0, 0, 0);
         byte[] original = Files.readAllBytes(region(0, 0));
         var guard = new LodChunkGuard(temp);
@@ -65,7 +65,7 @@ class LodChunkGuardTest {
     }
 
     @Test
-    void headerCacheRefreshesAndAChunkLoadImmediatelyOverridesCachedAbsence() throws Exception {
+    void testHeaderCacheRefreshes() throws Exception {
         var clock = new AtomicLong(1_000_000_000);
         var guard = new LodChunkGuard(temp, clock::get);
         assertEquals(15, guard.writableMask(0, 0));
@@ -78,7 +78,7 @@ class LodChunkGuardTest {
     }
 
     @Test
-    void rememberedChunkLimitStopsWritesInsteadOfDroppingProtection() {
+    void testRememberedChunkLimitStopsWrites() {
         var guard = new LodChunkGuard(temp);
         for (int i = 0; i < 4097; i++) guard.markLoaded(i * 32, 0);
         assertTrue(guard.overflow());
@@ -86,7 +86,7 @@ class LodChunkGuardTest {
     }
 
     @Test
-    void aTemporarilyIncompleteHeaderCanRecoverWithoutBeingTreatedAsACompletedRealCell() throws Exception {
+    void testATemporarilyIncompleteHeaderCanRecover() throws Exception {
         var clock = new AtomicLong(1_000_000_000);
         var guard = new LodChunkGuard(temp, clock::get);
         Files.write(region(0, 0), new byte[128]);

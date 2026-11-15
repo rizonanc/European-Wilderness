@@ -25,7 +25,7 @@ class CoarseSectionComposerTest {
     }
 
     @Test
-    void coarseSectionsEncodeLargeCellsAndAdvertiseOccupiedChildren() {
+    void testCoarseSectionsEncodeLargeCells() {
         long[] data = new long[32768];
         var result = fill(4, 0, flat(64), null, data, (x, z) -> false);
         assertEquals(4 * 1024, result.nonAir());
@@ -57,7 +57,7 @@ class CoarseSectionComposerTest {
     }
 
     @Test
-    void inPlaceSnapshotMergeMatchesSeparateBuffersAndKeepsCorrectChangedFlag() {
+    void testInPlaceSnapshotMergeMatchesSeparateBuffers() {
         long[] source = new long[32768];
         source[5] = 99;
         long[] separate = new long[32768], inPlace = source.clone();
@@ -77,7 +77,7 @@ class CoarseSectionComposerTest {
     }
 
     @Test
-    void oceansAndCanopiesAreOnlyPreviewMaterialsAndRespectWorldBounds() {
+    void testOceansAndCanopiesAreOnlyPreviewMaterials() {
         long[] out = new long[32768];
         var sea = fill(0, 1, flat(40), null, out, (x, z) -> false);
         assertEquals(31 * 1024, sea.nonAir());
@@ -92,7 +92,7 @@ class CoarseSectionComposerTest {
     }
 
     @Test
-    void retiringProviderDoesNotChangeOrReleaseForeignSections() {
+    void testRetiringProviderDoesNotChangeOrReleaseForeignSections() {
         Object engine = new Object(), section = new Object();
         assertSame(section, CoarseRenderHooks.render(engine, 0, section));
         var p =
@@ -117,7 +117,7 @@ class CoarseSectionComposerTest {
     }
 
     @Test
-    void fullyExactSectionsBypassPreviewIncludingNullSkyAndNegativeChunkCoordinates() {
+    void testFullyExactSectionsBypassPreviewIncludingNullSky() {
         var coverage = new CoarseCoverage();
         for (int z = -2; z < 0; z++) for (int x = -2; x < 0; x++) coverage.mark(x, z);
         assertTrue(

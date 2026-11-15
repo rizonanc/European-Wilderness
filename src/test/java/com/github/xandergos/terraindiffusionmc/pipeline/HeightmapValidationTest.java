@@ -27,7 +27,7 @@ class HeightmapValidationTest {
     }
 
     @Test
-    void validHeightQuantizationAndDefensiveClimateOwnershipStayUnchanged() throws Exception {
+    void testValidHeightQuantization() throws Exception {
         float[] climate = new float[8];
         climate[0] = 0.5f;
         var result =

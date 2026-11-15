@@ -21,7 +21,7 @@ class ExperimentalFlagsDefaultTest {
     }
 
     @Test
-    void catalogueContainsExactlyTheBundledKeysWithNewFlagsPresent() throws Exception {
+    void testCatalogueContainsTheBundledKeysWithNewFlagsPresent() throws Exception {
         var bundled = new java.util.Properties();
         try (var input = getClass().getResourceAsStream("/european-wilderness.properties")) {
             bundled.load(input);

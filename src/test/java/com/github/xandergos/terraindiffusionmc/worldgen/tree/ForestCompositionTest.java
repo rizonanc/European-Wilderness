@@ -10,7 +10,7 @@ class ForestCompositionTest {
     }
 
     @Test
-    void blendsCrossOld96BlockStandBordersAndNegativeCoordinatesContinuously() {
+    void testBlendsCrossOld96BlockStandBorders() {
         var ecology = climate();
         for (int border = -768; border <= 768; border += 96)
             for (int z = -512; z <= 512; z += 37) {
@@ -24,7 +24,7 @@ class ForestCompositionTest {
     }
 
     @Test
-    void eachStandContainsMixedSpeciesInsteadOfSharingOneNarrowRandomBand() {
+    void testEachStandContainsMixedSpecies() {
         for (int sx = -2; sx <= 2; sx++)
             for (int sz = -2; sz <= 2; sz++) {
                 var species = java.util.EnumSet.noneOf(TreeSpecies.class);
@@ -43,7 +43,7 @@ class ForestCompositionTest {
     }
 
     @Test
-    void speciesFieldVariesWithSeedAndLocationButRemainsDeterministic() {
+    void testSpeciesFieldDependsOnSeedAndLocation() {
         var ecology = climate();
         assertEquals(ForestComposition.at(42, 17, -19, ecology), ForestComposition.at(42, 17, -19, ecology));
         assertNotEquals(ForestComposition.at(42, 17, -19, ecology), ForestComposition.at(43, 17, -19, ecology));

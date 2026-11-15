@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PreparedDrainageTest {
     @Test
-    void flatRoutesToANearestExitInsteadOfFollowingTheRowScan() {
+    void testFlatRoutesToANearestExit() {
         int side = 25;
         int[][] heights = new int[side][side];
         for (int[] row : heights) Arrays.fill(row, 100);
@@ -28,14 +28,14 @@ class PreparedDrainageTest {
     }
 
     @Test
-    void downhillDirectionUsesSlopeAndAccountsForDiagonalDistance() {
+    void testDownhillDirectionUsesSlope() {
         int[][] heights = {{110, 110, 110}, {110, 100, 97}, {110, 110, 96}};
         var p = DrainagePlanner.planPrepared(1, 0, 0, heights);
         assertEquals(0, p.direction(1, 1), "east has steeper slope than the lower but more distant diagonal");
     }
 
     @Test
-    void routingPreservesLakesAndConservesCatchmentsWithoutCyclesOrUphillEdges() {
+    void testRoutingPreservesLakesAndConservesCatchments() {
         int width = 48, height = 32;
         Random random = new Random(49371);
         int[][] heights = new int[height][width];

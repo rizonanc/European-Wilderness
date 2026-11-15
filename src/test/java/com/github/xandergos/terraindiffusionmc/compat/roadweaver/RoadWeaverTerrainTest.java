@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class RoadWeaverTerrainTest {
     @Test
-    void mountainRoadCostPrefersGradualClimbsInBothDirections() {
+    void testRoadCostPrefersGradualClimbs() {
         assertEquals(0d, RoadWeaverTerrain.mountainGradeCost(8, 2, 0));
         double steep = RoadWeaverTerrain.mountainGradeCost(8, 6, 0);
         assertTrue(steep > RoadWeaverTerrain.mountainGradeCost(8, 6, 8));

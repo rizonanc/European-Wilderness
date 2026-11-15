@@ -30,7 +30,7 @@ class CoarseLodTest {
     }
 
     @Test
-    void weightedChannelsAndHalosAgreeAcrossPositiveAndNegativeSeams() {
+    void testChannelsAndHalosMatchAtSeams() {
         int span = 64 * 512;
         for (int boundary : new int[] {-span, 0, span}) {
             var left = patch(Math.floorDiv(boundary, span) - 1, -1);
@@ -45,7 +45,7 @@ class CoarseLodTest {
     }
 
     @Test
-    void badShapesMissingWeightsAndNonFiniteValuesAreRejected() {
+    void testBadShapesMissingWeights() {
         assertThrows(
                 IllegalArgumentException.class,
                 () ->
@@ -63,7 +63,7 @@ class CoarseLodTest {
     }
 
     @Test
-    void cacheIsBoundedAndFrontierSelectsNearPatchesWithoutMillionsOfCells() {
+    void testCacheIsBoundedAndFrontierSelectsNearPatches() {
         int span = 64 * 512;
         var cache = new CoarseLodCache(span, 2);
         assertEquals(new CoarseLodPatch.Key(0, 0), cache.next(span / 2, span / 2, 32768));
@@ -78,7 +78,7 @@ class CoarseLodTest {
     }
 
     @Test
-    void modelSurfaceIsDeterministicAndDoesNotRequireRawTilesOrWaterPlans() {
+    void testModelSurfaceIsDeterministic() {
         var a = patch(0, 0);
         var b = patch(0, 0);
         for (int z = 0; z < 512; z += 16)
@@ -100,7 +100,7 @@ class CoarseLodTest {
     }
 
     @Test
-    void automaticHorizonUsesVoxyRootSectionsRatherThanWorldGen512ChunkSlider() {
+    void testAutomaticHorizonUsesVoxyRootSections() {
         assertEquals(32768, Voxy016Api.horizonBlocks(64));
         assertEquals(8192, Voxy016Api.horizonBlocks(16));
         assertEquals(32768, Voxy016Api.horizonBlocks(1000));

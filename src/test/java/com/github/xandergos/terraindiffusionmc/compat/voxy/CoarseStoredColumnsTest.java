@@ -30,7 +30,7 @@ class CoarseStoredColumnsTest {
     }
 
     @Test
-    void queueDeduplicatesAndReadFailureLeavesOwnershipProtected() {
+    void testQueueDeduplicatesAndReadFailureLeavesOwnershipProtected() {
         var columns = new CoarseStoredColumns();
         for (int i = 0; i < 10; i++) columns.ready(0, 0);
         assertThrows(
@@ -50,7 +50,7 @@ class CoarseStoredColumnsTest {
     }
 
     @Test
-    void invalidationDuringProbeDiscardsTheOldSnapshotAndSchedulesOneFreshRead() throws Exception {
+    void testInvalidationDuringProbeDiscardsTheOldSnapshot() throws Exception {
         var columns = new CoarseStoredColumns();
         assertFalse(columns.ready(-513, 1040));
         var started = new CountDownLatch(1);

@@ -10,7 +10,7 @@ class CoarseUpdateQueueTest {
     }
 
     @Test
-    void rootsPassBeforeALargeFineNeighbourBacklogAndCleanupKeepsItsOwnShare() {
+    void testRootsPassBeforeALargeFineNeighbourBacklog() {
         var queue = new CoarseUpdateQueue(100010, 16);
         for (int i = 0; i < 100000; i++) assertTrue(queue.offer(key(0, i), false));
         queue.offer(key(1, 0), true);
@@ -25,7 +25,7 @@ class CoarseUpdateQueueTest {
     }
 
     @Test
-    void unfinishedRootsDoNotPreventReadyNearSectorsFromUpdating() {
+    void testUnfinishedRootsDoNotPreventReadyNearSectorsFromUpdating() {
         var queue = new CoarseUpdateQueue(1000, 16);
         for (int i = 0; i < 600; i++) queue.offer(key(4, i), false);
         queue.offer(key(0, 1), false);
@@ -54,7 +54,7 @@ class CoarseUpdateQueueTest {
     }
 
     @Test
-    void boundedUrgentOverflowRemainsDiscoverableAndCancelledSelectionStaysPending() {
+    void testBoundedUrgentOverflowRemainsDiscoverable() {
         var queue = new CoarseUpdateQueue(8, 1);
         for (int i = 0; i < 8; i++) assertTrue(queue.offer(key(4, i), true));
         assertFalse(queue.offer(key(4, 8), true));
@@ -70,7 +70,7 @@ class CoarseUpdateQueueTest {
     }
 
     @Test
-    void movementRetiresOutOfRangeWorkAndScanHasAFinitePerLevelBudget() {
+    void testMovementRetiresOutOfRangeWork() {
         var queue = new CoarseUpdateQueue(4000, 1);
         for (int i = 0; i < 1000; i++) queue.offer(key(4, i), false);
         var calls = new java.util.concurrent.atomic.AtomicInteger();
@@ -91,7 +91,7 @@ class CoarseUpdateQueueTest {
     }
 
     @Test
-    void interruptedPublishRetainsCleanupPriorityAheadOfRoots() {
+    void testInterruptedPublishRetainsCleanupPriorityAheadOfRoots() {
         var queue = new CoarseUpdateQueue(100010, 8);
         for (int i = 0; i < 100000; i++) queue.offer(key(4, i), false);
         queue.offer(key(0, 0), true);
@@ -105,7 +105,7 @@ class CoarseUpdateQueueTest {
     }
 
     @Test
-    void concurrentProducersDeduplicateWithoutLosingTheBound() throws Exception {
+    void testConcurrentProducersDeduplicate() throws Exception {
         var queue = new CoarseUpdateQueue(1000, 8);
         try (var threads = java.util.concurrent.Executors.newFixedThreadPool(4)) {
             var jobs = new ArrayList<java.util.concurrent.Future<?>>();
@@ -126,7 +126,7 @@ class CoarseUpdateQueueTest {
     }
 
     @Test
-    void healthySustainedLowFpsDoesNotApplyTheSpikeQuotaAndBacklogPausesNewWork() {
+    void testHealthySustainedLowFpsDoesNotApplyTheSpikeQuota() {
         var clock = new java.util.concurrent.atomic.AtomicLong(1_000_000_000L);
         var frames = new com.github.xandergos.terraindiffusionmc.worldgen.preparation.FrameBudget(clock::get);
         for (int i = 0; i < 1000; i++) {

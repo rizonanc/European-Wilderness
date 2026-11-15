@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CoarseWaterSurfaceTest {
     @Test
-    void shallowSeaKeepsWaterInsteadOfSandPlatformAtEveryNativeLevel() {
+    void testShallowSeaKeepsWater() {
         long[] palette = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
         for (int level = 0; level <= 4; level++)
             for (int firstAir = 48; firstAir <= 62; firstAir++) {

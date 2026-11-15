@@ -40,7 +40,7 @@ class WaterfallTest {
     }
 
     @Test
-    void detectsAnExistingSteepRiverDescentAndRefusesFlatWater() {
+    void testDetectsAnExistingSteepRiverDescent() {
         var t = terrain();
         var falls = WaterfallPlanner.select(0, 0, 128, t.raw, t.water);
         assertEquals(1, falls.size());
@@ -58,7 +58,7 @@ class WaterfallTest {
     }
 
     @Test
-    void cliffPoolAndSourceAreConnectedAndOnlyTheirFootprintChanges() {
+    void testCliffPoolAndSourceAreConnected() {
         var t = terrain();
         int[] beforeAir = t.air.clone(), beforeWater = t.water.clone();
         var f = fall();

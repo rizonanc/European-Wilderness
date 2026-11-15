@@ -14,7 +14,7 @@ class LodSurfaceStreamTest {
     }
 
     @Test
-    void surfaceCompletesBeforeBuriedCubesAndCompactResumeHasNoGapsOrDuplicates() throws Exception {
+    void testSurfaceCompletesBeforeBuriedCubes() throws Exception {
         var builder = new LodColumn.ForestBuilder(ground(-32, 32));
         builder.set(-20, 140, 40, TreeSpecies.OAK, false);
         var column = builder.build();
@@ -54,7 +54,7 @@ class LodSurfaceStreamTest {
     }
 
     @Test
-    void forestUpgradeRepublishesNewCanopyAndTerrainBandBeforeResumingUnderground() throws Exception {
+    void testForestUpgradeRepublishesNewCanopy() throws Exception {
         var column = ground(0, 0).awaitingForest();
         var cursor = LodPublisher.Cursor.visible(column, -3);
         List<Integer> order = new ArrayList<>();
@@ -83,7 +83,7 @@ class LodSurfaceStreamTest {
     }
 
     @Test
-    void highStaleTerrainIsClearedBeforeWaitingForForestAndDoesNotReturnDuringBuriedResume() throws Exception {
+    void testHighStaleTerrainIsClearedBeforeWaitingForForest() throws Exception {
         var column = ground(0, 0).awaitingForest();
         var cursor = LodPublisher.Cursor.visible(column, 9);
         Set<Integer> stale = new HashSet<>(List.of(5, 7, 9));
@@ -123,7 +123,7 @@ class LodSurfaceStreamTest {
     }
 
     @Test
-    void scanSharesTimeWithDetailsRotatesPendingColumnsAndBoundsMemory() {
+    void testScanSharesTimeWithDetailsRotatesPendingColumns() {
         var scan = new LodScan();
         scan.move(0, 0, 64);
         var saved = new LodPublisher.Progress(1, 5, 9, false);
@@ -175,7 +175,7 @@ class LodSurfaceStreamTest {
     }
 
     @Test
-    void hierarchyIgnoresNeighboursAndFindsHighestCubeIncludingNegativeCoordinates() throws Exception {
+    void testHierarchyIgnoresNeighbours() throws Exception {
         var index = new Index();
         index.add(-1, -2, 1);
         index.add(-1, 9, 1);
@@ -186,7 +186,7 @@ class LodSurfaceStreamTest {
     }
 
     @Test
-    void emptyWorldRequiresOnlyRootLookupsRatherThanEverySkyCube() throws Exception {
+    void testEmptyWorldRequiresOnlyRootLookups() throws Exception {
         var index = new Index();
         assertEquals(-3, LodSkyIndex.highest(ground(0, 0), index));
         assertEquals(5, index.reads);

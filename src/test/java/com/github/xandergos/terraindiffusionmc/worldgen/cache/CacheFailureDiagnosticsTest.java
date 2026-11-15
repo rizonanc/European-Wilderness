@@ -19,7 +19,7 @@ class CacheFailureDiagnosticsTest {
     }
 
     @Test
-    void crcFailureRepairsOneEntryWithoutRemovingOtherCachedData() throws Exception {
+    void testCrcFailureRepairsOneEntry() throws Exception {
         var writer = new DiskTerrainStore(temp);
         var key = DiskQuotaTest.key(0);
         var other = DiskQuotaTest.key(1);
@@ -56,7 +56,7 @@ class CacheFailureDiagnosticsTest {
     }
 
     @Test
-    void versionEofAndSemanticCorruptionAreClassifiedSeparately() throws Exception {
+    void testVersionEofAndSemanticCorruptionAreClassifiedSeparately() throws Exception {
         var key = DiskQuotaTest.key(0);
         var store = new DiskTerrainStore(temp);
         store.store(key, DiskQuotaTest.tile(key, false));
@@ -90,7 +90,7 @@ class CacheFailureDiagnosticsTest {
     }
 
     @Test
-    void failedWritePreservesTheOriginalExceptionAndIsNotReportedAsSuccess() {
+    void testFailedWritePreservesTheOriginalException() {
         var original = new IOException("fixture commit failure");
         var store =
                 new DiskTerrainStore(

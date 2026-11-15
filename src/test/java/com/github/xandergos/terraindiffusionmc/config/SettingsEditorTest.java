@@ -16,7 +16,7 @@ class SettingsEditorTest {
     }
 
     @Test
-    void catalogueExposesEveryBundledPropertyExactlyOnceIncludingLegacyConfigDefaults() throws Exception {
+    void testCatalogCoversConfigDefaults() throws Exception {
         var bundled = new Properties();
         try (var input = getClass().getResourceAsStream("/european-wilderness.properties")) {
             bundled.load(input);
@@ -35,7 +35,7 @@ class SettingsEditorTest {
     }
 
     @Test
-    void allNewControlsRoundTripPreservingCommentsUnknownOptionsAndCrLf() throws Exception {
+    void testControlsPreserveConfigFormat() throws Exception {
         Path path = temp.resolve("settings.properties");
         String original = "# keep comment\r\ncustom.unknown=KeepCase\r\ninference.device=auto\r\n";
         Files.writeString(path, original);
@@ -57,7 +57,7 @@ class SettingsEditorTest {
     }
 
     @Test
-    void newRangesAndChoicesRejectInvalidValuesAndKeepValidBoundaries() throws Exception {
+    void testNewRangesAndChoicesRejectInvalidValues() throws Exception {
         Map<String, String[]> invalid =
                 Map.of(
                         "inference.gpu_session_cache",
@@ -107,7 +107,7 @@ class SettingsEditorTest {
     }
 
     @Test
-    void allControlsChoicesAndPagesHaveEnglishAndRussianHelp() throws Exception {
+    void testHelpCoversMenuEntries() throws Exception {
         for (String language : List.of("en_us", "ru_ru"))
             try (var input =
                     getClass().getResourceAsStream("/assets/terrain-diffusion-mc/lang/" + language + ".json")) {
@@ -189,7 +189,7 @@ class SettingsEditorTest {
     }
 
     @Test
-    void photonFogOnlyChangesItsTwoOptionsAndKeepsOtherCustomizations() {
+    void testPhotonFogOnlyChangesItsTwoOptions() {
         Map<String, String> queue =
                 new LinkedHashMap<>(
                         Map.of("COLORED_LIGHTS", "true", "NETHER_FOG_INTENSITY", "1.50", "CUSTOM_USER_OPTION", "keep"));

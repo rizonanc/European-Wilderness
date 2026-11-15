@@ -213,7 +213,7 @@ public class WaterMipPolicyTest {
     }
 
     @Test
-    void realVoxyDropsCompleteWaterSurfaceAboveSandAndPolicyPreservesExistingWaterMapping() throws Exception {
+    void testRealVoxyDropsCompleteWaterSurfaceAboveSand() throws Exception {
         var f = new Fixture();
         long sand = voxel(SAND), water = voxel(WATER);
         long[] cell = {sand, sand, sand, sand, water, water, water, water};
@@ -257,7 +257,7 @@ public class WaterMipPolicyTest {
     }
 
     @Test
-    void mixedShoreRoofAndNonWaterCasesRetainPinnedDecision() throws Exception {
+    void testMixedShoreRoofAndNonWaterCasesRetainPinnedDecision() throws Exception {
         var f = new Fixture();
         long s = voxel(SAND), w = voxel(WATER), roof = voxel(STONE);
         for (long[] cell :
@@ -283,7 +283,7 @@ public class WaterMipPolicyTest {
     }
 
     @Test
-    void pinnedAbiSupportsClassificationAndDerivedOnlyRebuild() throws Exception {
+    void testPinnedAbiSupportsClassification() throws Exception {
         var mapper = node("me/cortex/voxy/common/world/other/Mapper");
         assertTrue(
                 mapper.fields.stream()
@@ -327,7 +327,7 @@ public class WaterMipPolicyTest {
     }
 
     @Test
-    void selectiveRepairMatchesPinnedParentLayoutAndPreservesConcurrentAndBaseData() throws Exception {
+    void testSelectiveRepairMatchesPinnedParentLayout() throws Exception {
         var f = new Fixture();
         Class<?> section = f.loadClass("me.cortex.voxy.common.world.WorldSection");
         Class<?> voxel = f.loadClass("me.cortex.voxy.common.voxelization.VoxelizedSection");

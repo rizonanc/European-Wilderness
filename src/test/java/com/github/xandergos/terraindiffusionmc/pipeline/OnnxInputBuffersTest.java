@@ -25,7 +25,7 @@ class OnnxInputBuffersTest {
     }
 
     @Test
-    void nativeRunSeesFreshValuesInTheSameTensorAndKeepsEarlierOutputsDetached() throws Exception {
+    void testNativeRunSeesFreshValuesInTheSameTensor() throws Exception {
         var env = OrtEnvironment.getEnvironment();
         try (var session = session();
                 var pool = new OnnxInputBuffers(1024)) {
@@ -53,7 +53,7 @@ class OnnxInputBuffersTest {
     }
 
     @Test
-    void shapeChangesAreRebuiltAndBudgetOverflowUsesTemporaryStorage() throws Exception {
+    void testShapeChangesAreRebuilt() throws Exception {
         var env = OrtEnvironment.getEnvironment();
         try (var session = session();
                 var pool = new OnnxInputBuffers(16)) {
@@ -74,7 +74,7 @@ class OnnxInputBuffersTest {
     }
 
     @Test
-    void invalidInputAndFailedRunDoNotPoisonTheNextLeaseAndActiveInputsCannotBeReplaced() throws Exception {
+    void testInvalidInputAndFailedRunDoNotPoisonTheNextLease() throws Exception {
         var env = OrtEnvironment.getEnvironment();
         try (var session = session();
                 var pool = new OnnxInputBuffers(128)) {

@@ -34,7 +34,7 @@ class TreeIntegrityTest {
     }
 
     @Test
-    void riverOutsideTheRootsMustNotPullTheTrunkBelowItsBank() {
+    void testRiverOutsideTheRootsMustNotPullTheTrunkBelowItsBank() {
         IntBinaryOperator bank = (x, z) -> x < 16 ? 101 : 95;
         assertEquals(
                 94,
@@ -47,7 +47,7 @@ class TreeIntegrityTest {
     }
 
     @Test
-    void terrainCollisionInOneChunkRejectsEveryPartOfABuriedTree() {
+    void testTerrainCollisionInOneChunkRejectsEveryPartOfABuriedTree() {
         IntBinaryOperator bank = (x, z) -> x < 16 ? 101 : 95;
         Predicate<EuropeanTreePlanner.PlannedVoxel> allowed = v -> v.log() || v.y() >= bank.applyAsInt(v.x(), v.z());
         var tree = tree(15, 8, 94);
@@ -59,7 +59,7 @@ class TreeIntegrityTest {
     }
 
     @Test
-    void oneWetRootRejectsTheWholeTreeEvenWhenItsOriginIsDry() {
+    void testOneWetRootRejectsTheWholeTree() {
         var voxels = new ArrayList<>(shape().voxels());
         voxels.add(new TreeShapeGenerator.Voxel(1, 0, 0, true, 0));
         var shape = new TreeShapeGenerator.Shape(voxels, 6, 2, TreeAge.ADULT, new TreeAge.Footprint(2, 1));
@@ -67,13 +67,13 @@ class TreeIntegrityTest {
     }
 
     @Test
-    void highCanopyMayOverhangWaterWithoutRemovingTheBankForest() {
+    void testHighCanopyMayOverhangWater() {
         assertTrue(
                 clear(shape(), 15, 100, 8, (x, z) -> x >= 16 ? 95 : 101, (x, z) -> x >= 16 ? 96 : Integer.MIN_VALUE));
     }
 
     @Test
-    void blockedTrunkAndBlockedRemoteLeafBothRejectAllChunkParts() {
+    void testBlockedTrunkAndBlockedRemoteLeafBothRejectAllChunkParts() {
         var t = tree(15, 15, 100);
         for (Pos obstacle : List.of(new Pos(15, 102, 15), new Pos(17, 104, 15))) {
             for (int cx = 0; cx < 2; cx++)
@@ -88,7 +88,7 @@ class TreeIntegrityTest {
     }
 
     @Test
-    void completeTreeAcrossFourChunksIsIndependentOfTheirOrder() {
+    void testCompleteTreeAcrossFourChunksIsIndependentOfTheirOrder() {
         var t = tree(15, 15, 100);
         Set<Pos> expected = new HashSet<>();
         for (var v : t.shape().voxels()) expected.add(new Pos(15 + v.x(), 100 + v.y(), 15 + v.z()));
@@ -139,7 +139,7 @@ class TreeIntegrityTest {
     }
 
     @Test
-    void roadUnderAnyRootRejectsTheWholeTreeAcrossChunkBorders() {
+    void testRoadUnderRootRejectsTree() {
         var voxels = new ArrayList<>(shape().voxels());
         voxels.add(new TreeShapeGenerator.Voxel(1, 0, 0, true, 0));
         var tree = new TreeShapeGenerator.Shape(voxels, 6, 2, TreeAge.ADULT, new TreeAge.Footprint(2, 1));
@@ -148,7 +148,7 @@ class TreeIntegrityTest {
     }
 
     @Test
-    void worldCollisionPolicyPreservesExistingWoodAndRejectsWaterOrStructures() {
+    void testWorldCollisionPolicyPreservesExistingWood() {
         assertTrue(TreePlacementValidator.mayPlaceWholeVoxel(true, 5, false, false, true, false));
         assertTrue(TreePlacementValidator.mayPlaceWholeVoxel(false, 5, false, false, true, false));
         assertFalse(TreePlacementValidator.mayPlaceWholeVoxel(true, 1, true, false, false, true));
@@ -219,7 +219,7 @@ class TreeIntegrityTest {
     }
 
     @Test
-    void fallingCurtainCountsAsWaterAboveTheLowerPoolAndForeignSessionsDoNotLeak() {
+    void testFallingCurtainCountsAsWaterAboveTheLowerPool() {
         var session = WorldSession.activate(GenerationProfile.defaultsFor(2, "model", "cpu", "cpu"), 7);
         try {
             var fall = new Waterfall(32, 32, 1, 0, 120, 108, 3, 12);

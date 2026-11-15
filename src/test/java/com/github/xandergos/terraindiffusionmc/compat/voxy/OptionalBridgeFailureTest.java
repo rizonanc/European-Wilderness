@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class OptionalBridgeFailureTest {
     @Test
-    void apiMismatchDisablesOnlyOptionalBridgeInsteadOfCrashingInitialization() throws Exception {
+    void testApiMismatchDisablesOnlyOptionalBridge() throws Exception {
         var supported = WorldGenCompat.class.getDeclaredField("supported");
         supported.setAccessible(true);
         var installed = WorldGenCompat.class.getDeclaredField("installed");

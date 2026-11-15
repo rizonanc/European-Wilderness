@@ -61,7 +61,7 @@ class RiverCurvesTest {
     }
 
     @Test
-    void connectedSamplesAndSharedJunctionsNeverRiseDownstream() {
+    void testConnectedSamplesAndSharedJunctionsNeverRiseDownstream() {
         var f = fixture(false);
         var paths = samples(f);
         for (var entry : paths.entrySet()) {
@@ -79,7 +79,7 @@ class RiverCurvesTest {
     }
 
     @Test
-    void keepsOriginalValleyWhenACurveWouldCutThroughAHighRidge() {
+    void testKeepsOriginalValleyWhenACurveWouldCutThroughAHighRidge() {
         var f = fixture(true);
         for (var points : samples(f).values())
             for (var p : points) assertTrue(f.ground[p.z][p.x] - 1 - p.y <= 10, "curve crossed the steep valley wall");
@@ -94,7 +94,7 @@ class RiverCurvesTest {
     }
 
     @Test
-    void allTributariesShareTheSameMovedConfluenceAndStayInsideTheGrid() {
+    void testAllTributariesShareTheSameMovedConfluence() {
         int[][] base = new int[32][32];
         for (int z = 0; z < 32; z++) for (int x = 0; x < 32; x++) base[z][x] = 200 - x + Math.abs(z - 16) * 2;
         var plan = DrainagePlanner.planCoarse(3, -1024, 512, base);

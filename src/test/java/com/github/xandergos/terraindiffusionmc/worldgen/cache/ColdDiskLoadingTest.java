@@ -61,7 +61,7 @@ class ColdDiskLoadingTest {
     }
 
     @Test
-    void concurrentGetAndPeekPublishOneDecodedObjectAndWarmRamDoesNoIo() throws Exception {
+    void testConcurrentGetAndPeekPublishOneDecodedObject() throws Exception {
         var key = key(0);
         new DiskTerrainStore(temp).store(key, tile(key));
         var entered = new CountDownLatch(1);
@@ -186,7 +186,7 @@ class ColdDiskLoadingTest {
     }
 
     @Test
-    void interruptedWaiterLeavesTheOwnerAndOtherConsumersAlive() throws Exception {
+    void testInterruptedWaiterLeavesTheOwner() throws Exception {
         var key = key(0);
         new DiskTerrainStore(temp).store(key, tile(key));
         var entered = new CountDownLatch(1);
@@ -230,7 +230,7 @@ class ColdDiskLoadingTest {
     }
 
     @Test
-    void failedFlightCanRetryAndCorruptDataNeverBecomesAValidPresenceHit() throws Exception {
+    void testFailedFlightCanRetry() throws Exception {
         var key = key(0);
         var writer = new DiskTerrainStore(temp);
         writer.store(key, tile(key));
@@ -283,7 +283,7 @@ class ColdDiskLoadingTest {
     }
 
     @Test
-    void oldVersionIsValidatedWhileUnknownTruncatedAndForeignFilesAreMisses() throws Exception {
+    void testCacheReaderValidatesFileVersion() throws Exception {
         var key = key(0);
         var store = new DiskTerrainStore(temp);
         var body = new ByteArrayOutputStream();
@@ -328,7 +328,7 @@ class ColdDiskLoadingTest {
     }
 
     @Test
-    void retiredReadIsDiscardedAndReopenedWorldLoadsTheSameBytes() throws Exception {
+    void testRetiredReadIsDiscarded() throws Exception {
         var key = key(0);
         new DiskTerrainStore(temp).store(key, tile(key));
         var session = WorldSession.activate(GenerationProfile.defaultsFor(2, "model", "cpu", "cpu"), 7);
@@ -377,7 +377,7 @@ class ColdDiskLoadingTest {
     }
 
     @Test
-    void saturatedReadQueueMakesProgressWithoutNestedWorkerDependencies() throws Exception {
+    void testSaturatedReadQueueMakesProgress() throws Exception {
         var writer = new DiskTerrainStore(temp);
         for (int i = 0; i < 80; i++) writer.store(key(i), tile(key(i)));
         var entered = new CountDownLatch(2);
@@ -409,7 +409,7 @@ class ColdDiskLoadingTest {
     }
 
     @Test
-    void nonAtomicCommitValidationDoesNotJoinAnOlderSharedRead() throws Exception {
+    void testNonAtomicCommitValidationDoesNotJoinAnOlderSharedRead() throws Exception {
         var key = key(0);
         var original = tile(key);
         var replacement = DiskQuotaTest.tile(key, true);

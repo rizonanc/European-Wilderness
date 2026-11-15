@@ -35,7 +35,7 @@ class RiverDetailsTest {
     }
 
     @Test
-    void halfBlocksAndVegetationArePresentAndStableAcrossChunkOrder() {
+    void testHalfBlocksAndVegetationArePresent() {
         var a = area(-128, -256);
         var forward = details(a, false);
         var reverse = details(a, true);
@@ -51,7 +51,7 @@ class RiverDetailsTest {
     }
 
     @Test
-    void plantsStayUnderWaterAndHalfBlocksNeverConflictWithPlants() {
+    void testPlantsStayUnderWater() {
         var a = area(0, 0);
         Set<String> occupied = new HashSet<>();
         for (var d : details(a, false)) {
@@ -66,7 +66,7 @@ class RiverDetailsTest {
     }
 
     @Test
-    void shelvesInterpolateRealOneBlockStepsAndPlantsAreSparse() {
+    void testShelvesInterpolateRealOneBlockSteps() {
         var a = area(0, 0);
         int plants = 0, slabs = 0;
         for (var d : details(a, false)) {
@@ -120,7 +120,7 @@ class RiverDetailsTest {
     }
 
     @Test
-    void alcovesAreOnlyOneConnectedColumnInLowBanksAndDoNotBridgeAHeightStep() {
+    void testAlcovesAreOnlyOneConnectedColumnInLowBanks() {
         int[] water = new int[4096], air = new int[4096];
         Arrays.fill(water, PreparedWaterArea.NONE);
         Arrays.fill(air, 101);
@@ -153,7 +153,7 @@ class RiverDetailsTest {
     }
 
     @Test
-    void steepBanksRemainDryAndTheFirstThreeWetBlocksStayShallow() {
+    void testSteepBanksRemainDryAndTheFirstThreeWetBlocksStayShallow() {
         int[] water = new int[4096], air = new int[4096];
         Arrays.fill(water, PreparedWaterArea.NONE);
         Arrays.fill(air, 120);

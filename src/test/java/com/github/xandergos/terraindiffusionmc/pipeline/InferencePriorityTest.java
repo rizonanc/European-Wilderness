@@ -13,7 +13,7 @@ class InferencePriorityTest {
     }
 
     @Test
-    void queuedForegroundOvertakesNearAndDistantButDoesNotInterruptTheRunningJob() throws Exception {
+    void testQueuedForegroundOvertakesNear() throws Exception {
         try (var worker = new InferenceThread("priority-test")) {
             var entered = new CountDownLatch(1);
             var release = new CountDownLatch(1);
@@ -43,7 +43,7 @@ class InferencePriorityTest {
     }
 
     @Test
-    void queuedSharedDemandIsPromotedAndPromotionBeforeBindingIsNotLost() throws Exception {
+    void testQueuedSharedDemandIsPromoted() throws Exception {
         try (var worker = new InferenceThread("promotion-test")) {
             var entered = new CountDownLatch(1);
             var release = new CountDownLatch(1);
@@ -76,7 +76,7 @@ class InferencePriorityTest {
     }
 
     @Test
-    void retiredWorldAndCancelledQueuedJobsNeverExecuteAndTheWorkerSurvivesFailure() throws Exception {
+    void testRetiredWorldAndCancelledQueuedJobsNeverExecute() throws Exception {
         try (var worker = new InferenceThread("stale-test")) {
             var entered = new CountDownLatch(1);
             var release = new CountDownLatch(1);

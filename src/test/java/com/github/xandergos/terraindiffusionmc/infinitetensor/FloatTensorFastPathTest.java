@@ -73,7 +73,7 @@ class FloatTensorFastPathTest {
     }
 
     @Test
-    void arbitraryOuterAndLastStridesUseCorrectFallbackAndBounds() {
+    void testArbitraryOuterAndLastStridesUseCorrectFallback() {
         var a = new FloatTensor(new int[] {4, 6, 6}, new float[288]);
         var b = new FloatTensor(a.shape, new float[288]);
         for (int i = 0; i < a.data.length; i++) {
@@ -100,7 +100,7 @@ class FloatTensorFastPathTest {
     }
 
     @Test
-    void independentWorkersNeverShareMutableScratchOrOutputs() throws Exception {
+    void testIndependentWorkersNeverShareMutableScratchOrOutputs() throws Exception {
         try (var workers = Executors.newFixedThreadPool(8)) {
             var tasks = new ArrayList<Future<FloatTensor>>();
             for (int i = 0; i < 32; i++)

@@ -17,7 +17,7 @@ class DiagnosticErrorsTest {
             new Context("td-test", "TEST_FAILURE", "minecraft:overworld", "opaque-session", "tile=(-1,2)");
 
     @Test
-    void preservesOriginalExceptionContextCodesAndBoundedDuplicateSummary() {
+    void testPreservesOriginalExceptionContextCodes() {
         var clock = new AtomicLong();
         var lines = new ArrayList<String>();
         var failures = new ArrayList<Throwable>();
@@ -46,7 +46,7 @@ class DiagnosticErrorsTest {
     }
 
     @Test
-    void recoverableWarningCannotSuppressTheNextCriticalFailure() {
+    void testRecoverableWarningCannotSuppressTheNextCriticalFailure() {
         var lines = new ArrayList<String>();
         var d = new DiagnosticErrors(() -> 0L, (line, failure) -> lines.add(line));
         d.record(Code.SCH_TASK, context, new IOException("optional prefetch"), Outcome.DEGRADED, "deferred", false);
@@ -57,7 +57,7 @@ class DiagnosticErrorsTest {
     }
 
     @Test
-    void reportsKeepCauseAndTraceButRedactPrivatePathsAndCredentials() throws Exception {
+    void testReportsKeepCauseAndTraceButRedactPrivatePaths() throws Exception {
         var d = new DiagnosticErrors(System::nanoTime, (line, failure) -> {});
         d.record(
                 Code.HYD_PLAN,
@@ -96,7 +96,7 @@ class DiagnosticErrorsTest {
     }
 
     @Test
-    void concurrentErrorsHaveBoundedQueueRingAndOwnedReportRetention() throws Exception {
+    void testConcurrentErrorsHaveBoundedQueueRing() throws Exception {
         var clock = new AtomicLong();
         var lines = new CopyOnWriteArrayList<String>();
         var d = new DiagnosticErrors(clock::get, (line, t) -> lines.add(line));
@@ -131,7 +131,7 @@ class DiagnosticErrorsTest {
     }
 
     @Test
-    void cancellationIsRecognizedThroughFutureWrappersAndScopesAreRestored() {
+    void testCancellationIsRecognizedThroughFutureWrappers() {
         assertTrue(cancelled(new ExecutionException(new CancellationException("normal"))));
         var previous = DiagnosticErrors.current("before");
         try (var outer = DiagnosticErrors.scope(context)) {

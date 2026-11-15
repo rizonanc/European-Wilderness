@@ -124,12 +124,12 @@ class CoarseRendererOwnershipTest {
     }
 
     @Test
-    void rendererClearsStaleSheetAndChildFlagsWithoutChangingOrReleasingOriginal() throws Exception {
+    void testRendererClearsStaleSheetAndChildFlags() throws Exception {
         exercise(false);
     }
 
     @Test
-    void rendererPreservesLoadedChunkAndItsAirWhileReplacingUnownedAdjacentColumns() throws Exception {
+    void testRendererPreservesLoadedChunkAndItsAir() throws Exception {
         exercise(true);
     }
 }

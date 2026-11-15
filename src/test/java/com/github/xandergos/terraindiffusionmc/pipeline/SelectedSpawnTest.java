@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SelectedSpawnTest {
     @Test
-    void choosesNearestDryForestGroundAndRejectsUnsuitableTerrain() {
+    void testChoosesNearestDryForestGround() {
         short[][] height = new short[97][97], biome = new short[97][97];
         for (int i = 0; i < 97; i++) {
             Arrays.fill(height[i], (short) 300);

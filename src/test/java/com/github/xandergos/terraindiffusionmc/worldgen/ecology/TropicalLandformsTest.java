@@ -25,7 +25,7 @@ class TropicalLandformsTest {
     }
 
     @Test
-    void largeIslandsHaveDistinctCoastsAndKeepTheirEntireFootprintInsideTheirCell() {
+    void testLargeIslandsHaveDistinctCoasts() {
         var profiles = new java.util.HashSet<java.util.List<Integer>>();
         var forms = new java.util.HashSet<TropicalLandforms.Form>();
         for (int z = -12; z <= 12; z++)

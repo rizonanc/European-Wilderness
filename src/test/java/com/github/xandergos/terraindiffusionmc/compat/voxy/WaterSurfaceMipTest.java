@@ -42,7 +42,7 @@ class WaterSurfaceMipTest {
     }
 
     @Test
-    void fullCoverageWithReefAndWaterloggedFloraSurvivesEveryAlignmentWithoutChangingBaseOrOtherLayers()
+    void testFullCoverageWithReef()
             throws Exception {
         for (int surface = 0; surface < 16; surface++) {
             long[] data = reef(surface, true);
@@ -77,7 +77,7 @@ class WaterSurfaceMipTest {
     }
 
     @Test
-    void dryCoastRoofAirColumnAndEmergentCoralKeepTheirCoarseSurface() throws Exception {
+    void testDryCoastRoofAirColumn() throws Exception {
         for (int dry : new int[] {0, 2, 180, 182}) {
             long[] data = reef(14, true);
             if (dry == 0) for (int y = 0; y < 16; y++) data[y * 256] = 0;
@@ -90,7 +90,7 @@ class WaterSurfaceMipTest {
     }
 
     @Test
-    void partialCoverageOnlyChangesFullyWaterCoveredSubregions() throws Exception {
+    void testPartialCoverageOnlyChangesFullyWaterCoveredSubregions() throws Exception {
         long[] data = reef(14, true);
         data[15 * 256] = value(2);
         stock(data);
@@ -118,7 +118,7 @@ class WaterSurfaceMipTest {
     }
 
     @Test
-    void steppedSurfaceDoesNotFillAColumnWithoutWaterAtTheSharedHeight() throws Exception {
+    void testSteppedSurfaceDoesNotFillAColumn() throws Exception {
         long[] data = reef(3, false);
         for (int z = 0; z < 16; z++)
             for (int x = 0; x < 16; x++) if ((x & 3) < 2) data[4 * 256 + z * 16 + x] = value(7);
@@ -131,7 +131,7 @@ class WaterSurfaceMipTest {
     }
 
     @Test
-    void deeperStepKeepsOnlyTheLayerCoveredByWaterInEveryColumn() throws Exception {
+    void testDeeperStepKeepsOnlyTheLayerCoveredByWaterInEveryColumn() throws Exception {
         long[] data = reef(3, false);
         for (int y = 4; y <= 8; y++)
             for (int z = 0; z < 16; z++) for (int x = 0; x < 2; x++) data[y * 256 + z * 16 + x] = value(7);
@@ -142,7 +142,7 @@ class WaterSurfaceMipTest {
     }
 
     @Test
-    void steppedSurfaceCanRepairAnExistingParentWithoutChangingTheFineSection() throws Exception {
+    void testSteppedSurfaceCanRepairAnExistingParent() throws Exception {
         long[] stock = reef(3, false);
         for (int z = 0; z < 16; z++)
             for (int x = 0; x < 16; x++) if ((x & 3) < 2) stock[4 * 256 + z * 16 + x] = value(7);

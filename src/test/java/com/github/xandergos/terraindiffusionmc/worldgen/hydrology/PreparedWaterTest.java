@@ -24,7 +24,7 @@ class PreparedWaterTest {
     }
 
     @Test
-    void lakeFillsWholeDepressionWithShallowShoreAndNaturalDeepInterior() {
+    void testLakeFillsWholeDepressionWithShallowShore() {
         var a = PreparedWaterArea.plan(7, 0, 0, bowl(64));
         assertTrue(a.wetColumns() > 1000);
         assertEquals(100, a.waterY(16, 16));
@@ -55,7 +55,7 @@ class PreparedWaterTest {
     }
 
     @Test
-    void replayActualFailed1024BlockAreaWhenSnapshotIsAvailable() throws Exception {
+    void testReplayActualFailed1024BlockAreaWhenSnapshotIsAvailable() throws Exception {
         Path snapshot = Path.of("../recovery-evidence/g3-invalid-column/terrain");
         Assumptions.assumeTrue(
                 Files.isDirectory(snapshot), "Local incident snapshot is not part of the source distribution");
@@ -169,7 +169,7 @@ class PreparedWaterTest {
     }
 
     @Test
-    void downstreamCurrentSurvivesReloadAndLeavesLakesStill() throws Exception {
+    void testDownstreamCurrentSurvivesReload() throws Exception {
         int[][] valley = new int[64][64];
         for (int z = 0; z < 64; z++) for (int x = 0; x < 64; x++) valley[z][x] = 140 - 2 * x + Math.abs(z - 32) * 3;
         var river = PreparedWaterArea.plan(4, 0, 0, valley);
@@ -329,7 +329,7 @@ class PreparedWaterTest {
     }
 
     @Test
-    void controllerRejectsUnsafeFrontierBeforeDoingWorkAndRetiresCleanly() throws Exception {
+    void testControllerRejectsUnsafeFrontierBeforeDoingWork() throws Exception {
         var session = WorldSession.activate(GenerationProfile.defaultsFor(2, "model", "cpu", "cpu"), 7);
         try (var controller = new PreparedWaterController(session, temp, 300)) {
             session.attachPreparedWater(controller);
@@ -360,7 +360,7 @@ class PreparedWaterTest {
     }
 
     @Test
-    void liningSealsCaveHolesInLakeFloorAndShoreWithOneColumnHalo() {
+    void testLiningSealsCaveHolesInLakeFloor() {
         var a = PreparedWaterArea.plan(7, 0, 0, bowl(64));
         Set<BlockPos> lining = new HashSet<>();
         WaterLining.forChunk(a, 16, 16, -64, 320, (x, y, z, bed) -> lining.add(new BlockPos(x, y, z)));
@@ -424,7 +424,7 @@ class PreparedWaterTest {
     }
 
     @Test
-    void generatedChunkGuardRejectsInFlightChunksAndIndexedDiskChunks() throws Exception {
+    void testGeneratedChunkGuardRejectsInFlightChunks() throws Exception {
         assertFalse(
                 GeneratedChunkGuard.check(
                                 temp,
@@ -474,7 +474,7 @@ class PreparedWaterTest {
     }
 
     @Test
-    void backgroundPreparationCommitsAndReloadsWithoutModelInference() throws Exception {
+    void testBackgroundPreparationCommitsAndReloads() throws Exception {
         var s = syntheticSession();
         var queue = new LinkedBlockingQueue<Runnable>();
         var checks = new AtomicInteger();

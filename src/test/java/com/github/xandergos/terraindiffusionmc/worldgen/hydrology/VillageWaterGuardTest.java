@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class VillageWaterGuardTest {
     @Test
-    void checksEveryColumnOfAPieceAtNegativeCoordinatesAndRespectsElevation() {
+    void testChecksEveryColumnOfAPieceAtNegativeCoordinates() {
         int[] air = new int[4096], water = new int[4096];
         Arrays.fill(air, 98);
         Arrays.fill(water, PreparedWaterArea.NONE);

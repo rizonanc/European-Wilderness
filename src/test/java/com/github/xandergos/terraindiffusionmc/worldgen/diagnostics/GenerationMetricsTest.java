@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class GenerationMetricsTest {
     @Test
-    void fullChunkEventsHaveTheirOwnCounterWithoutChangingInferenceCounts() {
+    void testFullChunkEventsHaveTheirOwnCounter() {
         var before = GenerationMetrics.snapshot();
         GenerationMetrics.countFullChunk();
         var after = GenerationMetrics.snapshot();

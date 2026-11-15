@@ -32,7 +32,7 @@ class InferenceAdmissionTest {
     }
 
     @Test
-    void backgroundCannotConsumeForegroundReserveAndRequiredRequestsAreNotDropped() throws Exception {
+    void testForegroundReserveProtectsRequiredWork() throws Exception {
         var release = new CountDownLatch(1);
         var order = Collections.synchronizedList(new ArrayList<String>());
         var submitters = Executors.newSingleThreadExecutor();
@@ -62,7 +62,7 @@ class InferenceAdmissionTest {
     }
 
     @Test
-    void byteBudgetDefersOnlyExplicitOptionalWorkAndOversizedRequiredWorkRunsAlone() throws Exception {
+    void testByteBudgetDefersOptionalWork() throws Exception {
         var release = new CountDownLatch(1);
         var callers = Executors.newSingleThreadExecutor();
         try (var worker = new InferenceThread("bytes", 4, 100, 1)) {
@@ -165,7 +165,7 @@ class InferenceAdmissionTest {
     }
 
     @Test
-    void cancellingQueuedWorkImmediatelyFreesItsSlotAndBytes() throws Exception {
+    void testCancellingQueuedWorkFreesItsSlotAndBytes() throws Exception {
         var release = new CountDownLatch(1);
         try (var worker = new InferenceThread("queued-cancel", 4, 100, 1)) {
             block(worker, release);
@@ -180,7 +180,7 @@ class InferenceAdmissionTest {
     }
 
     @Test
-    void agingProtectsRequiredBackgroundWorkWhileOnlyOptionalWorkExpires() throws Exception {
+    void testAgingProtectsRequiredBackgroundWork() throws Exception {
         var clock = new AtomicLong(1);
         var release = new CountDownLatch(1);
         var order = new ArrayList<String>();
@@ -237,7 +237,7 @@ class InferenceAdmissionTest {
     }
 
     @Test
-    void retirementWhileAwaitingAdmissionTerminatesWithoutLeavingQueuedWork() throws Exception {
+    void testRetirementWhileAwaitingAdmissionTerminates() throws Exception {
         var release = new CountDownLatch(1);
         var valid = new AtomicBoolean(true);
         var callers = Executors.newSingleThreadExecutor();
@@ -256,7 +256,7 @@ class InferenceAdmissionTest {
     }
 
     @Test
-    void nestedSubmissionFailsPromptlyInsteadOfDeadlockingTheNativeOwner() throws Exception {
+    void testNestedSubmissionFailsPromptly() throws Exception {
         try (var worker = new InferenceThread("recursive")) {
             var failed = worker.submit(() -> worker.submit(() -> 1).get());
             assertInstanceOf(
@@ -267,7 +267,7 @@ class InferenceAdmissionTest {
     }
 
     @Test
-    void closeWakesBlockedAdmissionAndDoesNotInterruptTheRunningOwner() throws Exception {
+    void testCloseWakesBlockedAdmission() throws Exception {
         var release = new CountDownLatch(1);
         var callers = Executors.newSingleThreadExecutor();
         var worker = new InferenceThread("close", 2, 100, 1);
@@ -290,7 +290,7 @@ class InferenceAdmissionTest {
     }
 
     @Test
-    void resultEstimatesRejectInvalidBoundsAndDoNotOverflowIntegerCoordinates() {
+    void testResultEstimatesRejectInvalidBounds() {
         assertEquals(4096L + 24 * 256 * 256, LocalTerrainProvider.estimateRegionBytes(-256, -256, 0, 0, 24));
         assertThrows(IllegalArgumentException.class, () -> LocalTerrainProvider.estimateRegionBytes(1, 0, 0, 1, 24));
         assertThrows(
@@ -301,7 +301,7 @@ class InferenceAdmissionTest {
     }
 
     @Test
-    void manyRequiredProducersCompleteWithoutExceedingTheBound() throws Exception {
+    void testManyRequiredProducersComplete() throws Exception {
         var workers = Executors.newFixedThreadPool(20);
         var completed = new AtomicInteger();
         try (var worker = new InferenceThread("stress", 6, 600, 1)) {
@@ -334,7 +334,7 @@ class InferenceAdmissionTest {
     }
 
     @Test
-    void interruptedAdmissionRestoresInterruptWithoutSilentlyDroppingRequiredWork() throws Exception {
+    void testInterruptedAdmissionRestoresInterrupt() throws Exception {
         var release = new CountDownLatch(1);
         var result = new AtomicReference<Future<Integer>>();
         var restored = new AtomicBoolean();

@@ -56,7 +56,7 @@ class CoarseRawAbiTest {
     }
 
     @Test
-    void realVoxyUntrackedSectionAcquiresCopiesMetadataAndReleasesWithoutAWorldOrSave() throws Exception {
+    void testRealVoxyUntrackedSectionAcquiresCopiesMetadata() throws Exception {
         Class<?> type = new RawLoader().loadClass("me.cortex.voxy.common.world.WorldSection");
         Method create = type.getMethod("_createRawUntrackedUnsafeSection", int.class, int.class, int.class, int.class);
         Object source = create.invoke(null, 4, -2, 0, 1), preview = create.invoke(null, 4, -2, 0, 1);

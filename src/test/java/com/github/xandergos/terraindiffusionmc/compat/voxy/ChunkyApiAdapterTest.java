@@ -33,7 +33,7 @@ class ChunkyApiAdapterTest {
     }
 
     @Test
-    void explicitRequestUsesPublicApiAndPreservesAnExistingTask() throws Exception {
+    void testExplicitRequestUsesPublicApi() throws Exception {
         var fake = new Api();
         var adapter = new ChunkyApiAdapter(fake);
         assertEquals(0, fake.starts);

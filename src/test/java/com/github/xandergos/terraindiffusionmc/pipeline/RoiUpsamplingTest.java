@@ -35,7 +35,7 @@ class RoiUpsamplingTest {
     }
 
     @Test
-    void randomizedCropsUseTheOriginalGlobalCoordinatesAndClamp() {
+    void testRandomizedCropsUseTheOriginalGlobalCoordinates() {
         var rng = new Random(98123);
         for (int run = 0; run < 1500; run++) {
             int h = 1 + rng.nextInt(17), w = 1 + rng.nextInt(21), dh = 1 + rng.nextInt(75), dw = 1 + rng.nextInt(79);
@@ -49,7 +49,7 @@ class RoiUpsamplingTest {
     }
 
     @Test
-    void everyScaleAndSignedWorldBorderKeepsElevationHaloAndClimateIdentical() {
+    void testUpsamplingMatchesAcrossScales() {
         for (int scale = 1; scale <= 6; scale++)
             for (int start : new int[] {-513, -257, -256, -255, -1, 0, 1, 255, 256, 257})
                 for (int size : new int[] {1, 16, 33}) {
@@ -80,7 +80,7 @@ class RoiUpsamplingTest {
     }
 
     @Test
-    void degenerateSourceEdgesFloatingPointSpecialsAndFallbackRemainAvailable() {
+    void testDegenerateSourceEdgesFloatingPointSpecials() {
         for (var src :
                 List.of(
                         new float[][] {{-0.0f}},
@@ -104,7 +104,7 @@ class RoiUpsamplingTest {
     }
 
     @Test
-    void destinationWritesOnlyItsOwnedSpanAndLeavesSourceUnchanged() {
+    void testDestinationWritesOnlyItsOwnedSpan() {
         var src = data(7, 11, 123);
         var original = Arrays.stream(src).map(float[]::clone).toArray(float[][]::new);
         var result = new float[103];

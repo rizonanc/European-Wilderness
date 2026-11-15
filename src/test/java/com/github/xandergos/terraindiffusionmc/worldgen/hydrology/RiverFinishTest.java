@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class RiverFinishTest {
     @Test
-    void onlySoilWithinWetColumnsIsReplacedAndRepeatFinishPreservesDecorationsAndStructures() {
+    void testOnlySoilWithinWetColumnsIsReplaced() {
         int[] air = new int[4096], water = new int[4096];
         Arrays.fill(air, 98);
         Arrays.fill(water, PreparedWaterArea.NONE);
@@ -57,7 +57,7 @@ class RiverFinishTest {
     }
 
     @Test
-    void cleanupIncludesTheBottomAndTopOfWetColumnsAndTheDrySurface() {
+    void testCleanupIncludesTheBottomAndTopOfWetColumns() {
         int[] air = new int[4096], water = new int[4096];
         Arrays.fill(air, 98);
         Arrays.fill(water, PreparedWaterArea.NONE);

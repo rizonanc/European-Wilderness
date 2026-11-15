@@ -40,7 +40,7 @@ class GpuSessionCacheTest {
     }
 
     @Test
-    void threeStagesStayResidentAcrossSixtyCyclesAndCloseExactlyOnce() throws Exception {
+    void testResidentSessionsCloseOnce() throws Exception {
         var f = new Fixture();
         for (int i = 0; i < 60; i++) for (String key : List.of("coarse", "base", "decoder")) f.run(key, 3);
         assertEquals(3, f.creates);
@@ -75,7 +75,7 @@ class GpuSessionCacheTest {
     }
 
     @Test
-    void creationMemoryFailureReleasesIdleSessionsAndKeepsSingleSessionLimit() throws Exception {
+    void testCreationMemoryFailureReleasesIdleSessions() throws Exception {
         var f = new Fixture();
         f.run("a", 3);
         AtomicInteger attempts = new AtomicInteger();
@@ -120,7 +120,7 @@ class GpuSessionCacheTest {
     }
 
     @Test
-    void secondFailureIsReportedWithOriginalAndOrdinaryFailuresAreNeverRetried() throws Exception {
+    void testSecondFailureIsReportedWithOriginal() throws Exception {
         var f = new Fixture();
         AtomicInteger runs = new AtomicInteger();
         Exception failure =
@@ -198,7 +198,7 @@ class GpuSessionCacheTest {
     }
 
     @Test
-    void actualNativeSessionsReuseAndPreserveInputsAcrossStages() throws Exception {
+    void testActualNativeSessionsReuse() throws Exception {
         var created = new AtomicInteger();
         var closed = new AtomicInteger();
         var cache =

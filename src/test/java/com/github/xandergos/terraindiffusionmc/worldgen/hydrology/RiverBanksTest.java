@@ -30,7 +30,7 @@ class RiverBanksTest {
     }
 
     @Test
-    void lakeShelfPreservesItsDeepInteriorAndAllWaterLevels() {
+    void testLakeShelfPreservesItsDeepInterior() {
         int[] water = new int[4096], air = new int[4096];
         Arrays.fill(water, PreparedWaterArea.NONE);
         Arrays.fill(air, 80);
@@ -58,7 +58,7 @@ class RiverBanksTest {
     }
 
     @Test
-    void beachAtWaterLevelIsContainedWithoutARetainingWallAboveWater() {
+    void testBeachAtWaterLevelIsContained() {
         int[] water = channel(), air = new int[4096];
         Arrays.fill(air, 105);
         RiverBanks.shape(7, 0, 0, 64, air, water, new boolean[1024]);

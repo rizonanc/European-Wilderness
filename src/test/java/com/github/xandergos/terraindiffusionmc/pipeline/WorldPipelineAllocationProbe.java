@@ -17,7 +17,7 @@ class WorldPipelineAllocationProbe {
     }
 
     @Test
-    void inPlaceSchedulerChainAllocatesAnOrderLessThanStepChain() {
+    void testInPlaceSchedulerChainAllocatesAnOrderLessThanStepChain() {
         var bean = bean();
         long self = Thread.currentThread().getId();
         Random random = new Random(19);

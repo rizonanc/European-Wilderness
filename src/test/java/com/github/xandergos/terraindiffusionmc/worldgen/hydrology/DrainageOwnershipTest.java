@@ -21,7 +21,7 @@ class DrainageOwnershipTest {
     }
 
     @Test
-    void everyCellReachesAnOutletAndContributesExactlyOnceOnFlatAndExtremeTerrain() {
+    void testEveryCellReachesAnOutlet() {
         for (int style = 0; style < 3; style++) {
             int[][] a = new int[53][41];
             var random = new Random(42);

@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FrameBudgetTest {
     @Test
-    void recurringJitterSlowsPreparationWithoutStarvingItAndKeepsOneSharedAdmission() {
+    void testRecurringJitterSlowsPreparation() {
         var now = new AtomicLong(1_000_000_000);
         var budget = new FrameBudget(now::get);
         for (int i = 0; i < 100; i++) frame(budget, now, 7);
@@ -25,7 +25,7 @@ class FrameBudgetTest {
     }
 
     @Test
-    void allBackgroundProducersShareOneAdmissionAndForegroundDoesNotNeedIt() {
+    void testAllBackgroundProducersShareOneAdmission() {
         var now = new AtomicLong(1_000_000_000);
         var budget = new FrameBudget(now::get);
         assertFalse(budget.claimPreparation());
@@ -38,7 +38,7 @@ class FrameBudgetTest {
     }
 
     @Test
-    void frameSpikeBacksOffThenRecoversAndStaleFramesCannotAdmitWork() {
+    void testFrameSpikeBacksOffThenRecovers() {
         var now = new AtomicLong(1_000_000_000);
         var budget = new FrameBudget(now::get);
         budget.observe(100_000_000, 80_000_000);
@@ -73,7 +73,7 @@ class FrameBudgetTest {
     }
 
     @Test
-    void twentyMillisecondSpikeAtHighFpsNowBacksOffWithoutAnImmediateFullSpeedRestart() {
+    void testHighFpsFrameSpikeTriggersBackoff() {
         var now = new AtomicLong(1_000_000_000);
         var budget = new FrameBudget(now::get);
         for (int i = 0; i < 150; i++) frame(budget, now, 7);
@@ -110,7 +110,7 @@ class FrameBudgetTest {
     }
 
     @Test
-    void routineFrameJitterDoesNotOscillateTheGateAndResetRequiresFreshFrames() {
+    void testRoutineFrameJitterDoesNotOscillateTheGate() {
         var now = new AtomicLong(1_000_000_000);
         var budget = new FrameBudget(now::get);
         for (int i = 0; i < 300; i++) {
@@ -126,7 +126,7 @@ class FrameBudgetTest {
     }
 
     @Test
-    void renderCallSpikeIsDetectedEvenIfStartToStartGapWasShort() {
+    void testRenderCallSpikeIsDetectedEvenIfStartToStartGapWasShort() {
         var now = new AtomicLong(1_000_000_000);
         var budget = new FrameBudget(now::get);
         for (int i = 0; i < 100; i++) frame(budget, now, 7);
@@ -136,7 +136,7 @@ class FrameBudgetTest {
     }
 
     @Test
-    void multiSecondStallsAreStillReportedAndHaveABoundedCooldown() {
+    void testMultiSecondStallsAreReported() {
         var now = new AtomicLong(1_000_000_000);
         var budget = new FrameBudget(now::get);
         frame(budget, now, 7);
