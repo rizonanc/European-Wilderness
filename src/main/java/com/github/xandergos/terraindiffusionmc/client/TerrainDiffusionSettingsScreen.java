@@ -138,9 +138,9 @@ public final class TerrainDiffusionSettingsScreen extends Screen {
                 .setTooltip(Tooltip.of(Text.translatable("gui.cancel")));
         int sideLeft = frameLeft + 6;
         int sideButtonWidth = sidebarWidth - 10;
-        menuButton(Text.translatable("gui.done"), sideLeft, frameBottom - 26, sideButtonWidth, this::save, true)
-                        .active =
-                draft != null;
+        var doneButton = menuButton(
+                Text.translatable("gui.done"), sideLeft, frameBottom - 26, sideButtonWidth, this::save, true);
+        doneButton.active = draft != null;
         sectionsList = addDrawableChild(new SectionsList(Math.max(22, frameHeight - 163)));
         sectionsList.setScrollY(sectionsScroll);
         menuButton(label("profiles"), sideLeft, frameBottom - 74, sideButtonWidth, this::openProfiles, false).active =
@@ -290,12 +290,12 @@ public final class TerrainDiffusionSettingsScreen extends Screen {
 
     private void addFilters(int x, int y, int size) {
         changedButton = menuButton(label("changed", 0), x, y, size, () -> toggle(View.CHANGED), false);
-        menuButton(label("favorites"), x + size + 3, y, size, () -> toggle(View.FAVORITES), view == View.FAVORITES)
-                        .active =
-                preferences != null;
-        menuButton(label("recent"), x + (size + 3) * 2, y, size, () -> toggle(View.RECENT), view == View.RECENT)
-                        .active =
-                draft != null;
+        var favoritesButton = menuButton(
+                label("favorites"), x + size + 3, y, size, () -> toggle(View.FAVORITES), view == View.FAVORITES);
+        favoritesButton.active = preferences != null;
+        var recentButton = menuButton(
+                label("recent"), x + (size + 3) * 2, y, size, () -> toggle(View.RECENT), view == View.RECENT);
+        recentButton.active = draft != null;
     }
 
     private TerrainSettingsCatalog.Page section() {
