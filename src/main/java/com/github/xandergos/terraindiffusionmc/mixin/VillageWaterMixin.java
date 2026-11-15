@@ -26,21 +26,34 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Structure.class)
 public abstract class VillageWaterMixin {
-    @Inject(method="createStructureStart",at=@At("RETURN"),cancellable=true)
-    private void td$avoidWater(RegistryEntry<Structure> entry,RegistryKey<World> dimension,
-            DynamicRegistryManager registries,ChunkGenerator generator,BiomeSource biomes,
-            NoiseConfig noise,StructureTemplateManager templates,long seed,ChunkPos chunk,int references,
-            HeightLimitView world,Predicate<RegistryEntry<Biome>> biomePredicate,
+    @Inject(method = "createStructureStart", at = @At("RETURN"), cancellable = true)
+    private void td$avoidWater(
+            RegistryEntry<Structure> entry,
+            RegistryKey<World> dimension,
+            DynamicRegistryManager registries,
+            ChunkGenerator generator,
+            BiomeSource biomes,
+            NoiseConfig noise,
+            StructureTemplateManager templates,
+            long seed,
+            ChunkPos chunk,
+            int references,
+            HeightLimitView world,
+            Predicate<RegistryEntry<Biome>> biomePredicate,
             CallbackInfoReturnable<StructureStart> result) {
-        var start=result.getReturnValue();
-        var session=WorldSession.current();
-        if(!start.hasChildren()||!entry.isIn(StructureTags.VILLAGE)
-                ||!WorldSessionBinding.ownsSession(dimension)||!(biomes instanceof TerrainDiffusionBiomeSource)
-                ||session==null||!session.isActive()||session.worldSeed()!=seed)return;
-        var overlay=session.riverOverlay();
-        if(overlay==null)return;
-        for(var piece:start.getChildren()) {
-            if(VillageWaterGuard.intersects(overlay,piece.getBoundingBox())) {
+        var start = result.getReturnValue();
+        var session = WorldSession.current();
+        if (!start.hasChildren()
+                || !entry.isIn(StructureTags.VILLAGE)
+                || !WorldSessionBinding.ownsSession(dimension)
+                || !(biomes instanceof TerrainDiffusionBiomeSource)
+                || session == null
+                || !session.isActive()
+                || session.worldSeed() != seed) return;
+        var overlay = session.riverOverlay();
+        if (overlay == null) return;
+        for (var piece : start.getChildren()) {
+            if (VillageWaterGuard.intersects(overlay, piece.getBoundingBox())) {
                 result.setReturnValue(StructureStart.DEFAULT);
                 return;
             }

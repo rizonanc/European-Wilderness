@@ -16,16 +16,25 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(PlacedFeature.class)
 abstract class DecorationFrequencyMixin {
-    @Inject(method = "generate(Lnet/minecraft/world/StructureWorldAccess;Lnet/minecraft/world/gen/chunk/ChunkGenerator;Lnet/minecraft/util/math/random/Random;Lnet/minecraft/util/math/BlockPos;)Z",
-        at = @At("HEAD"), cancellable = true)
-    private void terrainDiffusion$limitDecorations(StructureWorldAccess world, ChunkGenerator generator, Random random,
-                                                   BlockPos origin, CallbackInfoReturnable<Boolean> result) {
+    @Inject(
+            method =
+                    "generate(Lnet/minecraft/world/StructureWorldAccess;Lnet/minecraft/world/gen/chunk/ChunkGenerator;Lnet/minecraft/util/math/random/Random;Lnet/minecraft/util/math/BlockPos;)Z",
+            at = @At("HEAD"),
+            cancellable = true)
+    private void terrainDiffusion$limitDecorations(
+            StructureWorldAccess world,
+            ChunkGenerator generator,
+            Random random,
+            BlockPos origin,
+            CallbackInfoReturnable<Boolean> result) {
         if (!OptionalBiomeDecorations.hasFrequencyOverride()
                 || !(generator.getBiomeSource() instanceof TerrainDiffusionBiomeSource)) return;
-        var id = world.getRegistryManager().getOrThrow(RegistryKeys.PLACED_FEATURE).getId((PlacedFeature)(Object)this);
+        var id =
+                world.getRegistryManager().getOrThrow(RegistryKeys.PLACED_FEATURE).getId((PlacedFeature) (Object) this);
         if (id == null) return;
         int frequency = OptionalBiomeDecorations.frequencyFor(id);
-        if (frequency < 100 && Math.floorMod(HashCommon.mix(world.getSeed() ^ origin.asLong() ^ id.hashCode()), 100) >= frequency)
+        if (frequency < 100
+                && Math.floorMod(HashCommon.mix(world.getSeed() ^ origin.asLong() ^ id.hashCode()), 100) >= frequency)
             result.setReturnValue(false);
     }
 }

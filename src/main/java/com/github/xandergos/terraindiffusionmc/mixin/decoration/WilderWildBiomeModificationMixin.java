@@ -15,11 +15,16 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 abstract class WilderWildBiomeModificationMixin {
     @Shadow @Final private Identifier id;
 
-    @ModifyVariable(method = {
-        "add(Lnet/fabricmc/fabric/api/biome/v1/ModificationPhase;Ljava/util/function/Predicate;Ljava/util/function/Consumer;)Lnet/fabricmc/fabric/api/biome/v1/BiomeModification;",
-        "add(Lnet/fabricmc/fabric/api/biome/v1/ModificationPhase;Ljava/util/function/Predicate;Ljava/util/function/BiConsumer;)Lnet/fabricmc/fabric/api/biome/v1/BiomeModification;"
-    }, at = @At("HEAD"), argsOnly = true, require = 2)
-    private Predicate<BiomeSelectionContext> terrainDiffusion$keepSelectedDecorations(Predicate<BiomeSelectionContext> selector) {
+    @ModifyVariable(
+            method = {
+                "add(Lnet/fabricmc/fabric/api/biome/v1/ModificationPhase;Ljava/util/function/Predicate;Ljava/util/function/Consumer;)Lnet/fabricmc/fabric/api/biome/v1/BiomeModification;",
+                "add(Lnet/fabricmc/fabric/api/biome/v1/ModificationPhase;Ljava/util/function/Predicate;Ljava/util/function/BiConsumer;)Lnet/fabricmc/fabric/api/biome/v1/BiomeModification;"
+            },
+            at = @At("HEAD"),
+            argsOnly = true,
+            require = 2)
+    private Predicate<BiomeSelectionContext> terrainDiffusion$keepSelectedDecorations(
+            Predicate<BiomeSelectionContext> selector) {
         if (!id.getNamespace().equals("wilderwild")) return selector;
         return context -> !OptionalBiomeDecorations.isTerrainDiffusion(context) && selector.test(context);
     }

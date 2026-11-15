@@ -11,10 +11,24 @@ public final class TropicalLandforms {
 
     private TropicalLandforms() {}
 
-    public enum Form { SMALL, SANDY, ROCKY }
+    public enum Form {
+        SMALL,
+        SANDY,
+        ROCKY
+    }
 
-    public record Island(int x, int z, int radius, int peak, long seed, Form form,
-                         double cos, double sin, double stretch, double phase, double bay) {
+    public record Island(
+            int x,
+            int z,
+            int radius,
+            int peak,
+            long seed,
+            Form form,
+            double cos,
+            double sin,
+            double stretch,
+            double phase,
+            double bay) {
         Island(int x, int z, int radius, int peak, long seed) {
             this(x, z, radius, peak, seed, Form.SMALL, 1, 0, 1, 0, 0);
         }
@@ -37,12 +51,13 @@ public final class TropicalLandforms {
             distance /= 1 + 0.12 * coast;
             double shelf = 1 - EuropeanEcology.smoothstep(1.02, 1.39, distance);
             double hills = EuropeanEcology.valueNoise(seed, blockX, blockZ, 28, form == Form.ROCKY ? 115 : 225);
-            double crest = form == Form.ROCKY
-                ? (1 - EuropeanEcology.smoothstep(0.38, 0.89, distance)) * (0.42 + 1.03 * hills)
-                : (1 - EuropeanEcology.smoothstep(0.05, 0.88, distance)) * (0.64 + 0.61 * hills);
+            double crest =
+                    form == Form.ROCKY
+                            ? (1 - EuropeanEcology.smoothstep(0.38, 0.89, distance)) * (0.42 + 1.03 * hills)
+                            : (1 - EuropeanEcology.smoothstep(0.05, 0.88, distance)) * (0.64 + 0.61 * hills);
             double profile = peak * crest - 48 * Math.min(1, distance);
             double isolation = EuropeanEcology.smoothstep(70, 270, -seabed);
-            return (float)(seabed + shelf * isolation * Math.max(0, profile - seabed));
+            return (float) (seabed + shelf * isolation * Math.max(0, profile - seabed));
         }
 
         short biome(float height, float temperature, int scale, int blockX, int blockZ) {
@@ -65,7 +80,7 @@ public final class TropicalLandforms {
             double shelf = 1 - EuropeanEcology.smoothstep(1.02, 1.45, distance);
             double profile = peak * (1 - EuropeanEcology.smoothstep(0.1, 0.94, distance)) - 50 * Math.min(1, distance);
             double isolation = EuropeanEcology.smoothstep(40, 220, -seabed);
-            return (float)(seabed + shelf * isolation * Math.max(0, profile - seabed));
+            return (float) (seabed + shelf * isolation * Math.max(0, profile - seabed));
         }
     }
 
@@ -79,9 +94,11 @@ public final class TropicalLandforms {
         if (random.nextBoolean()) return List.of(main);
         double angle = random.nextDouble() * Math.TAU;
         int separation = radius + random.nextInt(130, 205);
-        int dx = (int)(Math.cos(angle) * separation), dz = (int)(Math.sin(angle) * separation);
-        return List.of(main, new Island(x + dx, z + dz, random.nextInt(65, 115), random.nextInt(95, 155), seed),
-            new Island(x - dz, z + dx, random.nextInt(55, 95), random.nextInt(85, 145), seed));
+        int dx = (int) (Math.cos(angle) * separation), dz = (int) (Math.sin(angle) * separation);
+        return List.of(
+                main,
+                new Island(x + dx, z + dz, random.nextInt(65, 115), random.nextInt(95, 155), seed),
+                new Island(x - dz, z + dx, random.nextInt(55, 95), random.nextInt(85, 145), seed));
     }
 
     public static List<Island> islands(long seed, int cellX, int cellZ, boolean largeIslands) {
@@ -96,8 +113,19 @@ public final class TropicalLandforms {
         var form = random.nextBoolean() ? Form.SANDY : Form.ROCKY;
         int peak = form == Form.SANDY ? random.nextInt(300, 560) : random.nextInt(920, 1520);
         double rotation = random.nextDouble() * Math.TAU;
-        var main = new Island(x, z, radius, peak, seed, form, Math.cos(rotation), Math.sin(rotation),
-            random.nextDouble(1.12, 1.35), random.nextDouble() * Math.TAU, random.nextDouble() * Math.TAU);
+        var main =
+                new Island(
+                        x,
+                        z,
+                        radius,
+                        peak,
+                        seed,
+                        form,
+                        Math.cos(rotation),
+                        Math.sin(rotation),
+                        random.nextDouble(1.12, 1.35),
+                        random.nextDouble() * Math.TAU,
+                        random.nextDouble() * Math.TAU);
         int count = random.nextInt(3);
         if (count == 0) return List.of(main);
         var group = new java.util.ArrayList<Island>(count + 1);
@@ -105,15 +133,21 @@ public final class TropicalLandforms {
         for (int i = 0; i < count; i++) {
             double angle = rotation + i * Math.PI + random.nextDouble(-0.42, 0.42);
             int offset = random.nextInt(1200, 1510);
-            group.add(new Island(x + (int)(offset * Math.cos(angle)), z + (int)(offset * Math.sin(angle)),
-                random.nextInt(80, 141), random.nextInt(120, 275), seed));
+            group.add(
+                    new Island(
+                            x + (int) (offset * Math.cos(angle)),
+                            z + (int) (offset * Math.sin(angle)),
+                            random.nextInt(80, 141),
+                            random.nextInt(120, 275),
+                            seed));
         }
         return List.copyOf(group);
     }
 
     public record IslandColumn(float height, short biome) {}
 
-    public static IslandColumn islandColumn(List<Island> group, float seabed, int x, int z, float temperature, int scale) {
+    public static IslandColumn islandColumn(
+            List<Island> group, float seabed, int x, int z, float temperature, int scale) {
         Island winner = null;
         float height = seabed;
         for (Island island : group) {
@@ -133,9 +167,9 @@ public final class TropicalLandforms {
     }
 
     public static short islandBiome(float height, float temperature, int scale) {
-        if (height < 0) return (short)(temperature >= 17 ? 41 : temperature < 5 ? 46 : 44);
+        if (height < 0) return (short) (temperature >= 17 ? 41 : temperature < 5 ? 46 : 44);
         if (height < 120F / scale) return ISLAND_BEACH;
-        return temperature >= 17 ? PALM_ISLAND : (short)229;
+        return temperature >= 17 ? PALM_ISLAND : (short) 229;
     }
 
     public record Oasis(int x, int z, int radius, long seed) {
@@ -147,16 +181,20 @@ public final class TropicalLandforms {
 
     public static Oasis oasis(long seed, int cellX, int cellZ) {
         var random = random(seed, cellX, cellZ, 22);
-        return new Oasis(cellX * OASIS_CELL + random.nextInt(96, OASIS_CELL - 96),
-            cellZ * OASIS_CELL + random.nextInt(96, OASIS_CELL - 96), random.nextInt(19, 26), seed);
+        return new Oasis(
+                cellX * OASIS_CELL + random.nextInt(96, OASIS_CELL - 96),
+                cellZ * OASIS_CELL + random.nextInt(96, OASIS_CELL - 96),
+                random.nextInt(19, 26),
+                seed);
     }
 
     static int oasisOffset(double distance) {
-        return (int)Math.round(-5 + 10 * EuropeanEcology.smoothstep(0.18, 1, distance));
+        return (int) Math.round(-5 + 10 * EuropeanEcology.smoothstep(0.18, 1, distance));
     }
 
     static java.util.SplittableRandom random(long seed, int x, int z, int salt) {
-        long bits = Double.doubleToRawLongBits(EuropeanEcology.hashNoise01(x ^ (int)seed, z ^ (int)(seed >>> 32), salt));
+        long bits =
+                Double.doubleToRawLongBits(EuropeanEcology.hashNoise01(x ^ (int) seed, z ^ (int) (seed >>> 32), salt));
         return new java.util.SplittableRandom(bits ^ seed);
     }
 }

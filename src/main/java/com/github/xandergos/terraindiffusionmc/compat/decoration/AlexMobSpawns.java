@@ -21,28 +21,39 @@ public final class AlexMobSpawns {
         boolean hostile = TerrainDiffusionConfig.enabled("animals.alex_hostile");
         if (percent == 100 && land && aquatic && hostile) return;
 
-        BiomeModifications.create(Identifier.of("terrain-diffusion-mc", "alex_spawn_settings")).add(
-            ModificationPhase.POST_PROCESSING, OptionalBiomeDecorations::isTerrainDiffusion, modification -> {
-                var settings = modification.getSpawnSettings();
-                for (SpawnGroup group : SpawnGroup.values()) {
-                    boolean enabled = switch (group) {
-                        case MONSTER -> hostile;
-                        case WATER_CREATURE, WATER_AMBIENT, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> aquatic;
-                        default -> land;
-                    };
-                    if (enabled && percent == 100) continue;
-                    var original = List.copyOf(settings.getSpawnEntries(group));
-                    if (!settings.removeSpawns((current, spawn) -> current == group && isAlexMob(spawn.type()))) continue;
-                    if (!enabled || percent == 0) continue;
-                    for (var weighted : original) {
-                        var entry = weighted.value();
-                        if (isAlexMob(entry.type()) && weighted.weight() > 0) {
-                            int weight = (int)Math.clamp(Math.round(weighted.weight() * (percent / 100.0)), 1L, Integer.MAX_VALUE);
-                            settings.addSpawn(group, entry, weight);
-                        }
-                    }
-                }
-            });
+        BiomeModifications.create(Identifier.of("terrain-diffusion-mc", "alex_spawn_settings"))
+                .add(
+                        ModificationPhase.POST_PROCESSING,
+                        OptionalBiomeDecorations::isTerrainDiffusion,
+                        modification -> {
+                            var settings = modification.getSpawnSettings();
+                            for (SpawnGroup group : SpawnGroup.values()) {
+                                boolean enabled =
+                                        switch (group) {
+                                            case MONSTER -> hostile;
+                                            case WATER_CREATURE, WATER_AMBIENT, UNDERGROUND_WATER_CREATURE, AXOLOTLS ->
+                                                    aquatic;
+                                            default -> land;
+                                        };
+                                if (enabled && percent == 100) continue;
+                                var original = List.copyOf(settings.getSpawnEntries(group));
+                                if (!settings.removeSpawns(
+                                        (current, spawn) -> current == group && isAlexMob(spawn.type()))) continue;
+                                if (!enabled || percent == 0) continue;
+                                for (var weighted : original) {
+                                    var entry = weighted.value();
+                                    if (isAlexMob(entry.type()) && weighted.weight() > 0) {
+                                        int weight =
+                                                (int)
+                                                        Math.clamp(
+                                                                Math.round(weighted.weight() * (percent / 100.0)),
+                                                                1L,
+                                                                Integer.MAX_VALUE);
+                                        settings.addSpawn(group, entry, weight);
+                                    }
+                                }
+                            }
+                        });
     }
 
     private static boolean isAlexMob(EntityType<?> type) {

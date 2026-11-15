@@ -15,21 +15,28 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(MinecraftServer.class)
 public class MinecraftServerMixin {
-   @Inject(
-      method = "setupSpawn(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/world/level/ServerWorldProperties;ZZLnet/minecraft/world/chunk/ChunkLoadProgress;)V",
-      at = @At("HEAD"),
-      cancellable = true
-   )
-   private static void overrideWorldSpawn(
-      ServerWorld world, ServerWorldProperties worldProperties, boolean bonusChest, boolean debugWorld, ChunkLoadProgress loadProgress, CallbackInfo ci
-   ) {
-      if (world.getRegistryKey().equals(World.OVERWORLD)
-          && world.getChunkManager().getChunkGenerator().getBiomeSource() instanceof
-             com.github.xandergos.terraindiffusionmc.world.TerrainDiffusionBiomeSource source) {
-         BlockPos spawnPos = source.spawnChoice().filter(choice -> choice.seed() == world.getSeed())
-            .map(SpawnSelector::findSelectedSpawn).orElseGet(SpawnSelector::findSpawnBlockPos);
-         worldProperties.setSpawnPoint(SpawnPoint.create(World.OVERWORLD, spawnPos, 0.0F, 0.0F));
-         ci.cancel();
-      }
-   }
+    @Inject(
+            method =
+                    "setupSpawn(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/world/level/ServerWorldProperties;ZZLnet/minecraft/world/chunk/ChunkLoadProgress;)V",
+            at = @At("HEAD"),
+            cancellable = true)
+    private static void overrideWorldSpawn(
+            ServerWorld world,
+            ServerWorldProperties worldProperties,
+            boolean bonusChest,
+            boolean debugWorld,
+            ChunkLoadProgress loadProgress,
+            CallbackInfo ci) {
+        if (world.getRegistryKey().equals(World.OVERWORLD)
+                && world.getChunkManager().getChunkGenerator().getBiomeSource()
+                        instanceof com.github.xandergos.terraindiffusionmc.world.TerrainDiffusionBiomeSource source) {
+            BlockPos spawnPos =
+                    source.spawnChoice()
+                            .filter(choice -> choice.seed() == world.getSeed())
+                            .map(SpawnSelector::findSelectedSpawn)
+                            .orElseGet(SpawnSelector::findSpawnBlockPos);
+            worldProperties.setSpawnPoint(SpawnPoint.create(World.OVERWORLD, spawnPos, 0.0F, 0.0F));
+            ci.cancel();
+        }
+    }
 }

@@ -1,4 +1,5 @@
 package com.github.xandergos.terraindiffusionmc.mixin.client;
+
 import net.minecraft.client.MinecraftClient;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -10,6 +11,14 @@ import com.github.xandergos.terraindiffusionmc.client.ClientPerformance;
 @Mixin(MinecraftClient.class)
 public abstract class FramePacingMixin {
     @Unique private long ewh$frameStart;
-    @Inject(method="render",at=@At("HEAD")) private void ewh$begin(boolean tick,CallbackInfo ci){ewh$frameStart=System.nanoTime();}
-    @Inject(method="render",at=@At("RETURN")) private void ewh$finish(boolean tick,CallbackInfo ci){ClientPerformance.frame(ewh$frameStart,System.nanoTime());}
+
+    @Inject(method = "render", at = @At("HEAD"))
+    private void ewh$begin(boolean tick, CallbackInfo ci) {
+        ewh$frameStart = System.nanoTime();
+    }
+
+    @Inject(method = "render", at = @At("RETURN"))
+    private void ewh$finish(boolean tick, CallbackInfo ci) {
+        ClientPerformance.frame(ewh$frameStart, System.nanoTime());
+    }
 }

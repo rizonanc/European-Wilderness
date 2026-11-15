@@ -19,7 +19,9 @@ public final class OptionalBiomeDecorations {
     private static final int WILDER_WILD = frequency("wilder_wild");
 
     private static int frequency(String option) {
-        return TerrainDiffusionConfig.enabled("nature." + option) ? TerrainDiffusionConfig.percent("nature." + option + "_frequency") : 0;
+        return TerrainDiffusionConfig.enabled("nature." + option)
+                ? TerrainDiffusionConfig.percent("nature." + option + "_frequency")
+                : 0;
     }
 
     public static int frequencyFor(Identifier id) {
@@ -43,21 +45,23 @@ public final class OptionalBiomeDecorations {
     }
 
     public static void register() {
-        BiomeModifications.create(Identifier.of(MOD, "optional_biome_decorations")).add(
-            ModificationPhase.POST_PROCESSING,
-            context -> isTerrainDiffusion(context) && !features(context.getBiomeKey().getValue()).isEmpty(),
-            (context, modification) -> {
-                var registries = ((BiomeSelectionRegistries) context).terrainDiffusion$getRegistries();
-                var placed = registries.getOrThrow(RegistryKeys.PLACED_FEATURE);
-                for (String feature : features(context.getBiomeKey().getValue())) {
-                    var key = RegistryKey.of(RegistryKeys.PLACED_FEATURE, Identifier.of(feature));
-                    if (frequencyFor(key.getValue()) > 0 && placed.contains(key)) {
-                        // Let terrain, trees and river finishes run before optional surface decorations.
-                        modification.getGenerationSettings().addFeature(GenerationStep.Feature.TOP_LAYER_MODIFICATION, key);
-                    }
-                }
-            }
-        );
+        BiomeModifications.create(Identifier.of(MOD, "optional_biome_decorations"))
+                .add(
+                        ModificationPhase.POST_PROCESSING,
+                        context -> isTerrainDiffusion(context) && !features(context.getBiomeKey().getValue()).isEmpty(),
+                        (context, modification) -> {
+                            var registries = ((BiomeSelectionRegistries) context).terrainDiffusion$getRegistries();
+                            var placed = registries.getOrThrow(RegistryKeys.PLACED_FEATURE);
+                            for (String feature : features(context.getBiomeKey().getValue())) {
+                                var key = RegistryKey.of(RegistryKeys.PLACED_FEATURE, Identifier.of(feature));
+                                if (frequencyFor(key.getValue()) > 0 && placed.contains(key)) {
+                                    // Let terrain, trees and river finishes run before optional surface decorations.
+                                    modification
+                                            .getGenerationSettings()
+                                            .addFeature(GenerationStep.Feature.TOP_LAYER_MODIFICATION, key);
+                                }
+                            }
+                        });
     }
 
     static List<String> features(Identifier biome) {
@@ -77,7 +81,8 @@ public final class OptionalBiomeDecorations {
             case "taiga" -> taiga();
             case "snowy_taiga" -> List.of("geophilic:taiga/grove/logs");
             case "plains", "meadow" -> meadow();
-            case "swamp" -> List.of("geophilic:swamp/logs", "wilderwild:cattail_uncommon", "wilderwild:patch_algae_small");
+            case "swamp" ->
+                    List.of("geophilic:swamp/logs", "wilderwild:cattail_uncommon", "wilderwild:patch_algae_small");
             case "jungle" -> List.of("geophilic:jungle/bushes", "geophilic:jungle/logs");
             case "windswept_hills" -> List.of("geophilic:windswept/rocks");
             default -> List.of();

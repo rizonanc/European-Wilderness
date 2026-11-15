@@ -7,8 +7,10 @@ public final class TerrainWeather {
 
     public static boolean applies(World world) {
         if (world == null) return false;
-        return world.getDimensionEntry().getKey()
-            .map(key -> key.getValue().getNamespace().equals("terrain-diffusion-mc")).orElse(false);
+        return world.getDimensionEntry()
+                .getKey()
+                .map(key -> key.getValue().getNamespace().equals("terrain-diffusion-mc"))
+                .orElse(false);
     }
 
     public static boolean snow(int aboveSea, float temperature) {

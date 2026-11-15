@@ -4,7 +4,11 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 
 public final class RegionalGeology {
-    public enum Rock { LIMESTONE, GRANITE, VOLCANIC }
+    public enum Rock {
+        LIMESTONE,
+        GRANITE,
+        VOLCANIC
+    }
 
     private RegionalGeology() {}
 
@@ -30,7 +34,8 @@ public final class RegionalGeology {
         return y >= 210 && temperature - (y - 63) * 0.022 <= -5;
     }
 
-    static MountainSurfaceMaterials.Material glacialSurface(long seed, int x, int z, int y, float temperature, int slope) {
+    static MountainSurfaceMaterials.Material glacialSurface(
+            long seed, int x, int z, int y, float temperature, int slope) {
         if (slope > 3 || !glacial(temperature, y)) return MountainSurfaceMaterials.Material.NONE;
         double flow = MountainSurfaceMaterials.valueNoise01(seed ^ 0x7e0195L, x, z, 132);
         if (flow > 0.66) return MountainSurfaceMaterials.Material.SNOW;

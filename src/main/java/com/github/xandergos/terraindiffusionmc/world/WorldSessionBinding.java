@@ -5,12 +5,11 @@ import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 
 public final class WorldSessionBinding {
-   private static final Identifier OVERWORLD_ID = Identifier.of("minecraft", "overworld");
+    private static final Identifier OVERWORLD_ID = Identifier.of("minecraft", "overworld");
 
-   private WorldSessionBinding() {
-   }
+    private WorldSessionBinding() {}
 
-   public static boolean ownsSession(RegistryKey<World> dimension) {
-      return dimension != null && OVERWORLD_ID.equals(dimension.getValue());
-   }
+    public static boolean ownsSession(RegistryKey<World> dimension) {
+        return dimension != null && OVERWORLD_ID.equals(dimension.getValue());
+    }
 }

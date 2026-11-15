@@ -7,24 +7,23 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 final class TreeFeaturePlanning {
-   private TreeFeaturePlanning() {
-   }
+    private TreeFeaturePlanning() {}
 
-   static <P> boolean planAndWrite(PerformanceProfile.PreparationMode mode, Supplier<P> planner, Predicate<P> writer) {
-      Objects.requireNonNull(planner, "planner");
-      Objects.requireNonNull(writer, "writer");
+    static <P> boolean planAndWrite(PerformanceProfile.PreparationMode mode, Supplier<P> planner, Predicate<P> writer) {
+        Objects.requireNonNull(planner, "planner");
+        Objects.requireNonNull(writer, "writer");
 
-      P plan;
-      try {
-         plan = planner.get();
-      } catch (PreparedFallback.PreparedTileMissingException missing) {
-         if (mode == PerformanceProfile.PreparationMode.PREPARED_ONLY) {
-            return false;
-         }
+        P plan;
+        try {
+            plan = planner.get();
+        } catch (PreparedFallback.PreparedTileMissingException missing) {
+            if (mode == PerformanceProfile.PreparationMode.PREPARED_ONLY) {
+                return false;
+            }
 
-         throw missing;
-      }
+            throw missing;
+        }
 
-      return writer.test(plan);
-   }
+        return writer.test(plan);
+    }
 }

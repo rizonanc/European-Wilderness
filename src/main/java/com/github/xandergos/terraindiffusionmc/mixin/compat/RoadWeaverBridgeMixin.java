@@ -15,7 +15,9 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 @Mixin(targets = "net.shiroha233.roadweaver.features.path.pathlogic.bridge.BridgeSegmentPlanner", remap = false)
 abstract class RoadWeaverBridgeMixin {
     @ModifyVariable(method = "processSegment", at = @At("HEAD"), argsOnly = true, index = 7)
-    private static int td$localDeckTarget(int target, @Local(argsOnly = true) StructureWorldAccess access,
+    private static int td$localDeckTarget(
+            int target,
+            @Local(argsOnly = true) StructureWorldAccess access,
             @Local(argsOnly = true, ordinal = 0) BlockPos center) {
         var world = access.toServerWorld();
         var session = RoadWeaverTerrain.session(world);
@@ -25,9 +27,16 @@ abstract class RoadWeaverBridgeMixin {
         return water > sea ? target + (water - sea) : Math.max(target, center.getY());
     }
 
-    @ModifyExpressionValue(method = "processSegment", at = @At(value = "INVOKE",
-            target = "Lnet/shiroha233/roadweaver/features/path/pathlogic/bridge/BridgeSegmentPlanner;clampDeckY(ILjava/lang/Integer;ILnet/shiroha233/roadweaver/config/ModConfig;ZZ)I"))
-    private static int td$keepDeckAboveRiver(int deck, @Local(argsOnly = true) StructureWorldAccess access,
+    @ModifyExpressionValue(
+            method = "processSegment",
+            at =
+                    @At(
+                            value = "INVOKE",
+                            target =
+                                    "Lnet/shiroha233/roadweaver/features/path/pathlogic/bridge/BridgeSegmentPlanner;clampDeckY(ILjava/lang/Integer;ILnet/shiroha233/roadweaver/config/ModConfig;ZZ)I"))
+    private static int td$keepDeckAboveRiver(
+            int deck,
+            @Local(argsOnly = true) StructureWorldAccess access,
             @Local(argsOnly = true, ordinal = 0) BlockPos center) {
         var world = access.toServerWorld();
         var session = RoadWeaverTerrain.session(world);

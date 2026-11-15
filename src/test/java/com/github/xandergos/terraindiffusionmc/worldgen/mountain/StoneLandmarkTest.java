@@ -4,7 +4,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class StoneLandmarkTest {
-    @Test void archHasTwoFeetAndAnOpenPassage() {
+    @Test
+    void archHasTwoFeetAndAnOpenPassage() {
         assertFalse(StoneLandmark.solid(StoneLandmark.Shape.ARCH, 0, 0, 0, 16));
         assertTrue(StoneLandmark.solid(StoneLandmark.Shape.ARCH, -5, 0, 0, 16));
         assertTrue(StoneLandmark.solid(StoneLandmark.Shape.ARCH, 5, 0, 0, 16));

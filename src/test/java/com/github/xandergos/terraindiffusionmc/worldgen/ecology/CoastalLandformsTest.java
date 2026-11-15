@@ -5,7 +5,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CoastalLandformsTest {
-    @Test void coastalProvinceCutsDeepInletsAndRaisesOffshoreSkerries() {
+    @Test
+    void coastalProvinceCutsDeepInletsAndRaisesOffshoreSkerries() {
         float deepestInlet = 80, highestSkerry = -18;
         for (int z = -1800; z <= 1800; z += 20) {
             for (int x = -1800; x <= 1800; x += 20) {

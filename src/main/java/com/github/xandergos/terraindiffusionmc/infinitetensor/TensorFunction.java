@@ -4,5 +4,5 @@ import java.util.List;
 
 @FunctionalInterface
 public interface TensorFunction {
-   FloatTensor apply(int[] var1, List<FloatTensor> var2);
+    FloatTensor apply(int[] var1, List<FloatTensor> var2);
 }

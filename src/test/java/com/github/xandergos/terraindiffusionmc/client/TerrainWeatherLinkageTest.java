@@ -32,7 +32,9 @@ class TerrainWeatherLinkageTest {
                     }
                 }
             }
-            assertEquals(hook.equals("TerrainFogMixin") ? java.util.Set.of("applies") : java.util.Set.of("applies", "snow"), calls);
+            assertEquals(
+                    hook.equals("TerrainFogMixin") ? java.util.Set.of("applies") : java.util.Set.of("applies", "snow"),
+                    calls);
         }
     }
 }

@@ -18,7 +18,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class ModelAssetDownloadTest {
     @TempDir Path directory;
 
-    @Test void decompressesGzipAndBoundsTheInstalledSize() throws Exception {
+    @Test
+    void decompressesGzipAndBoundsTheInstalledSize() throws Exception {
         byte[] model = {1, 2, 3};
         var compressed = new ByteArrayOutputStream();
         try (var gzip = new GZIPOutputStream(compressed)) {
@@ -26,33 +27,39 @@ class ModelAssetDownloadTest {
         }
         byte[] archive = compressed.toByteArray();
         var server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        server.createContext("/", exchange -> {
-            try (exchange) {
-                exchange.sendResponseHeaders(200, archive.length);
-                exchange.getResponseBody().write(archive);
-            }
-        });
+        server.createContext(
+                "/",
+                exchange -> {
+                    try (exchange) {
+                        exchange.sendResponseHeaders(200, archive.length);
+                        exchange.getResponseBody().write(archive);
+                    }
+                });
         server.start();
         try {
             var uri = URI.create("http://127.0.0.1:" + server.getAddress().getPort() + "/");
             Path file = directory.resolve("asset.tmp");
             ModelAssetManager.downloadBody(uri, file, "test", 3, 2000, 2000, true);
             assertArrayEquals(model, Files.readAllBytes(file));
-            assertThrows(IOException.class, () -> ModelAssetManager.downloadBody(uri, file, "test", 2, 2000, 2000, true));
+            assertThrows(
+                    IOException.class, () -> ModelAssetManager.downloadBody(uri, file, "test", 2, 2000, 2000, true));
             assertTrue(Files.size(file) <= 2);
         } finally {
             server.stop(0);
         }
     }
 
-    @Test void enforcesManifestSizeForChunkedResponses() throws Exception {
+    @Test
+    void enforcesManifestSizeForChunkedResponses() throws Exception {
         var server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        server.createContext("/", exchange -> {
-            try (exchange) {
-                exchange.sendResponseHeaders(200, 0);
-                exchange.getResponseBody().write(new byte[] {1, 2, 3});
-            }
-        });
+        server.createContext(
+                "/",
+                exchange -> {
+                    try (exchange) {
+                        exchange.sendResponseHeaders(200, 0);
+                        exchange.getResponseBody().write(new byte[] {1, 2, 3});
+                    }
+                });
         server.start();
         try {
             Path file = directory.resolve("asset.tmp");
@@ -66,19 +73,22 @@ class ModelAssetDownloadTest {
         }
     }
 
-    @Test void timesOutWhenBodyStopsAfterHeaders() throws Exception {
+    @Test
+    void timesOutWhenBodyStopsAfterHeaders() throws Exception {
         var release = new CountDownLatch(1);
         var server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        server.createContext("/", exchange -> {
-            try (exchange) {
-                exchange.sendResponseHeaders(200, 0);
-                exchange.getResponseBody().write(1);
-                exchange.getResponseBody().flush();
-                release.await(5, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        });
+        server.createContext(
+                "/",
+                exchange -> {
+                    try (exchange) {
+                        exchange.sendResponseHeaders(200, 0);
+                        exchange.getResponseBody().write(1);
+                        exchange.getResponseBody().flush();
+                        release.await(5, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                });
         server.start();
         try {
             assertThrows(SocketTimeoutException.class, () -> download(server, directory.resolve("asset.tmp"), 2, 300));

@@ -22,7 +22,11 @@ abstract class GeophilicResourcePackMixin {
     private void terrainDiffusion$keepGeophilicFeatures(CallbackInfo ci) {
         if (!mod.getMetadata().getId().equals("geophilic")) return;
         // Geophilic puts its vanilla biome replacements in minecraft, including in overlay packs.
-        namespaces.computeIfPresent(ResourceType.SERVER_DATA, (type, names) ->
-            names.stream().filter(name -> !name.equals("minecraft")).collect(Collectors.toUnmodifiableSet()));
+        namespaces.computeIfPresent(
+                ResourceType.SERVER_DATA,
+                (type, names) ->
+                        names.stream()
+                                .filter(name -> !name.equals("minecraft"))
+                                .collect(Collectors.toUnmodifiableSet()));
     }
 }

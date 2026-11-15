@@ -7,6 +7,5 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
 
 @Environment(EnvType.CLIENT)
 public class TerrainDiffusionMcDataGenerator implements DataGeneratorEntrypoint {
-   public void onInitializeDataGenerator(FabricDataGenerator fabricDataGenerator) {
-   }
+    public void onInitializeDataGenerator(FabricDataGenerator fabricDataGenerator) {}
 }

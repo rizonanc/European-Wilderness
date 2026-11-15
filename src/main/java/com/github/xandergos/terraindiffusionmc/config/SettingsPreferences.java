@@ -34,11 +34,15 @@ public final class SettingsPreferences {
         if (Files.size(path) > 256 * 1024) throw new IOException("Settings preferences exceed the file size limit");
         try {
             Data saved = GSON.fromJson(Files.readString(path), Data.class);
-            if (saved == null || saved.favorites == null || saved.recent == null || saved.profiles == null
+            if (saved == null
+                    || saved.favorites == null
+                    || saved.recent == null
+                    || saved.profiles == null
                     || saved.profiles.size() > MAX_PROFILES) throw new IOException("Invalid settings preferences");
             var profiles = new LinkedHashMap<String, Map<String, String>>();
             for (var profile : saved.profiles.entrySet()) {
-                if (!validName(profile.getKey()) || profile.getValue() == null) throw new IOException("Invalid saved profile");
+                if (!validName(profile.getKey()) || profile.getValue() == null)
+                    throw new IOException("Invalid saved profile");
                 var known = new LinkedHashMap<String, String>();
                 for (String key : TerrainSettingsCatalog.KEYS) {
                     String value = profile.getValue().get(key);
@@ -46,8 +50,12 @@ public final class SettingsPreferences {
                 }
                 profiles.put(profile.getKey(), Map.copyOf(known));
             }
-            return new SettingsPreferences(path, new Data(Set.copyOf(knownKeys(saved.favorites)),
-                knownKeys(saved.recent).stream().limit(MAX_RECENT).toList(), Collections.unmodifiableMap(profiles)));
+            return new SettingsPreferences(
+                    path,
+                    new Data(
+                            Set.copyOf(knownKeys(saved.favorites)),
+                            knownKeys(saved.recent).stream().limit(MAX_RECENT).toList(),
+                            Collections.unmodifiableMap(profiles)));
         } catch (JsonParseException invalid) {
             throw new IOException("Invalid settings preferences", invalid);
         }
@@ -59,9 +67,17 @@ public final class SettingsPreferences {
         return known;
     }
 
-    public boolean favorite(String key) { return data.favorites.contains(key); }
-    public List<String> recent() { return data.recent; }
-    public Map<String, Map<String, String>> profiles() { return data.profiles; }
+    public boolean favorite(String key) {
+        return data.favorites.contains(key);
+    }
+
+    public List<String> recent() {
+        return data.recent;
+    }
+
+    public Map<String, Map<String, String>> profiles() {
+        return data.profiles;
+    }
 
     public void toggleFavorite(String key) throws IOException {
         var updated = new LinkedHashSet<>(data.favorites);
@@ -77,7 +93,10 @@ public final class SettingsPreferences {
     }
 
     public static boolean validName(String name) {
-        return name != null && !name.isBlank() && name.length() <= 32 && name.chars().noneMatch(Character::isISOControl);
+        return name != null
+                && !name.isBlank()
+                && name.length() <= 32
+                && name.chars().noneMatch(Character::isISOControl);
     }
 
     public void saveProfile(String name, Map<String, String> settings) throws IOException {

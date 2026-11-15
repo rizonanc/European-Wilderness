@@ -17,7 +17,10 @@ final class DensitySurfaceCache {
 
     private void context(UUID id, UUID waterId, Object lookup) {
         if (id != session || waterId != water || source != lookup) {
-            session = id; water = waterId; source = lookup; next = 0;
+            session = id;
+            water = waterId;
+            source = lookup;
+            next = 0;
             Arrays.fill(used, false);
         }
     }
@@ -25,8 +28,7 @@ final class DensitySurfaceCache {
     long get(UUID id, UUID waterId, Object lookup, int x, int z) {
         context(id, waterId, lookup);
         for (int i = 0; i < used.length; i++) {
-            if (used[i] && xs[i] == (x >> 4) && zs[i] == (z >> 4))
-                return surfaces[i][((z & 15) << 4) | (x & 15)];
+            if (used[i] && xs[i] == (x >> 4) && zs[i] == (z >> 4)) return surfaces[i][((z & 15) << 4) | (x & 15)];
         }
         return MISSING;
     }
@@ -35,11 +37,17 @@ final class DensitySurfaceCache {
         context(id, waterId, lookup);
         int slot = -1;
         for (int i = 0; i < used.length; i++) {
-            if (used[i] && xs[i] == (x >> 4) && zs[i] == (z >> 4)) { slot = i; break; }
+            if (used[i] && xs[i] == (x >> 4) && zs[i] == (z >> 4)) {
+                slot = i;
+                break;
+            }
         }
         if (slot < 0) {
-            slot = next; next = (next + 1) % used.length;
-            used[slot] = true; xs[slot] = x >> 4; zs[slot] = z >> 4;
+            slot = next;
+            next = (next + 1) % used.length;
+            used[slot] = true;
+            xs[slot] = x >> 4;
+            zs[slot] = z >> 4;
             Arrays.fill(surfaces[slot], MISSING);
         }
         surfaces[slot][((z & 15) << 4) | (x & 15)] = surface;

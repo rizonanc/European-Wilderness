@@ -12,10 +12,15 @@ import org.spongepowered.asm.mixin.injection.At;
 @Pseudo
 @Mixin(targets = "net.shiroha233.roadweaver.features.path.pathlogic.pathfinding.RoadPathCalculator", remap = false)
 abstract class RoadWeaverSpansMixin {
-    @ModifyExpressionValue(method = "extractSpans", at = @At(value = "INVOKE",
-            target = "Lnet/shiroha233/roadweaver/pathfinding/cache/AccurateHeightSampler;oceanFloorWg(II)I"))
-    private static int td$compareBridgeDepth(int original, @Local(argsOnly = true) ServerWorld world,
-            @Local(index = 12) BlockPos pos) {
+    @ModifyExpressionValue(
+            method = "extractSpans",
+            at =
+                    @At(
+                            value = "INVOKE",
+                            target =
+                                    "Lnet/shiroha233/roadweaver/pathfinding/cache/AccurateHeightSampler;oceanFloorWg(II)I"))
+    private static int td$compareBridgeDepth(
+            int original, @Local(argsOnly = true) ServerWorld world, @Local(index = 12) BlockPos pos) {
         return RoadWeaverTerrain.bridgeComparisonFloor(world, pos.getX(), pos.getZ(), original);
     }
 }

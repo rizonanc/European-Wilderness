@@ -4,7 +4,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SlopeClimateTest {
-    @Test void northSlopesAreCoolerAndWetterThanSouthSlopes() {
+    @Test
+    void northSlopesAreCoolerAndWetterThanSouthSlopes() {
         float north = SlopeClimate.exposure(100, 140, 120, 120, 15);
         float south = SlopeClimate.exposure(140, 100, 120, 120, 15);
         assertTrue(SlopeClimate.temperature(north) < SlopeClimate.temperature(south));

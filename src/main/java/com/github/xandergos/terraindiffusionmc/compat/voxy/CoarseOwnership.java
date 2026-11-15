@@ -16,10 +16,18 @@ package com.github.xandergos.terraindiffusionmc.compat.voxy;
  * (preserveOriginal in CoarseSectionComposer): voxels AND air stay real even before
  * the ingest, without filling virtual stone into real air. */
 public final class CoarseOwnership {
-    public enum Decision { OPEN, EXACT_STORED }
-    private CoarseOwnership() {}
-    public static Decision decide(boolean storedKnownContains) {
-        return storedKnownContains?Decision.EXACT_STORED:Decision.OPEN;
+    public enum Decision {
+        OPEN,
+        EXACT_STORED
     }
-    public static boolean exact(Decision decision){return decision==Decision.EXACT_STORED;}
+
+    private CoarseOwnership() {}
+
+    public static Decision decide(boolean storedKnownContains) {
+        return storedKnownContains ? Decision.EXACT_STORED : Decision.OPEN;
+    }
+
+    public static boolean exact(Decision decision) {
+        return decision == Decision.EXACT_STORED;
+    }
 }

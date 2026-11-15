@@ -40,9 +40,12 @@ final class SettingsStatusScreen extends Screen {
         this.parent = parent;
     }
 
-    private static Text label(String key) { return Text.translatable(PREFIX + key); }
+    private static Text label(String key) {
+        return Text.translatable(PREFIX + key);
+    }
 
-    @Override protected void init() {
+    @Override
+    protected void init() {
         int center = width / 2;
         addDrawableChild(new TextWidget(0, 10, width, 12, title, textRenderer));
         water = action("water", center - 150, 28, 146, () -> message(VoxyCompat.rebuildWater(16)));
@@ -51,24 +54,40 @@ final class SettingsStatusScreen extends Screen {
         stopVegetation = action("stop_vegetation", center + 4, 51, 146, () -> message(VegetationMipRebuild.stop()));
         reportList = addDrawableChild(new ReportList(Math.max(22, height - 141)));
         feedback = addDrawableChild(new TextWidget(0, height - 55, width, 10, Text.empty(), textRenderer));
-        cancelPrepare = action("cancel_prepare", center - 150, height - 36, 103, () -> {
-            var session = localSession();
-            if (session != null && session.preparation() != null) session.preparation().cancel();
-        });
-        action("copy", center - 42, height - 36, 100, () -> {
-            client.keyboard.setClipboard(String.join("\n", report.stream().map(Text::getString).toList()));
-            feedback.setMessage(label("copied"));
-        });
-        addDrawableChild(ButtonWidget.builder(Text.translatable("gui.back"), button -> close())
-            .dimensions(center + 64, height - 36, 86, 20).build());
+        cancelPrepare =
+                action(
+                        "cancel_prepare",
+                        center - 150,
+                        height - 36,
+                        103,
+                        () -> {
+                            var session = localSession();
+                            if (session != null && session.preparation() != null) session.preparation().cancel();
+                        });
+        action(
+                "copy",
+                center - 42,
+                height - 36,
+                100,
+                () -> {
+                    client.keyboard.setClipboard(String.join("\n", report.stream().map(Text::getString).toList()));
+                    feedback.setMessage(label("copied"));
+                });
+        addDrawableChild(
+                ButtonWidget.builder(Text.translatable("gui.back"), button -> close())
+                        .dimensions(center + 64, height - 36, 86, 20)
+                        .build());
         report = List.of();
         nextRefresh = 0;
         tick();
     }
 
     private ButtonWidget action(String key, int x, int y, int width, Runnable action) {
-        return addDrawableChild(ButtonWidget.builder(label(key), button -> action.run())
-            .dimensions(x, y, width, 20).tooltip(Tooltip.of(label(key + "_tip"))).build());
+        return addDrawableChild(
+                ButtonWidget.builder(label(key), button -> action.run())
+                        .dimensions(x, y, width, 20)
+                        .tooltip(Tooltip.of(label(key + "_tip")))
+                        .build());
     }
 
     private void message(String message) {
@@ -82,14 +101,23 @@ final class SettingsStatusScreen extends Screen {
         var server = client.getServer();
         var overworld = server == null ? null : server.getOverworld();
         var session = WorldSession.current();
-        return session != null && session.isActive() && overworld != null
-            && overworld.getChunkManager().getChunkGenerator().getBiomeSource() instanceof TerrainDiffusionBiomeSource ? session : null;
+        return session != null
+                        && session.isActive()
+                        && overworld != null
+                        && overworld.getChunkManager().getChunkGenerator().getBiomeSource()
+                                instanceof TerrainDiffusionBiomeSource
+                ? session
+                : null;
     }
 
-    @Override public void tick() {
+    @Override
+    public void tick() {
         WorldSession session = localSession();
-        boolean canRebuild = session != null && client.world != null
-            && client.world.getRegistryKey().equals(World.OVERWORLD) && VoxyCompat.usable();
+        boolean canRebuild =
+                session != null
+                        && client.world != null
+                        && client.world.getRegistryKey().equals(World.OVERWORLD)
+                        && VoxyCompat.usable();
         water.active = canRebuild && !WaterMipRebuild.running();
         vegetation.active = canRebuild && !VegetationMipRebuild.running();
         stopWater.active = WaterMipRebuild.running();
@@ -112,8 +140,10 @@ final class SettingsStatusScreen extends Screen {
         nextRefresh = now + 1_000_000_000L;
         if (session != null && pending == null) {
             pendingSession = session;
-            pending = CompletableFuture.supplyAsync(() -> TerrainDiffusionMc.statsReport(session))
-                .exceptionally(failure -> List.of("Terrain statistics: " + failure.getClass().getSimpleName()));
+            pending =
+                    CompletableFuture.supplyAsync(() -> TerrainDiffusionMc.statsReport(session))
+                            .exceptionally(
+                                    failure -> List.of("Terrain statistics: " + failure.getClass().getSimpleName()));
         }
         updateReport(session);
     }
@@ -125,8 +155,15 @@ final class SettingsStatusScreen extends Screen {
         } else {
             var profile = session.profile();
             var waterOptions = profile.water();
-            lines.add(Text.translatable(PREFIX + "world_profile", profile.worldScale(), profile.mountainRelief(), profile.biomeVariety(),
-                waterOptions.widthVariation(), waterOptions.depthVariation(), waterOptions.lakeThreshold()));
+            lines.add(
+                    Text.translatable(
+                            PREFIX + "world_profile",
+                            profile.worldScale(),
+                            profile.mountainRelief(),
+                            profile.biomeVariety(),
+                            waterOptions.widthVariation(),
+                            waterOptions.depthVariation(),
+                            waterOptions.lakeThreshold()));
             var prep = session.preparation();
             lines.add(prep == null ? label("no_preparation") : Text.literal(prep.progress().toString()));
             var automatic = session.automaticWater();
@@ -142,7 +179,8 @@ final class SettingsStatusScreen extends Screen {
         report = List.copyOf(lines);
         var rows = new ArrayList<ReportRow>();
         for (Text line : report) {
-            for (OrderedText wrapped : textRenderer.wrapLines(line, reportList.getRowWidth() - 8)) rows.add(new ReportRow(wrapped));
+            for (OrderedText wrapped : textRenderer.wrapLines(line, reportList.getRowWidth() - 8))
+                rows.add(new ReportRow(wrapped));
             rows.add(new ReportRow(OrderedText.EMPTY));
         }
         double scroll = reportList.getScrollY();
@@ -150,8 +188,15 @@ final class SettingsStatusScreen extends Screen {
         reportList.setScrollY(scroll);
     }
 
-    @Override public boolean shouldPause() { return false; }
-    @Override public void close() { client.setScreen(parent); }
+    @Override
+    public boolean shouldPause() {
+        return false;
+    }
+
+    @Override
+    public void close() {
+        client.setScreen(parent);
+    }
 
     private final class ReportList extends ElementListWidget<ReportRow> {
         ReportList(int height) {
@@ -159,16 +204,31 @@ final class SettingsStatusScreen extends Screen {
             centerListVertically = false;
         }
 
-        @Override public int getRowWidth() { return SettingsStatusScreen.this.width - 38; }
+        @Override
+        public int getRowWidth() {
+            return SettingsStatusScreen.this.width - 38;
+        }
     }
 
     private final class ReportRow extends ElementListWidget.Entry<ReportRow> {
         private final OrderedText line;
 
-        ReportRow(OrderedText line) { this.line = line; }
-        @Override public List<? extends Element> children() { return List.of(); }
-        @Override public List<? extends Selectable> selectableChildren() { return List.of(); }
-        @Override public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float delta) {
+        ReportRow(OrderedText line) {
+            this.line = line;
+        }
+
+        @Override
+        public List<? extends Element> children() {
+            return List.of();
+        }
+
+        @Override
+        public List<? extends Selectable> selectableChildren() {
+            return List.of();
+        }
+
+        @Override
+        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float delta) {
             context.drawTextWithShadow(textRenderer, line, getContentX(), getContentY(), 0xFFE4E8ED);
         }
     }

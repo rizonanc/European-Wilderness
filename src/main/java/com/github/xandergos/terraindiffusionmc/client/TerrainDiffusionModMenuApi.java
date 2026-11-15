@@ -7,7 +7,7 @@ import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 public final class TerrainDiffusionModMenuApi implements ModMenuApi {
-   public ConfigScreenFactory<?> getModConfigScreenFactory() {
-      return TerrainDiffusionSettingsScreen::new;
-   }
+    public ConfigScreenFactory<?> getModConfigScreenFactory() {
+        return TerrainDiffusionSettingsScreen::new;
+    }
 }

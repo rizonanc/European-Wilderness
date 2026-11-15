@@ -10,12 +10,15 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 /** The ingest worker must not read a section that keeps changing after enqueue. */
 @Pseudo
-@Mixin(targets="me.cortex.voxy.common.world.service.VoxelIngestService$IngestSection",remap=false)
+@Mixin(targets = "me.cortex.voxy.common.world.service.VoxelIngestService$IngestSection", remap = false)
 public abstract class VoxyIngestSnapshotMixin {
-    @ModifyVariable(method="<init>",at=@At("HEAD"),argsOnly=true,remap=false)
+    @ModifyVariable(method = "<init>", at = @At("HEAD"), argsOnly = true, remap = false)
     private static ChunkSection td$snapshotSection(ChunkSection section) {
-        var session=WorldSession.current();
-        return session!=null&&session.isActive()&&section.hasAny(state->state.getFluidState().isIn(FluidTags.WATER))
-            ?section.copy():section;
+        var session = WorldSession.current();
+        return session != null
+                        && session.isActive()
+                        && section.hasAny(state -> state.getFluidState().isIn(FluidTags.WATER))
+                ? section.copy()
+                : section;
     }
 }
