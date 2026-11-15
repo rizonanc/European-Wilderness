@@ -29,11 +29,11 @@ public final class WorldWaterController implements WorldSession.RiverOverlay, Au
     private final WaterPlanCache<WorldWaterGrid.Cell, WorldWaterTile> tiles;
     private final WaterPlanCache<WorldWaterGrid.Cell, WorldWaterUnit> units;
 
-    /** Phase 4 experimental bounded write-behind; null keeps the synchronous save path. */
+    /** a null writer persists each plan synchronously. */
     private final WaterWriteBehind writer;
 
     private final Semaphore planning = new Semaphore(1, true);
-    // One materialized unit/scratch set, including its synchronous persistence, as before Phase 2.
+    // hold scratch space for one water unit through persistence.
     private final Semaphore unitMemory = new Semaphore(1, true);
     private volatile long unitMemorySince;
 
@@ -685,8 +685,6 @@ public final class WorldWaterController implements WorldSession.RiverOverlay, Au
         return computedTiles.get();
     }
 
-    /** Phase 4: persistence goes through the optional bounded write-behind; with the
-     * feature off this is the unchanged synchronous save. */
     private void saveTile(WorldWaterTile tile) throws IOException {
         if (writer == null) store.save(tile);
         else writer.tile(tile);

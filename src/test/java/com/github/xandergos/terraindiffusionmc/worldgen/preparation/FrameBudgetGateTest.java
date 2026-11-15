@@ -3,10 +3,6 @@ package com.github.xandergos.terraindiffusionmc.worldgen.preparation;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Phase 5.1: the publication gate must be explainable and must recover from both
- * silence (no frames observed) and pressure (spike backoff) as soon as fresh cheap
- * frames arrive again — this is the regression for the confirmed alt-tab stall where
- * publish stayed false with coarse data fully ready. */
 class FrameBudgetGateTest {
     private long now = 1_000_000_000L;
     private final FrameBudget budget = new FrameBudget(() -> now);

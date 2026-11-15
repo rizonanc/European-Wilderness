@@ -64,10 +64,7 @@ public final class CoarseSectionComposer {
         return fill(level, sx, sy, sz, bottom, top, field, original, target, exact, palette, isAir, adjustment, null);
     }
 
-    /** Phase 5.4.1: {@code preserveOriginal} keeps the ORIGINAL column (voxels and air)
-     * when real ownership evidence exists but the stored representation is not consulted
-     * — a loaded Minecraft chunk whose Voxy ingest is still pending. This prevents both
-     * the ownership wall (protected air) and virtual terrain inside real air. */
+    /** preserve both blocks and air from a loaded chunk awaiting ingest. */
     public static Result fill(
             int level,
             int sx,

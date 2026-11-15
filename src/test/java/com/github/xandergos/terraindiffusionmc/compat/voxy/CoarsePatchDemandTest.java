@@ -3,9 +3,6 @@ package com.github.xandergos.terraindiffusionmc.compat.voxy;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Phase 4.3 coverage diagnostics: patchDemand counts the patch keys whose rectangles
- * intersect the radius disc (nearest-point distance <= radius) — the denominator of the
- * new "patches=X/needed" status line. */
 class CoarsePatchDemandTest {
     @Test
     void tinyRadiusShortCircuitsToOnePatch() {

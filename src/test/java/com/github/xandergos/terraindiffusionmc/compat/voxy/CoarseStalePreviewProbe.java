@@ -3,7 +3,7 @@ package com.github.xandergos.terraindiffusionmc.compat.voxy;
 import java.nio.file.*;
 import java.util.*;
 
-/** Runs unchanged against the previous and candidate released JARs. No game/GL/save writes. */
+/** Runs existing against the previous and candidate released JARs. No game/GL/save writes. */
 public final class CoarseStalePreviewProbe {
     public static void main(String[] args) throws Exception {
         long[] palette = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};

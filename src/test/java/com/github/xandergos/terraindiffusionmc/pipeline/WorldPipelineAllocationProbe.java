@@ -6,10 +6,6 @@ import java.util.Random;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Phase 4 headless allocation probe (Шаг 12). Measures real allocation bytes of the
- * in-place scratch paths against the allocation-heavy originals on the same thread via
- * com.sun.management.ThreadMXBean. These are headless component numbers, not in-game
- * frametime measurements. */
 class WorldPipelineAllocationProbe {
     private static com.sun.management.ThreadMXBean bean() {
         var raw = java.lang.management.ManagementFactory.getThreadMXBean();

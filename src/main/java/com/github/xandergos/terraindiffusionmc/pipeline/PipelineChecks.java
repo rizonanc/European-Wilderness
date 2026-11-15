@@ -43,8 +43,6 @@ final class PipelineChecks {
             } catch (ArithmeticException overflow) {
                 throw invalid(Code.INF_INPUT, "Model input size overflow");
             }
-            // Phase 4.2: name the exact contract so a mismatch is diagnosable without a
-            // debugger. Shape is per-tensor, so this stays a single rate-limited line.
             if (count != data.length)
                 throw invalid(
                         Code.INF_INPUT,

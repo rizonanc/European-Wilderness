@@ -6,13 +6,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.Arrays;
 
-/** Phase 4 experimental bounded write-behind for frozen water plans (opt-in, default off).
- * Plans are regenerable caches: dropping a queued write only costs a recompute next
- * session, and the disk write itself stays atomic and write-once (temp file + atomic move,
- * existing-file guard unchanged). When the bounded queue is full — or after close — the
- * caller writes synchronously exactly as before, so no entry is silently lost and no
- * unbounded memory is retained. Write failures are already recorded by WorldWaterStore
- * (TD-HYD-004); this class only counts them. */
+/** queue regenerable water plans. Full or closed queues write synchronously. */
 final class WaterWriteBehind implements AutoCloseable {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WaterWriteBehind.class);
 
@@ -152,8 +146,7 @@ final class WaterWriteBehind implements AutoCloseable {
         synchronized (admission) {
             closed = true;
         }
-        // Bounded shutdown: drain typically finishes in well under a second (queue<=16);
-        // past this deadline remaining plans are regenerable and are dropped deliberately.
+        // queued water plans can be recomputed after shutdown.
         try {
             worker.join(5_000);
         } catch (InterruptedException e) {

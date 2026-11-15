@@ -40,7 +40,7 @@ public final class TerrainRepository {
                 requireOwnerActive();
                 if (disk.isPresent()) {
                     GenerationMetrics.countRepoDiskHit();
-                    // Publish before completion/removal: a late RAM miss must not launch another decode.
+                    // Publish before completion/removal: a late RAM miss cannot launch another decode.
                     ramPut(disk.get());
                 }
                 return disk;

@@ -3,10 +3,6 @@ package com.github.xandergos.terraindiffusionmc.pipeline;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Phase 4.2 regression contract: variable-batch ONNX input buffers must be exact-fit
- * for every batch size, reused only between equal-size calls, and must never hand
- * runModel an array whose length differs from batch*perBatch (the production
- * "Tensor shape/data mismatch: x" world-creation failure). */
 class BatchBuffersTest {
     private static final int PER_BATCH = 5 * 64 * 64;
 

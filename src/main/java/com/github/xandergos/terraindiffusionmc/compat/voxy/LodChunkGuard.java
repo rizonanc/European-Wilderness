@@ -110,7 +110,7 @@ public final class LodChunkGuard {
 
     /** Both background workers share the small disk cache; render reads never enter this lock. */
     private Header header(Region region) {
-        // Never use the markLoaded monitor: a slow disk must not hold up the client thread.
+        // Never use the markLoaded monitor: a slow disk cannot hold up the client thread.
         synchronized (headers) {
             long now = clock.getAsLong();
             var header = headers.get(region);

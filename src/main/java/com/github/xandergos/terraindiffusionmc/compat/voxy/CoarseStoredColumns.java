@@ -42,9 +42,7 @@ final class CoarseStoredColumns {
         return (ready.size() >= 4096 || ready.containsKey(key(x, z))) && contains(x, z);
     }
 
-    /** Phase 5.4.1: drop cached probes for a region so a freshly ingested real chunk
-     * becomes protected on the next prepare; without this the probe stays stale and the
-     * neural preview keeps drawing over stored columns. */
+    /** invalidate stored-column probes when a region changes. */
     void invalidate(int x, int z) {
         long key = key(x, z);
         synchronized (pending) {

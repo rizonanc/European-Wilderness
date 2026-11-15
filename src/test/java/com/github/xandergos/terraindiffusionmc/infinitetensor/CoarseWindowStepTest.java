@@ -3,13 +3,6 @@ package com.github.xandergos.terraindiffusionmc.infinitetensor;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Phase 4.3 regression: prepareIndependentWindowStep computes exactly one uncached
- * window per call and reports an explicit status (1=computed, 0=slice already complete),
- * so the coarse LOD controller can finish a whole patch inside one background claim.
- * Window ranges include the boundary window below pixel 0 (getLowestIntersection yields
- * -1 when the first pixels fall inside window -1's span), so the expected counts here
- * follow the production enumeration. Composition VALUES (weighted overlap blending via
- * addFrom) belong to the production design and are intentionally not re-specified here. */
 class CoarseWindowStepTest {
     private static final int IN = 64, STRIDE = 32;
 

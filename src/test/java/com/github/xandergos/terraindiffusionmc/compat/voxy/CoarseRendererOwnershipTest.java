@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Real renderer + unchanged Voxy WorldSection; only the environment flag is stubbed. */
+/** Real renderer + existing Voxy WorldSection; only the environment flag is stubbed. */
 class CoarseRendererOwnershipTest {
     @TempDir Path temp;
 
@@ -88,11 +88,6 @@ class CoarseRendererOwnershipTest {
             assertEquals(4, guard.prepareRenderRegions(32));
             if (realChunk) guard.markLoaded(128, 0);
             preview = provider.render(engine, position, source);
-            // Phase 5.4.1: the test data fills the WHOLE y=0 layer (all 1024 columns) with
-            // real voxels. With a loaded real chunk every column is owned, so the correct
-            // result is the ORIGINAL section itself (real data renders itself; no virtual
-            // copy, no ownership wall). Without the loaded chunk the stale voxels are
-            // replaced by the neural surface.
             if (realChunk) assertSame(source, preview, "fully real section renders itself: no virtual copy, no wall");
             else assertNotSame(source, preview);
             assertNotNull(preview);
@@ -111,9 +106,6 @@ class CoarseRendererOwnershipTest {
             queueField.setAccessible(true);
             var queue = (CoarseUpdateQueue) queueField.get(provider);
             for (var task : queue.select(8, k -> true, k -> true)) queue.complete(task);
-            // Phase 5.4.1: a fully real section never becomes a virtual preview, so there
-            // is no virtual sky to clean here; the cleanup path is covered by the
-            // !realChunk scenario below, where a coarse preview is actually built.
             if (!realChunk) {
                 var historyField = renderer.getDeclaredField("virtual");
                 historyField.setAccessible(true);

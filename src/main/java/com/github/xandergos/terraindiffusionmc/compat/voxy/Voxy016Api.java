@@ -224,7 +224,7 @@ public final class Voxy016Api {
         }
 
         /** Rebuild only derived LOD cells from an existing base cube. Never writes level 0,
-         * creates terrain, changes child masks, or relies on insertUpdate's unchanged-base shortcut. */
+         * creates terrain, changes child masks, or relies on insertUpdate's existing-base shortcut. */
         public int repairWaterCube(int x32, int y32, int z32) throws Exception {
             if (!(state.map instanceof WaterMipMapping mapping))
                 throw new IllegalStateException("Voxy water mip compatibility hooks are not active");
@@ -339,7 +339,7 @@ public final class Voxy016Api {
                                         changed++;
                                     }
                                     // Voxy tracks nonempty block counts only for L0. Derived child
-                                    // masks describe the unchanged fine children, not these voxels.
+                                    // masks describe the existing fine children, not these voxels.
                                 } finally {
                                     sectionRelease.invoke(parent);
                                 }
@@ -371,7 +371,7 @@ public final class Voxy016Api {
             return true;
         }
 
-        /** Phase 4.4 read-only census helpers: acquire/release only, never dirty or save. */
+        /** census access acquires sections without marking them dirty. */
         public boolean exists(int level, int x, int y, int z) throws ReflectiveOperationException {
             Object value = exists.invoke(engine, level, x, y, z);
             if (value == null) return false;

@@ -3,10 +3,6 @@ package com.github.xandergos.terraindiffusionmc.compat.voxy;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Phase 5.3 adaptive publication budget. The confirmed backlog mechanism was the old
- * step collapse (pressure 3/4 -> 4/1 tasks) with an empty Voxy mesh queue: 48k waiting
- * sections drained at ~80/s or froze entirely. The adaptive budget keeps a floor while
- * the mesh queue has headroom, follows meshQueue caps, and recovers additively. */
 class CoarseUpdateBudgetTest {
     @Test
     void severePressureWithFreeMeshQueueKeepsADrainFloor() {

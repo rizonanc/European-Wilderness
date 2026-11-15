@@ -39,7 +39,7 @@ public final class ForestLodProbe {
             var result = builder.build();
             checksum += result.maxY;
             var encoder = new LodVoxelEncoder(result, biome -> palette);
-            // This intentionally tests one encoded canopy section, not a full underground column.
+            // This tests one encoded canopy section, not a full underground column.
             checksum += encoder.fill(0, 7, 0, buffer);
         }
         return checksum;

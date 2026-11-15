@@ -64,7 +64,7 @@ final class RiverCurves {
                     }
                 }
                 if (!clear) {
-                    // A curve must not cut a new notch through a high ridge. Rejoin
+                    // A curve cannot cut a new notch through a high ridge. Rejoin
                     // the original valley via the checked node offsets instead.
                     line(sample, c, px[c], pz[c], level, c % width * 2, c / width * 2, level);
                     line(

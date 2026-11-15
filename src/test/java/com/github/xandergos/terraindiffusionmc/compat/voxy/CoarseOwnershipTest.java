@@ -3,24 +3,15 @@ package com.github.xandergos.terraindiffusionmc.compat.voxy;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Phase 5.4.1 regression: the confirmed wall mechanism. Ownership evidence WITHOUT
- * stored data (loaded-but-not-ingested chunk, coverage mark, unread region) must NOT
- * suppress the neural preview — it used to produce "protected air" and a vertical wall
- * against neighbouring neural columns. Only actual stored data protects a column. */
 class CoarseOwnershipTest {
     @Test
     void loadedButNotIngestedChunkIsNoLongerProtectedAir() {
-        // The confirmed trace: Anvil/loaded evidence at (367,15,-512), no exact Voxy
-        // section, coarse firstAir ~ 45. Old decision: protected air (wall). New: OPEN.
         assertFalse(CoarseOwnership.exact(CoarseOwnership.decide(false)));
         assertTrue(CoarseOwnership.exact(CoarseOwnership.decide(true)));
     }
 
     @Test
     void composerPreservesLoadedChunkVoxelsAndAirWhileNeuralFillsUnowned() {
-        // Geometry-level regression on the pure composer: an owned loaded column keeps its
-        // voxel AND its air (no virtual stone in real air), while the unowned neighbouring
-        // column receives the neural surface — no ownership wall between them.
         var field = new CoarseLodPatch.Surface[1024];
         for (int z = 0; z < 32; z++)
             for (int x = 0; x < 32; x++) field[z * 32 + x] = new CoarseLodPatch.Surface(80, (short) 229, (short) 0);

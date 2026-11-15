@@ -34,7 +34,7 @@ public final class CoarseInferenceProbe {
                                     return null;
                                 });
         FabricLoaderImpl.INSTANCE.setGameProvider(provider);
-        // This process deliberately tests just the coarse graph. Prevent the normal
+        // This process tests just the coarse graph. Prevent the normal
         // all-assets downloader from fetching/validating the unused 2GB base model.
         Field ready = ModelAssetManager.class.getDeclaredField("READY");
         ready.setAccessible(true);

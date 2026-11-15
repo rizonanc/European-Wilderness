@@ -6,11 +6,6 @@ import java.util.Random;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Phase 4 scratch-buffer parity. The reused in-place paths must be bit-identical to the
- * allocation-heavy originals. Reference semantics below are copied verbatim from the
- * pre-change sources (WorldPipeline.flatten3d / WorldPipeline.nearestUpsample) because
- * touching WorldPipeline itself would trigger model-config loading outside the game.
- * EDMScheduler and GaussianNoisePatch are safe to load directly. */
 class WorldPipelineScratchParityTest {
     private static void assertBitsEqual(float[] expected, float[] actual, String what) {
         assertEquals(expected.length, actual.length, what + ": length");
@@ -83,7 +78,7 @@ class WorldPipelineScratchParityTest {
     void schedulerStepIntoChainMatchesStepChainBitForBit() {
         Random random = new Random(11);
         int n = 6 * 64 * 64;
-        // Pre-generate identical model outputs for both chains: the Random stream must not
+        // Pre-generate identical model outputs for both chains: the Random stream cannot
         // diverge between the reference and in-place runs.
         float[] initial = new float[n];
         List<float[]> modelOuts = new ArrayList<>();
@@ -130,10 +125,6 @@ class WorldPipelineScratchParityTest {
 
     @Test
     void reusedNoiseBufferCarriesNoStaleValuesAcrossSeedsAndBoundaries() {
-        // Phase 4.1: the production scratch buffer is reused call after call. Fill it with
-        // garbage (including NaN) first: any stale element would surface here. The buffer
-        // is sized for the largest case, as a real caller-sized buffer would be; only the
-        // first c*h*w elements are written and compared.
         float[] reused = new float[6 * 130 * 64];
         java.util.Arrays.fill(reused, Float.NaN);
         long[] seeds = {42L, -777L, Long.MAX_VALUE - 1};
@@ -155,8 +146,6 @@ class WorldPipelineScratchParityTest {
 
     @Test
     void schedulerPredBuffersStayCorrectAcrossConsecutiveChains() {
-        // Phase 4.1: coarseTile reuses predA/predB across tiles. Three consecutive chains
-        // with different noise must each match a fresh reference bit for bit.
         Random random = new Random(29);
         int n = 6 * 64 * 64;
         float[] predA = new float[n], predB = new float[n];

@@ -23,9 +23,6 @@ class PipelineChecksTest {
 
     @Test
     void variableBatchBufferLongerThanShapeIsRejectedWithExactFieldMessage() {
-        // Phase 4.2 regression: latentBatch with a smaller batch after a larger one reused
-        // a longer buffer — the production world-creation failure. Reproduces the field
-        // error exactly and requires the enriched diagnosis (expected shape/count + actual length).
         var failure =
                 assertThrows(
                         PipelineChecks.Invalid.class,

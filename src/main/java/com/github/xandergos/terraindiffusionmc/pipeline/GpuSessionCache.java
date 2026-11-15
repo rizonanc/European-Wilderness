@@ -111,7 +111,7 @@ final class GpuSessionCache<K, V> {
         if (failure != null) throw failure;
     }
 
-    // Commands on the server thread must not wait for a GPU run holding the cache lock.
+    // Commands on the server thread cannot wait for a GPU run holding the cache lock.
     String statistics() {
         return snapshot;
     }

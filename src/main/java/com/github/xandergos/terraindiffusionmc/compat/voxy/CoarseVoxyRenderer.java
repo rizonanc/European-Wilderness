@@ -30,12 +30,12 @@ public final class CoarseVoxyRenderer implements CoarseRenderHooks.Provider {
     final CoarseUpdateQueue waiting = new CoarseUpdateQueue(MAX_WAITING, 8192);
     private volatile RenderGenerationService service;
     final LongAdder built = new LongAdder(), errors = new LongAdder(), dropped = new LongAdder();
-    // Phase 4.3 defer-cause counters: why sections did not show coarse geometry.
+    // counts of deferred coarse sections by cause.
     final LongAdder deferredNoField = new LongAdder(),
             deferredRegion = new LongAdder(),
             protectedExact = new LongAdder(),
             outsideRadius = new LongAdder();
-    // Phase 5.3 backlog diagnostics: how much of the waiting queue is actually ready.
+    // counts of ready and deferred sections.
     final LongAdder readyProbes = new LongAdder(), readyHits = new LongAdder();
     private final java.util.concurrent.ConcurrentHashMap<String, Long> exactReasons =
             new java.util.concurrent.ConcurrentHashMap<>();
@@ -332,11 +332,7 @@ public final class CoarseVoxyRenderer implements CoarseRenderHooks.Provider {
         }
     }
 
-    /** Phase 5.4.1: ownership requires ACTUAL stored data (the 512-region stored-column
-     * probe). Intent-only evidence (loaded-but-not-ingested chunk, coverage mark,
-     * unread/uncertain region) used to produce "protected air" — the confirmed
-     * vertical-wall mechanism. The neural preview fills such columns until stored data
-     * arrives; a probe refresh (invalidate on chunk load) then protects them. */
+    /** only stored voxels establish coarse ownership. */
     private boolean exact(int x, int z) {
         var decision = CoarseOwnership.decide(storedColumns.knownContains(x, z));
         if (decision != CoarseOwnership.Decision.OPEN) exactReasons.merge(decision.name(), 1L, Long::sum);
@@ -384,7 +380,7 @@ public final class CoarseVoxyRenderer implements CoarseRenderHooks.Provider {
                 Mapper::isAir);
     }
 
-    /** Phase 5.4.1: re-probe the 512-region containing this chunk after real data lands. */
+    /** invalidate the chunk storage region probe after ingest. */
     void invalidateStoredColumns(int chunkX, int chunkZ) {
         storedColumns.invalidate(chunkX * 16, chunkZ * 16);
     }
@@ -469,8 +465,7 @@ public final class CoarseVoxyRenderer implements CoarseRenderHooks.Provider {
             defer(position);
             return original;
         }
-        // Phase 5.4.1: a loaded real chunk whose Voxy ingest is still pending keeps its
-        // original columns (voxels AND air) inside the composed section.
+        // keep loaded chunks intact while Voxy ingest is pending.
         CoarseSectionComposer.Protected preserveOriginal = null;
         if (original != null
                 && (guard.knownRealColumn(x * side + 8, z * side + 8)

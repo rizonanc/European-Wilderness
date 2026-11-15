@@ -106,7 +106,7 @@ public final class DrainagePlanner {
                     exits.add(z * width + x);
                 }
             }
-        // Seed ALL exits first. A newly resolved cell must not become another
+        // Seed ALL exits first. A newly resolved cell cannot become another
         // zero-distance exit during a row scan: that caused long directional stripes.
         exits.sort((a, b) ->
                 Long.compareUnsigned(

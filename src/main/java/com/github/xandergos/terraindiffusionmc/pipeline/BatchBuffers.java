@@ -1,10 +1,6 @@
 package com.github.xandergos.terraindiffusionmc.pipeline;
 
-/** Phase 4.2: exact-fit reusable ONNX input buffers for variable batch sizes.
- * PipelineChecks.inputs compares the full array length to the shape product, so every
- * buffer handed to runModel must have length exactly batch*perBatch — a longer reused
- * buffer is rejected as "Tensor shape/data mismatch". Fixed-size stages keep the
- * grow-only scratch in WorldPipeline; only variable-size inputs go through here. */
+/** cache ONNX input arrays by exact length because tensor shapes forbid spare capacity. */
 final class BatchBuffers {
     private BatchBuffers() {}
 

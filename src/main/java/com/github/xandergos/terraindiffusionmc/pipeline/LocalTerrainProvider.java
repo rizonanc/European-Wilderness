@@ -210,11 +210,7 @@ public final class LocalTerrainProvider {
         }
     }
 
-    /** Phase 4.3: one coarse window of the patch slice per call, with an explicit status so
-     * the caller can finish a whole patch inside a single background claim. Still one
-     * optional DISTANT submission per window, so foreground inference preempts between
-     * windows and a busy queue defers instead of blocking. Returns 1 when a window was
-     * computed, 0 when the whole slice is already computed, -1 when deferred. */
+    /** prepares one preemptible window. Returns 1 for progress, 0 when complete, or -1 when deferred. */
     public static int prepareCoarseLodWindowStep(
             int ci0, int cj0, int ci1, int cj1, WorldSession ticket, java.util.function.BooleanSupplier allowed)
             throws Exception {

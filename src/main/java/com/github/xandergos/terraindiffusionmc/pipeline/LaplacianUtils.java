@@ -35,7 +35,6 @@ public final class LaplacianUtils {
         return separableGaussianBlur(downsampled, kernelSigma);
     }
 
-    /** Phase 4: moved from WorldPipeline unchanged so tests can load it without model config. */
     public static float[] nearestUpsample(float[] src, int C, int sH, int sW, int dH, int dW) {
         float[] dst = new float[C * dH * dW];
         nearestUpsampleInto(src, C, sH, sW, dH, dW, dst);

@@ -78,8 +78,7 @@ public final class FrameBudget {
         return last != 0 && now - last < 2_000_000_000L && now >= blockedUntil;
     }
 
-    /** Phase 5.1 gate telemetry: "fresh" when frame observations are current, "stale"
-     * after two seconds without frames, "silent" before the first observed frame. */
+    /** reports frame samples as fresh, stale after two seconds, or silent before the first frame. */
     public synchronized String heartbeatState() {
         long now = clock.getAsLong();
         if (last == 0) return "silent";

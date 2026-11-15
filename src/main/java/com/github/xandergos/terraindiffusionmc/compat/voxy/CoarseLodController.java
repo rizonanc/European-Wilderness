@@ -120,8 +120,7 @@ public final class CoarseLodController implements AutoCloseable {
     public void realChunk(net.minecraft.world.chunk.WorldChunk chunk) {
         var pos = chunk.getPos();
         if (!coverage.mark(pos.x, pos.z)) return;
-        // Phase 5.4.1: refresh the stored-column probe for this region so the freshly
-        // ingested chunk becomes protected instead of staying an unprotected hole.
+        // invalidate the region probe when real chunk data arrives.
         renderer.invalidateStoredColumns(pos.x, pos.z);
         renderer.exactChanged(Math.floorDiv(pos.x, 2), Math.floorDiv(pos.z, 2));
         if (anchors.size() >= 4096) return;
@@ -285,7 +284,7 @@ public final class CoarseLodController implements AutoCloseable {
                     close();
                     return;
                 }
-                // Phase 5.4.1: sample the gate BEFORE the external fork so closed cycles are counted.
+                // count closed publication cycles before forking.
                 boolean gateOpen = ClientPerformance.mayPublish();
                 gateTracker.sample(gateOpen);
                 TimeUnit.MILLISECONDS.sleep(50);

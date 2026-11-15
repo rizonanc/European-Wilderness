@@ -116,11 +116,7 @@ public final class ClientPerformance {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             boolean nextPaused = client.isPaused();
             var ticket = WorldSession.current();
-            // Phase 5.1: window focus no longer freezes the Native LOD pipeline. An unfocused
-            // game keeps ticking and rendering; the frame budget observes those (cheap) frames
-            // and adapts. Pause remains a hard gate. This removes the confirmed publication
-            // stall: alt-tab previously silenced frame() for over two seconds, which turned
-            // mayPublish() and the background policy false while coarse data was ready.
+            // frame pacing gates publication while the game is running.
             boolean active = !nextPaused && client.world != null && ticket != null && ticket.isActive();
             if (ticket != observedTicket
                     || client.world != observedWorld
@@ -141,8 +137,7 @@ public final class ClientPerformance {
         });
     }
 
-    /** Phase 5.1 publication-gate telemetry: the concrete reason the coarse publisher is
-     * currently held, or "open". Pure function of observable state. */
+    /** reports the reason coarse publication is paused. */
     public static String publishGateReason() {
         var client = MinecraftClient.getInstance();
         var ticket = WorldSession.current();

@@ -2,7 +2,7 @@ package com.github.xandergos.terraindiffusionmc.worldgen.hydrology;
 
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
 
-/** Deterministic bed/shore lining, shared by game code and regression tests. */
+/** Deterministic bed/shore lining, shared by game code and tests. */
 final class WaterLining {
     private static final int[][] NEIGHBOURS = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 

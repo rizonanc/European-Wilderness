@@ -462,9 +462,7 @@ public final class VoxyCompat {
         return api != null;
     }
 
-    /** Phase 4.5: pure eligibility for the chunks-mode renderer-only Native Neural LOD.
-     * Deliberately independent of the prepared bridge: in chunks mode no persistent TD
-     * writer runs, so an experimental coarse preview can coexist with native ingest. */
+    /** native ingest can run alongside the renderer-only preview. */
     static boolean chunksCoarseGate(boolean voxyEnabled, boolean nativeChunks, boolean experimental) {
         return voxyEnabled && nativeChunks && experimental;
     }
@@ -477,7 +475,7 @@ public final class VoxyCompat {
         return preparedGate(enabled && TerrainDiffusionConfig.voxyEnabled(), TerrainDiffusionConfig.voxyNativeChunks());
     }
 
-    /** Phase 4.4 read-only storage census around the player (no writes, no meshing). */
+    /** inspect stored sections without writing or meshing. */
     private static String census(int radiusChunks) {
         return census(radiusChunks, null);
     }
@@ -591,12 +589,9 @@ public final class VoxyCompat {
         }
     }
 
-    // ---- Phase 4.5: renderer-only Native Neural LOD in chunks mode ----
     private static volatile ChunksCoarse chunksState;
 
-    /** Phase 4.5: an experimental coarse preview may run beside native chunk ingest. The
-     * prepared bridge stays fully retired in this mode, so nothing approximate reaches
-     * RocksDB; the preview is renderer-only and real chunks remain authoritative. */
+    /** coarse previews stay in the renderer and native chunks own storage. */
     private static void tickChunksCoarse(
             MinecraftClient client,
             WorldSession ticket,
@@ -1020,8 +1015,7 @@ public final class VoxyCompat {
             preparer.start();
         }
 
-        /** Phase 4 opt-in experimental coarse horizon. Any failure disables only this preview;
-         * exact LOD export and native generation continue unchanged. */
+        /** preview failures leave exact LOD export active. */
         private CoarseLodController buildCoarse() {
             try {
                 return new CoarseLodController(

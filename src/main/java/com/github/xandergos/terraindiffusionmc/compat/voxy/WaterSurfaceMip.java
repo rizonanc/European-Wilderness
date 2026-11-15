@@ -1,6 +1,6 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
-/** Derive water coverage from unchanged full-resolution columns, before LOD loses vegetation/fluids. */
+/** Derive water coverage from existing full-resolution columns, before LOD loses vegetation/fluids. */
 public final class WaterSurfaceMip {
     private static final class Scan {
         final int[] height = new int[256];

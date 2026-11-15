@@ -46,10 +46,7 @@ public final class WorldPipeline implements AutoCloseable {
     final InfiniteTensor latents;
     final InfiniteTensor residual;
 
-    // Phase 4 inference-owner-thread scratch buffers. Every pipeline method that touches them
-    // runs only on the single "terrain-diffusion-inference" thread, buffers are never shared
-    // between pipeline instances, and every element is written before it is read. Sizes are
-    // fixed by the constants above, so each buffer is allocated lazily once per instance.
+    // access inference scratch buffers on the owner thread.
     private float[] scratchCondImg;
     private float[] scratchCondNoise;
     private float[] scratchCondMixed;
@@ -530,9 +527,7 @@ public final class WorldPipeline implements AutoCloseable {
         return coarse.prepareIndependentSliceStep(start, end) ? coarse.getSlice(start, end) : null;
     }
 
-    /** Phase 4.3: 1=one coarse window of the patch slice computed, 0=slice already complete.
-     * Lets the LOD controller finish a whole patch inside one background claim while every
-     * window remains a separate, preemptible inference submission. */
+    /** prepares one coarse window. Returns 1 for progress or 0 when complete. */
     public int prepareCoarseLodWindow(int ci0, int cj0, int ci1, int cj1) {
         int[] start = {0, ci0, cj0}, end = {7, ci1, cj1};
         return coarse.prepareIndependentWindowStep(start, end);

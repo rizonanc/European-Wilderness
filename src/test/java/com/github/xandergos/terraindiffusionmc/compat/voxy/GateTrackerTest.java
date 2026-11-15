@@ -4,9 +4,6 @@ import org.junit.jupiter.api.Test;
 import java.util.concurrent.atomic.AtomicLong;
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Phase 5.4.1: gate statistics on MONOTONIC TIME. Buckets advance with real seconds
- * even when the controller step counter is frozen, long pauses expire the history,
- * windows without samples report an honest -1, and reads are safe from other threads. */
 class GateTrackerTest {
     private static void seconds(AtomicLong clock, int count, boolean open, Runnable between) {
         for (int s = 0; s < count; s++) {

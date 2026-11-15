@@ -3,8 +3,6 @@ package com.github.xandergos.terraindiffusionmc.compat.voxy;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Phase 4.4 read-only census arithmetic: persisted-top extraction from a 32³ raw tile
- * and the aggregator bookkeeping that the /td-voxy census report is built from. */
 class VoxyCensusAggregatorTest {
     private static long voxel(
             long blockId, int light) { // composeMappingId-like: light<<...|block; only non-zero matters

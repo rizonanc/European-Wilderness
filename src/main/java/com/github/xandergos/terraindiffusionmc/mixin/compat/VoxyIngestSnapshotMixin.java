@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
-/** The ingest worker must not read a section that keeps changing after enqueue. */
+/** The ingest worker cannot read a section that keeps changing after enqueue. */
 @Pseudo
 @Mixin(targets = "me.cortex.voxy.common.world.service.VoxelIngestService$IngestSection", remap = false)
 public abstract class VoxyIngestSnapshotMixin {

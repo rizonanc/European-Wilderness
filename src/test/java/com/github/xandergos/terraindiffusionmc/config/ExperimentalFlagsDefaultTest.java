@@ -3,9 +3,6 @@ package com.github.xandergos.terraindiffusionmc.config;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Phase 4.1: experimental flags are off by default, legacy keys keep their values, and
- * the coarse mixin gate refuses to apply anything while the flag is off (the gate must
- * short-circuit before touching FabricLoader so this holds in plain unit tests). */
 class ExperimentalFlagsDefaultTest {
     @Test
     void phase4FlagsAreOffUnderBundledDefaults() {

@@ -1,24 +1,11 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
-/** Phase 5.3 adaptive publication budget (AIMD-lite). Replaces the collapsing step
- * function that pinned publication at 1/4 tasks under sustained moderate frame
- * pressure while the actual downstream (Voxy mesh queue) had headroom — the confirmed
- * mechanism behind the 48k-section waiting backlog.
- *
- * Control loop: the Voxy mesh queue is the primary pressure signal. Frame pressure
- * modulates the target but, while the mesh queue has real headroom, publication never
- * collapses below a small floor. Growth is additive (one step per controller cycle,
- * ~50 ms), decrease is multiplicative (halving towards the target), so a spike cuts
- * the rate quickly without the sustained starvation of a step collapse. The meshQueue
- * hard caps (0 at 512+, tight at 256+) are unchanged. */
+/** adjust coarse publication to frame pressure and Voxy mesh capacity. */
 public final class CoarseUpdateBudget {
     private int allowance = 16;
     private long adjustments;
 
-    /** One controller cycle (~50 ms). Returns the publication quota for this cycle.
-     * Phase 5.4.1: the hard mesh-queue caps apply to the ISSUED value immediately —
-     * a warm budget falling onto a capped queue can no longer emit an oversized batch
-     * on its first cycle. */
+    /** apply the mesh queue cap to the current batch. */
     public synchronized int quota(int pressure, int meshQueue) {
         adjustments++;
         if (meshQueue >= 512) {

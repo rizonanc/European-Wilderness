@@ -6,9 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Phase 4 write-behind: bounded queue still lands every plan on disk (write-once,
- * atomic, regenerable), synchronous fallback after close, and duplicate-plan tolerance
- * for the eviction-recompute race. Real WorldWaterStore files in a temp directory. */
 class WaterWriteBehindTest {
     @TempDir Path temp;
     private static final WorldWaterGrid GRID = WorldWaterGrid.DEFAULT;

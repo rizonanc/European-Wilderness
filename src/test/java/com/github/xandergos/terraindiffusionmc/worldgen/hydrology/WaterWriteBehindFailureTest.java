@@ -8,9 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Phase 4.1 failure injection: disk failures must never escape to the caller, never
- * lose an accepted entry (saturation falls back to synchronous writes), and shutdown
- * must stay bounded. Real WorldWaterStore files in a temp directory. */
 class WaterWriteBehindFailureTest {
     @TempDir Path temp;
     private static final WorldWaterGrid GRID = WorldWaterGrid.DEFAULT;

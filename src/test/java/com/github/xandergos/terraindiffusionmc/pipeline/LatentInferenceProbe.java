@@ -9,13 +9,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import net.fabricmc.loader.impl.FabricLoaderImpl;
 import net.fabricmc.loader.impl.game.GameProvider;
 
-/** Phase 4.2 headless probe: the FULL neural pipeline (coarse + base + decoder) against
- * the real ONNX models on CPU. Loads all three graphs, then computes elevation/climate
- * for regions whose latent-window counts produce mixed batch sizes (groups of up to 4
- * plus a smaller remainder) — the exact production sequence that exposed
- * "Tensor shape/data mismatch: x" in latentBatch. Verifies finiteness, plausibility,
- * repeat determinism (bit-for-bit) and cross-region scratch reuse.
- * Usage: LatentInferenceProbe <models-dir> <out-qa-dir> [regionSize] [repeat] */
 public final class LatentInferenceProbe {
     public static void main(String[] args) throws Exception {
         Path source = Path.of(args[0]), out = Path.of(args[1]).toAbsolutePath();

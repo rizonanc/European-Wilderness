@@ -63,7 +63,7 @@ public final class TerrainDiffusionConfig {
         return parsePrefetchMode(value) == PrefetchMode.ADAPTIVE;
     }
 
-    /** Phase 4 experimental bounded write-behind for frozen water plans. Off by default. */
+    /** enables bounded background writes for frozen water plans. */
     public static boolean waterWriteBehind() {
         return readBoolean("performance.water_write_behind", false);
     }
@@ -76,7 +76,7 @@ public final class TerrainDiffusionConfig {
         return readBoolean("compat.voxy.trees", true);
     }
 
-    /** Old coarse previews are retired; legacy true values must not reactivate them. */
+    /** Old coarse previews are retired; legacy true values cannot reactivate them. */
     public static boolean voxyCoarse() {
         return false;
     }
@@ -126,7 +126,7 @@ public final class TerrainDiffusionConfig {
         return "manual".equals(readString("compat.voxy.radius_mode", "auto"));
     }
 
-    /** Phase 4 experimental renderer-only coarse neural horizon. Off by default; never writes Voxy storage. */
+    /** enables a renderer-only coarse horizon without Voxy storage writes. */
     public static boolean voxyCoarseExperimental() {
         return readBoolean("compat.voxy.coarse_experimental", false);
     }

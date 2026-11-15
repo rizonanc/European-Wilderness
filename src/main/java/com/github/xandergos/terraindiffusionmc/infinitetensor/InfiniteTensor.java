@@ -109,9 +109,7 @@ public class InfiniteTensor {
         return !computed[0];
     }
 
-    /** Phase 4.3: like {@link #prepareIndependentSliceStep} but with an explicit status so
-     * the caller can distinguish progress from deferral. Returns 1 when one uncached window
-     * was computed, 0 when the whole slice is already computed. Requires an independent stage. */
+    /** prepares one independent window. Returns 1 for progress or 0 when complete. */
     public int prepareIndependentWindowStep(int[] start, int[] end) {
         if (deps.length != 0) throw new IllegalStateException("Incremental preparation requires an independent stage");
         int[][] range = buildRange(start, end);

@@ -89,7 +89,7 @@ public final class CoarseUpdateQueue {
         }
     }
 
-    /** Remove only the selected revision. A concurrently promoted cleanup must not be lost. */
+    /** Remove only the selected revision. A concurrently promoted cleanup stays queued. */
     public boolean complete(Task task) {
         if (levels.get(level(task.key())).remove(task.key(), task)) {
             size.decrementAndGet();

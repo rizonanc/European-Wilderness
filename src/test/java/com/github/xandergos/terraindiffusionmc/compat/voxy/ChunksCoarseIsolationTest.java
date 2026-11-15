@@ -3,10 +3,6 @@ package com.github.xandergos.terraindiffusionmc.compat.voxy;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Phase 4.5 acceptance: (1) the chunks-mode Native Neural LOD gate follows the
- * experimental flag only, and (2) the renderer-only coarse pipeline has NO persistent
- * write path at bytecode level — no WorldUpdater.insertUpdate, no saveSection anywhere
- * in CoarseVoxyRenderer (stronger than checking a single UPDATE_TYPE_DONT_SAVE flag). */
 class ChunksCoarseIsolationTest {
     @Test
     void gateFollowsTheExperimentalFlagInChunksMode() {
@@ -53,7 +49,7 @@ class ChunksCoarseIsolationTest {
         assertTrue(
                 utf8Occurrences(bytes, "markDirty") > 0,
                 "renderer-only notifications go through WorldEngine.markDirty");
-        // The prepared-bridge write path must not be reachable from the coarse renderer either.
+        // The prepared-bridge write path cannot be reachable from the coarse renderer either.
         assertEquals(0, utf8Occurrences(bytes, "LodPublisher"), "no exact-LOD publication from the coarse renderer");
         assertEquals(0, utf8Occurrences(bytes, "LodVoxelEncoder"), "no exact-LOD encoding from the coarse renderer");
     }

@@ -135,8 +135,6 @@ class CoarseUpdateQueueTest {
         }
         assertEquals(50_000_000, frames.transferInterval());
         assertEquals(0, frames.pressure());
-        // Phase 5.3: the budget is adaptive (stateful, additive ramp from 16); mesh-queue
-        // caps are unchanged, and severe pressure keeps a drain floor instead of 1.
         var budget = new CoarseUpdateBudget();
         for (int i = 0; i < 64 && budget.allowance() < 64; i++) budget.quota(frames.pressure(), 0);
         assertEquals(64, budget.allowance(), "healthy 33 ms frames reach the full quota");

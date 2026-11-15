@@ -2,11 +2,7 @@ package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
 import java.util.function.LongSupplier;
 
-/** Phase 5.4.1 rolling publication-gate statistics on MONOTONIC TIME.
- * Buckets advance with real elapsed seconds even when the controller loop is idle or
- * its step counter is frozen; long pauses expire the history; windows without samples
- * report an honest -1 instead of a fake ratio. Reads are synchronized and safe from
- * other threads. */
+/** expire gate samples using monotonic time, including across pauses. */
 public final class GateTracker {
     private static final int BUCKETS = 1280; // ≈21 minutes of history
     private final LongSupplier clock;
