@@ -1,6 +1,8 @@
 name: Publish European Wilderness
 
 on:
+  push:
+    tags: ['v*']
   workflow_dispatch:
 
 permissions:
@@ -8,7 +10,6 @@ permissions:
 
 jobs:
   publish:
-    if: github.ref == 'refs/tags/v2.12.50+1.21.11'
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -19,6 +20,9 @@ jobs:
       - name: Build and verify
         shell: pwsh
         run: |
+          if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME -ne 'v2.12.50+1.21.11') {
+            throw "Unexpected release tag: $env:GITHUB_REF_NAME"
+          }
           .\gradlew.bat build --console=plain
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $jar = 'build/libs/european-wilderness-2.12.50+1.21.11.jar'
