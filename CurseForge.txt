@@ -1,0 +1,26 @@
+Project name: European Wilderness
+Slug: european-wilderness
+Type: Minecraft Mods / World Gen
+License: MIT
+File type: Beta
+Game version: 1.21.11
+Mod loader: Fabric
+Required dependency: Fabric API
+Optional integrations: Mod Menu, Voxy, Road Weaver, Wilder Wild
+Platform: Windows x64, Java 21
+
+Summary
+Explore European-inspired terrain with snowy mountain passes, flowing rivers, fjords, rocky islands, and desert oases.
+
+Description
+European Wilderness adds a world type focused on large, varied landscapes. Follow rivers through forested valleys, cross mountain passes marked with stone cairns, or sail between fjords and rocky skerries. Discover limestone sinkholes, desert oases, and tropical archipelagos.
+
+Choose European Wilderness when creating a world. Use the settings to adjust terrain and biome proportions or select a starting area in European Wilderness Explorer. Mod Menu is optional. This build requires Windows x64, Java 21, Fabric Loader 0.18.1 or newer, and Fabric API. On first launch it downloads and verifies about 2.3 GB of terrain model files.
+
+European Wilderness is based on Alexander Goslin’s MIT-licensed Terrain Diffusion MC and uses his terrain models. Thanks to Joao for upstream DirectML support.
+Original project and credits: https://github.com/xandergos/terrain-diffusion-mc
+
+File changelog
+- European Wilderness branding across the world preset, settings and Explorer.
+- Existing worlds retain their identifiers. Settings and menu profiles migrate on first use.
+- Includes fixes for snow-covered summits, Road Weaver tree placement, and invalid precipitation predictions.
