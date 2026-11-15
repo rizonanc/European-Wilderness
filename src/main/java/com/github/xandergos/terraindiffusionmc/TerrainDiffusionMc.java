@@ -346,35 +346,37 @@ public class TerrainDiffusionMc implements ModInitializer {
                 runtime.service.signalStateChanged();
             }
         });
-        CommandRegistrationCallback.EVENT.register((CommandRegistrationCallback)
-                (dispatcher, registryAccess, environment) -> {
-                    PreparedWaterCommands.register(dispatcher);
-                    dispatcher.register((LiteralArgumentBuilder)
-                            CommandManager.literal("td-explore").executes(TerrainDiffusionMc::executeExplore));
-                    dispatcher.register((LiteralArgumentBuilder) ((LiteralArgumentBuilder) ((LiteralArgumentBuilder)
-                                            ((LiteralArgumentBuilder) CommandManager.literal("td-prepare")
-                                                            .then(CommandManager.literal("start")
-                                                                    .then(CommandManager.argument(
-                                                                                    "radius",
-                                                                                    IntegerArgumentType.integer(1, 15))
-                                                                            .executes(
-                                                                                    TerrainDiffusionMc
-                                                                                            ::executePrepareStart))))
-                                                    .then(CommandManager.literal("probe")
-                                                            .then(CommandManager.argument(
-                                                                            "tileX", IntegerArgumentType.integer())
-                                                                    .then(CommandManager.argument(
-                                                                                    "tileZ",
-                                                                                    IntegerArgumentType.integer())
-                                                                            .executes(
-                                                                                    TerrainDiffusionMc
-                                                                                            ::executePrepareProbe)))))
-                                    .then(CommandManager.literal("status")
-                                            .executes(TerrainDiffusionMc::executePrepareStatus)))
-                            .then(CommandManager.literal("cancel").executes(TerrainDiffusionMc::executePrepareCancel)));
-                    dispatcher.register((LiteralArgumentBuilder)
-                            CommandManager.literal("td-stats").executes(TerrainDiffusionMc::executeStats));
-                });
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+            PreparedWaterCommands.register(dispatcher);
+            dispatcher.register(CommandManager.literal("td-explore").executes(TerrainDiffusionMc::executeExplore));
+            dispatcher.register(CommandManager.literal("td-prepare")
+                    .then(prepareStartCommand())
+                    .then(prepareProbeCommand())
+                    .then(prepareStatusCommand())
+                    .then(prepareCancelCommand()));
+            dispatcher.register(CommandManager.literal("td-stats").executes(TerrainDiffusionMc::executeStats));
+        });
+    }
+
+    private static LiteralArgumentBuilder<ServerCommandSource> prepareStartCommand() {
+        return CommandManager.literal("start")
+                .then(CommandManager.argument("radius", IntegerArgumentType.integer(1, 15))
+                        .executes(TerrainDiffusionMc::executePrepareStart));
+    }
+
+    private static LiteralArgumentBuilder<ServerCommandSource> prepareProbeCommand() {
+        return CommandManager.literal("probe")
+                .then(CommandManager.argument("tileX", IntegerArgumentType.integer())
+                        .then(CommandManager.argument("tileZ", IntegerArgumentType.integer())
+                                .executes(TerrainDiffusionMc::executePrepareProbe)));
+    }
+
+    private static LiteralArgumentBuilder<ServerCommandSource> prepareStatusCommand() {
+        return CommandManager.literal("status").executes(TerrainDiffusionMc::executePrepareStatus);
+    }
+
+    private static LiteralArgumentBuilder<ServerCommandSource> prepareCancelCommand() {
+        return CommandManager.literal("cancel").executes(TerrainDiffusionMc::executePrepareCancel);
     }
 
     private static void stopPrefetch() {

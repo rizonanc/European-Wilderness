@@ -14,6 +14,7 @@ import com.github.xandergos.terraindiffusionmc.worldgen.preparation.PreparationP
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import java.util.Locale;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
@@ -188,15 +189,7 @@ public final class VoxyCompat {
                         .then(argument("sx", IntegerArgumentType.integer(-1000000, 1000000))
                                 .then(argument("sy", IntegerArgumentType.integer(-128, 127))
                                         .then(argument("sz", IntegerArgumentType.integer(-1000000, 1000000))
-                                                .executes(c -> {
-                                                    c.getSource().sendFeedback(Text.literal(census(0, new int[] {
-                                                        IntegerArgumentType.getInteger(c, "level"),
-                                                        IntegerArgumentType.getInteger(c, "sx"),
-                                                        IntegerArgumentType.getInteger(c, "sy"),
-                                                        IntegerArgumentType.getInteger(c, "sz")
-                                                    })));
-                                                    return 1;
-                                                })))));
+                                                .executes(VoxyCompat::executeInspect)))));
     }
 
     private static LiteralArgumentBuilder<FabricClientCommandSource> inspectAtCommand() {
@@ -205,24 +198,7 @@ public final class VoxyCompat {
                         .then(argument("y", IntegerArgumentType.integer(-4096, 4096))
                                 .then(argument("z", IntegerArgumentType.integer(-29999984, 29999984))
                                         .then(argument("level", IntegerArgumentType.integer(0, 4))
-                                                .executes(c -> {
-                                                    int l = IntegerArgumentType.getInteger(c, "level"),
-                                                            x = IntegerArgumentType.getInteger(c, "x"),
-                                                            y = IntegerArgumentType.getInteger(c, "y"),
-                                                            z = IntegerArgumentType.getInteger(c, "z"),
-                                                            side = 32 << l;
-                                                    c.getSource()
-                                                            .sendFeedback(Text.literal(census(
-                                                                    0,
-                                                                    new int[] {
-                                                                        l,
-                                                                        Math.floorDiv(x, side),
-                                                                        Math.floorDiv(y, side),
-                                                                        Math.floorDiv(z, side)
-                                                                    },
-                                                                    new int[] {x, y, z})));
-                                                    return 1;
-                                                })))));
+                                                .executes(VoxyCompat::executeInspectAt)))));
     }
 
     private static LiteralArgumentBuilder<FabricClientCommandSource> vegetationRebuildCommand() {
@@ -401,22 +377,20 @@ public final class VoxyCompat {
                                 return bound.rawCopy(l, x, y, z);
                             }
                         };
-                        result = section == null
-                                ? VoxyCensus.scan(reader, samples, radiusChunks, bottom, top, cx, cz)
-                                : VoxyCensus.inspect(reader, section[0], section[1], section[2], section[3])
-                                        + "; "
-                                        + (point == null
-                                                ? CoarseRenderHooks.describe(
-                                                        bound.identity(),
-                                                        me.cortex.voxy.common.world.WorldEngine.getWorldSectionId(
-                                                                section[0], section[1], section[2], section[3]))
-                                                : CoarseRenderHooks.describePoint(
-                                                        bound.identity(),
-                                                        me.cortex.voxy.common.world.WorldEngine.getWorldSectionId(
-                                                                section[0], section[1], section[2], section[3]),
-                                                        point[0],
-                                                        point[1],
-                                                        point[2]));
+                        if (section == null) {
+                            result = VoxyCensus.scan(reader, samples, radiusChunks, bottom, top, cx, cz);
+                        } else {
+                            String inspected =
+                                    VoxyCensus.inspect(reader, section[0], section[1], section[2], section[3]);
+                            var identity = bound.identity();
+                            long sectionId = me.cortex.voxy.common.world.WorldEngine.getWorldSectionId(
+                                    section[0], section[1], section[2], section[3]);
+                            String description = point == null
+                                    ? CoarseRenderHooks.describe(identity, sectionId)
+                                    : CoarseRenderHooks.describePoint(
+                                            identity, sectionId, point[0], point[1], point[2]);
+                            result = inspected + "; " + description;
+                        }
                     }
                 } catch (Exception | LinkageError failure) {
                     emit(
@@ -1180,5 +1154,29 @@ public final class VoxyCompat {
                     }
             });
         }
+    }
+
+    private static int executeInspect(CommandContext<FabricClientCommandSource> c) {
+        c.getSource().sendFeedback(Text.literal(census(0, new int[] {
+            IntegerArgumentType.getInteger(c, "level"),
+            IntegerArgumentType.getInteger(c, "sx"),
+            IntegerArgumentType.getInteger(c, "sy"),
+            IntegerArgumentType.getInteger(c, "sz")
+        })));
+        return 1;
+    }
+
+    private static int executeInspectAt(CommandContext<FabricClientCommandSource> c) {
+        int l = IntegerArgumentType.getInteger(c, "level"),
+                x = IntegerArgumentType.getInteger(c, "x"),
+                y = IntegerArgumentType.getInteger(c, "y"),
+                z = IntegerArgumentType.getInteger(c, "z"),
+                side = 32 << l;
+        c.getSource()
+                .sendFeedback(Text.literal(census(
+                        0,
+                        new int[] {l, Math.floorDiv(x, side), Math.floorDiv(y, side), Math.floorDiv(z, side)},
+                        new int[] {x, y, z})));
+        return 1;
     }
 }

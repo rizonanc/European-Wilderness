@@ -8,6 +8,8 @@ import com.github.xandergos.terraindiffusionmc.world.WorldSessionBinding;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.server.command.*;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
@@ -20,97 +22,80 @@ public final class PreparedWaterCommands {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("td-water")
                 .requires(CommandManager.requirePermissionLevel(CommandManager.GAMEMASTERS_CHECK))
-                .then(literal("status").executes(ctx -> {
-                    try {
-                        var s = session(ctx.getSource());
-                        String status = s.automaticWater() != null
-                                ? s.automaticWater().status()
-                                : s.preparedWater().status();
-                        ctx.getSource().sendFeedback(() -> Text.literal(status), false);
-                        return 1;
-                    } catch (Exception e) {
-                        ctx.getSource().sendError(Text.literal(e.getMessage()));
-                        return 0;
-                    }
-                }))
-                .then(literal("falls").executes(ctx -> {
-                    try {
-                        var s = session(ctx.getSource());
-                        var falls = s.riverOverlay().waterfalls();
-                        if (falls.isEmpty())
-                            ctx.getSource()
-                                    .sendFeedback(
-                                            () -> Text.literal(
-                                                    s.automaticWater() != null
-                                                            ? "В ближайших рассчитанных участках водопадов нет. Исследуйте мир: они появятся там, где найдётся подходящий уступ."
-                                                            : "В сохранённых областях водопадов нет. При новой подготовке они появятся, если найдётся подходящий уступ."),
-                                            false);
-                        for (var f : falls)
-                            ctx.getSource()
-                                    .sendFeedback(
-                                            () -> Text.literal("Водопад: верх ("
-                                                    + f.x()
-                                                    + ", "
-                                                    + f.upperY()
-                                                    + ", "
-                                                    + f.z()
-                                                    + "), низ ("
-                                                    + f.worldX(f.run(), 0)
-                                                    + ", "
-                                                    + f.lowerY()
-                                                    + ", "
-                                                    + f.worldZ(f.run(), 0)
-                                                    + "), высота "
-                                                    + (f.upperY() - f.lowerY())
-                                                    + ", ширина "
-                                                    + f.width()
-                                                    + ". Осмотр: /tp "
-                                                    + f.x()
-                                                    + " "
-                                                    + (f.upperY() + 5)
-                                                    + " "
-                                                    + f.z()),
-                                            false);
-                        return falls.size();
-                    } catch (Exception e) {
-                        ctx.getSource().sendError(Text.literal(e.getMessage()));
-                        return 0;
-                    }
-                }))
-                .then(literal("prepare")
-                        .then(argument("x", IntegerArgumentType.integer(-29_980_000, 29_980_000))
-                                .then(argument("z", IntegerArgumentType.integer(-29_980_000, 29_980_000))
-                                        .then(argument("radius", IntegerArgumentType.integer(64, 512))
-                                                .executes(ctx -> {
-                                                    var source = ctx.getSource();
-                                                    try {
-                                                        var water = controller(source);
-                                                        var bounds = PreparedWaterController.Bounds.around(
-                                                                IntegerArgumentType.getInteger(ctx, "x"),
-                                                                IntegerArgumentType.getInteger(ctx, "z"),
-                                                                IntegerArgumentType.getInteger(ctx, "radius"));
-                                                        water.start(
-                                                                bounds,
-                                                                () -> requireUnexplored(source.getWorld(), bounds),
-                                                                source.getServer()::execute);
-                                                        source.sendFeedback(
-                                                                () -> Text.literal(
-                                                                        "Подготовка рек и озёр запущена. Область: ("
-                                                                                + bounds.x()
-                                                                                + ", "
-                                                                                + bounds.z()
-                                                                                + "), "
-                                                                                + bounds.side()
-                                                                                + "×"
-                                                                                + bounds.side()
-                                                                                + " блоков. Ход работы: /td-water status. До завершения не приближайтесь к области."),
-                                                                false);
-                                                        return 1;
-                                                    } catch (Exception e) {
-                                                        source.sendError(Text.literal(e.getMessage()));
-                                                        return 0;
-                                                    }
-                                                }))))));
+                .then(statusCommand())
+                .then(fallsCommand())
+                .then(prepareCommand()));
+    }
+
+    private static LiteralArgumentBuilder<ServerCommandSource> statusCommand() {
+        return literal("status").executes(ctx -> {
+            try {
+                var s = session(ctx.getSource());
+                String status = s.automaticWater() != null
+                        ? s.automaticWater().status()
+                        : s.preparedWater().status();
+                ctx.getSource().sendFeedback(() -> Text.literal(status), false);
+                return 1;
+            } catch (Exception e) {
+                ctx.getSource().sendError(Text.literal(e.getMessage()));
+                return 0;
+            }
+        });
+    }
+
+    private static LiteralArgumentBuilder<ServerCommandSource> fallsCommand() {
+        return literal("falls").executes(ctx -> {
+            try {
+                var s = session(ctx.getSource());
+                var falls = s.riverOverlay().waterfalls();
+                if (falls.isEmpty())
+                    ctx.getSource()
+                            .sendFeedback(
+                                    () -> Text.literal(
+                                            s.automaticWater() != null
+                                                    ? "В ближайших рассчитанных участках водопадов нет. Исследуйте мир: они появятся там, где найдётся подходящий уступ."
+                                                    : "В сохранённых областях водопадов нет. При новой подготовке они появятся, если найдётся подходящий уступ."),
+                                    false);
+                for (var f : falls)
+                    ctx.getSource()
+                            .sendFeedback(
+                                    () -> Text.literal("Водопад: верх ("
+                                            + f.x()
+                                            + ", "
+                                            + f.upperY()
+                                            + ", "
+                                            + f.z()
+                                            + "), низ ("
+                                            + f.worldX(f.run(), 0)
+                                            + ", "
+                                            + f.lowerY()
+                                            + ", "
+                                            + f.worldZ(f.run(), 0)
+                                            + "), высота "
+                                            + (f.upperY() - f.lowerY())
+                                            + ", ширина "
+                                            + f.width()
+                                            + ". Осмотр: /tp "
+                                            + f.x()
+                                            + " "
+                                            + (f.upperY() + 5)
+                                            + " "
+                                            + f.z()),
+                                    false);
+                return falls.size();
+            } catch (Exception e) {
+                ctx.getSource().sendError(Text.literal(e.getMessage()));
+                return 0;
+            }
+        });
+    }
+
+    private static LiteralArgumentBuilder<ServerCommandSource> prepareCommand() {
+        return literal("prepare")
+                .then(argument("x", IntegerArgumentType.integer(-29_980_000, 29_980_000))
+                        .then(argument("z", IntegerArgumentType.integer(-29_980_000, 29_980_000))
+                                .then(argument("radius", IntegerArgumentType.integer(64, 512))
+                                        .executes(PreparedWaterCommands::executePrepare))));
     }
 
     private static PreparedWaterController controller(ServerCommandSource source) {
@@ -154,5 +139,32 @@ public final class PreparedWaterCommands {
                             + "). Выберите неизведанную область дальше от игроков. Причина: "
                             + result.reason());
             }
+    }
+
+    private static int executePrepare(CommandContext<ServerCommandSource> ctx) {
+        var source = ctx.getSource();
+        try {
+            var water = controller(source);
+            var bounds = PreparedWaterController.Bounds.around(
+                    IntegerArgumentType.getInteger(ctx, "x"),
+                    IntegerArgumentType.getInteger(ctx, "z"),
+                    IntegerArgumentType.getInteger(ctx, "radius"));
+            water.start(bounds, () -> requireUnexplored(source.getWorld(), bounds), source.getServer()::execute);
+            source.sendFeedback(
+                    () -> Text.literal("Подготовка рек и озёр запущена. Область: ("
+                            + bounds.x()
+                            + ", "
+                            + bounds.z()
+                            + "), "
+                            + bounds.side()
+                            + "×"
+                            + bounds.side()
+                            + " блоков. Ход работы: /td-water status. До завершения не приближайтесь к области."),
+                    false);
+            return 1;
+        } catch (Exception e) {
+            source.sendError(Text.literal(e.getMessage()));
+            return 0;
+        }
     }
 }

@@ -112,18 +112,15 @@ public final class CoarseSectionComposer {
                             // A coarse cell may straddle bed and water. Keep the water surface,
                             // like the exact water mip path, instead of exposing a sand platform.
                             if (air <= 62 && wy <= 62 && wy + unit > air) value = materials[6];
-                            else if (wy <= bed)
-                                value = materials[
-                                        wy + unit - 1 < bed - unit
-                                                ? 1
-                                                : bed < 62
-                                                        ? 4
-                                                        : surface.biome() == 32
-                                                                ? 5
-                                                                : (surface.biome() == 5 || surface.biome() == 18)
-                                                                        ? 4
-                                                                        : surface.biome() == 35 || air > 500 ? 1 : 3];
-                            else if (wy <= 62) value = materials[6];
+                            else if (wy <= bed) {
+                                int material;
+                                if (wy + unit - 1 < bed - unit) material = 1;
+                                else if (bed < 62) material = 4;
+                                else if (surface.biome() == 32) material = 5;
+                                else if (surface.biome() == 5 || surface.biome() == 18) material = 4;
+                                else material = surface.biome() == 35 || air > 500 ? 1 : 3;
+                                value = materials[material];
+                            } else if (wy <= 62) value = materials[6];
                             else if (air > 63
                                     && surface.canopy() > 0
                                     && wy < air + surface.canopy()
