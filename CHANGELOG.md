@@ -4,6 +4,7 @@
 - Existing worlds keep their IDs. Settings and menu preferences migrate on first use.
 - Fixes for snowy summits, Road Weaver tree placement and invalid precipitation predictions.
 - Settings follow the game language. Experimental options remain available, and Reset section covers the entire section.
+- The Iris and Photon shortcuts left the settings menu; select a shader in Iris itself.
 
 ## Requirements and installation
 

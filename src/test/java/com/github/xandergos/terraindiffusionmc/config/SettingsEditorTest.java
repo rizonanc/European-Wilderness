@@ -137,10 +137,8 @@ class SettingsEditorTest {
                         "water.new_world",
                         "water.automatic",
                         "water.prepared")) assertTrue(json.has(prefix + status), language + " " + status);
-                for (String action : List.of("open_voxy", "open_iris", "photon_clear", "photon_normal")) {
-                    assertTrue(json.has(prefix + action));
-                    assertTrue(json.has(prefix + action + ".tip"));
-                }
+                assertTrue(json.has(prefix + "open_voxy"));
+                assertTrue(json.has(prefix + "open_voxy.tip"));
             }
     }
 
@@ -190,21 +188,5 @@ class SettingsEditorTest {
         reloaded.deleteProfile("Mountains");
         assertTrue(SettingsPreferences.load(path).profiles().isEmpty());
         assertFalse(Files.exists(temp.resolve("missing.properties")));
-    }
-
-    @Test
-    void testPhotonFogOnlyChangesItsTwoOptions() {
-        Map<String, String> queue = new LinkedHashMap<>(
-                Map.of("COLORED_LIGHTS", "true", "NETHER_FOG_INTENSITY", "1.50", "CUSTOM_USER_OPTION", "keep"));
-        PhotonFogPreset.queue(queue, true);
-        assertEquals("0.10", queue.get("OVERWORLD_FOG_INTENSITY"));
-        assertEquals("false", queue.get("BORDER_FOG"));
-        assertEquals("1.50", queue.get("NETHER_FOG_INTENSITY"));
-        assertEquals("true", queue.get("COLORED_LIGHTS"));
-        assertEquals("keep", queue.get("CUSTOM_USER_OPTION"));
-        PhotonFogPreset.queue(queue, false);
-        assertEquals("1.00", queue.get("OVERWORLD_FOG_INTENSITY"));
-        assertEquals("true", queue.get("BORDER_FOG"));
-        assertEquals(5, queue.size());
     }
 }
