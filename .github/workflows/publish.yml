@@ -1,0 +1,47 @@
+name: Publish European Wilderness
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    if: github.ref == 'refs/tags/v2.12.50+1.21.11'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Build and verify
+        shell: pwsh
+        run: |
+          .\gradlew.bat build --console=plain
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $jar = 'build/libs/european-wilderness-2.12.50+1.21.11.jar'
+          $sha = (Get-FileHash $jar -Algorithm SHA256).Hash.ToLowerInvariant()
+          Copy-Item CHANGELOG.md build/release-notes.md
+          Add-Content build/release-notes.md "`nSHA-256: $sha"
+      - name: Publish to CurseForge and GitHub
+        uses: Kira-NT/mc-publish@c23376546a97f5ba7984e94445da359459b14419
+        with:
+          curseforge-id: ${{ vars.CURSEFORGE_ID }}
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          files: build/libs/european-wilderness-2.12.50+1.21.11.jar
+          name: European Wilderness 2.12.50 for Minecraft 1.21.11
+          version: 2.12.50+1.21.11
+          github-tag: v2.12.50+1.21.11
+          github-name: European Wilderness 2.12.50 for Minecraft 1.21.11
+          version-type: beta
+          environment: client
+          java: '21'
+          game-versions: '1.21.11'
+          loaders: fabric
+          changelog-file: build/release-notes.md
+          dependencies: |
+            fabric-api(required)
+            modmenu(optional)

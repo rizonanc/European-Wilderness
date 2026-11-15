@@ -13,13 +13,17 @@ Summary
 A Minecraft world type with snowy mountain passes, flowing rivers, fjords, rocky islands and desert oases.
 
 Description
+Windows x64 only. Requires Java 21 and a DirectML-capable GPU.
+
 Choose European Wilderness when creating a world. Adjust terrain and biome proportions there, or use European Wilderness Explorer to pick a starting area.
 
-Requires Windows x64, Java 21, Fabric Loader 0.18.1 or newer and Fabric API. The first launch downloads and verifies about 2.3 GB of terrain models. Mod Menu is optional.
+Requires Windows x64, Java 21, Fabric Loader 0.18.1 or newer and Fabric API. The first launch downloads and verifies about 2.3 GB of terrain models from Hugging Face. Mod Menu is optional.
 
-MIT-licensed. Based on Alexander Goslin's Terrain Diffusion MC and ONNX models. Thanks to Joao for upstream DirectML support.
+European Wilderness is an MIT-licensed fork of Alexander Goslin's Terrain Diffusion MC. It uses the upstream terrain pipeline and ONNX models, and adds its own terrain, hydrology, vegetation and settings. Voxy, Road Weaver and Wilder Wild are optional and ship separately. Thanks to Joao for upstream DirectML support.
 Source: https://github.com/xandergos/terrain-diffusion-mc
 Models: https://huggingface.co/xandergos/terrain-diffusion-30m-onnx
+
+Issues: https://github.com/rizonanc/European-Wilderness/issues
 
 File changelog
 - European Wilderness branding across the world preset, settings and Explorer.
