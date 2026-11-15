@@ -1,9 +1,10 @@
 package com.github.xandergos.terraindiffusionmc.pipeline;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors;
 import java.util.concurrent.*;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors;
 
 class InferenceDiagnosticsTest {
     @Test
@@ -15,18 +16,20 @@ class InferenceDiagnosticsTest {
             try (var scope = DiagnosticErrors.scope(context)) {
                 assertEquals(
                         "td-correlation",
-                        worker.submit(() -> DiagnosticErrors.current("execute").requestId()).get(5, TimeUnit.SECONDS));
-                var failed =
-                        worker.submit(() -> {
-                            throw original;
-                        });
+                        worker.submit(() -> DiagnosticErrors.current("execute").requestId())
+                                .get(5, TimeUnit.SECONDS));
+                var failed = worker.submit(() -> {
+                    throw original;
+                });
                 assertSame(
                         original,
-                        assertThrows(ExecutionException.class, () -> failed.get(5, TimeUnit.SECONDS)).getCause());
+                        assertThrows(ExecutionException.class, () -> failed.get(5, TimeUnit.SECONDS))
+                                .getCause());
             }
             assertNotEquals(
                     "td-correlation",
-                    worker.submit(() -> DiagnosticErrors.current("next").requestId()).get(5, TimeUnit.SECONDS));
+                    worker.submit(() -> DiagnosticErrors.current("next").requestId())
+                            .get(5, TimeUnit.SECONDS));
         }
     }
 }

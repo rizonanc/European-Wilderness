@@ -1,15 +1,18 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.hydrology;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.zip.GZIPOutputStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import static org.junit.jupiter.api.Assertions.*;
 
 class RiverRevisionTest {
-    @TempDir Path temp;
+    @TempDir
+    Path temp;
+
     private static final int NONE = PreparedWaterArea.NONE;
 
     @Test
@@ -40,7 +43,8 @@ class RiverRevisionTest {
                 assertArrayEquals(old.air(), revised.air());
                 kept = true;
             } else {
-                assertEquals(0, Arrays.stream(revised.water()).filter(w -> w != NONE).count());
+                assertEquals(
+                        0, Arrays.stream(revised.water()).filter(w -> w != NONE).count());
                 dropped = true;
             }
         }
@@ -65,30 +69,23 @@ class RiverRevisionTest {
         assertEquals(58, air[64 * side + 90], "Natural ocean must not be filled to a retaining wall");
         var view = new PreparedWaterView(0, 0, side, air, water, List.of());
         var sealed = new ArrayList<String>();
-        WaterLining.forChunk(
-                view,
-                80,
-                64,
-                -64,
-                319,
-                (x, y, z, sand) -> {
-                    if (x == 90 && z == 64) sealed.add(y + ":" + sand);
-                });
+        WaterLining.forChunk(view, 80, 64, -64, 319, (x, y, z, sand) -> {
+            if (x == 90 && z == 64) sealed.add(y + ":" + sand);
+        });
         assertTrue(sealed.isEmpty());
-        var columns =
-                new RiverWaterPlanning.ColumnAccess() {
-                    public boolean isAir(int x, int y, int z) {
-                        return y >= air[z * side + x] && !isWater(x, y, z);
-                    }
+        var columns = new RiverWaterPlanning.ColumnAccess() {
+            public boolean isAir(int x, int y, int z) {
+                return y >= air[z * side + x] && !isWater(x, y, z);
+            }
 
-                    public boolean isWater(int x, int y, int z) {
-                        return raw[z][x] <= 62 && y >= air[z * side + x] && y <= 62;
-                    }
+            public boolean isWater(int x, int y, int z) {
+                return raw[z][x] <= 62 && y >= air[z * side + x] && y <= 62;
+            }
 
-                    public boolean isSolidDry(int x, int y, int z) {
-                        return y < air[z * side + x];
-                    }
-                };
+            public boolean isSolidDry(int x, int y, int z) {
+                return y < air[z * side + x];
+            }
+        };
         int x = 89, z = 64, bed = view.bedY(x, z, 0);
         assertEquals(62, view.waterY(x, z));
         assertTrue(FluidContainment.canPlace(FluidContainment.Fluid.WATER, view, x, z, bed, 62, -64, 319, columns));
@@ -148,20 +145,19 @@ class RiverRevisionTest {
         air[16 * 32 + 17] = 58;
         water[16 * 32 + 16] = 62;
         var view = new PreparedWaterView(0, 0, 32, air, water, List.of());
-        var columns =
-                new RiverWaterPlanning.ColumnAccess() {
-                    public boolean isAir(int x, int y, int z) {
-                        return x == 16 && z == 16 && y >= 62;
-                    }
+        var columns = new RiverWaterPlanning.ColumnAccess() {
+            public boolean isAir(int x, int y, int z) {
+                return x == 16 && z == 16 && y >= 62;
+            }
 
-                    public boolean isWater(int x, int y, int z) {
-                        return x == 17 && z == 16 && y >= 58 && y <= 62;
-                    }
+            public boolean isWater(int x, int y, int z) {
+                return x == 17 && z == 16 && y >= 58 && y <= 62;
+            }
 
-                    public boolean isSolidDry(int x, int y, int z) {
-                        return y < air[z * 32 + x];
-                    }
-                };
+            public boolean isSolidDry(int x, int y, int z) {
+                return y < air[z * 32 + x];
+            }
+        };
         assertTrue(FluidContainment.canPlace(FluidContainment.Fluid.WATER, view, 16, 16, 61, 62, -64, 319, columns));
         assertFalse(FluidContainment.canPlace(FluidContainment.Fluid.LAVA, view, 16, 16, 61, 62, -64, 319, columns));
     }
@@ -171,9 +167,8 @@ class RiverRevisionTest {
         var grid = new WorldWaterGrid(64, 32, 128);
         var cell = new WorldWaterGrid.Cell(0, 0);
         var store = new WorldWaterStore(temp, 7, "fp", 256, grid);
-        var unit =
-                new WorldWaterUnit(
-                        grid, cell, new int[] {64 * 128 + 64}, new short[] {62}, new byte[] {0}, List.of(), 2);
+        var unit = new WorldWaterUnit(
+                grid, cell, new int[] {64 * 128 + 64}, new short[] {62}, new byte[] {0}, List.of(), 2);
         store.save(unit);
         assertEquals(2, store.loadUnit(cell).revision);
         assertArrayEquals(unit.levels, store.loadUnit(cell).levels);
@@ -193,17 +188,14 @@ class RiverRevisionTest {
         var grid = new WorldWaterGrid(64, 32, 128);
         var cell = new WorldWaterGrid.Cell(0, 0);
         var store = new WorldWaterStore(temp, 7, "fp", 256, grid);
-        var old =
-                new WorldWaterUnit(
-                        grid, cell, new int[] {64 * 128 + 64}, new short[] {100}, new byte[] {0}, List.of(), 3);
+        var old = new WorldWaterUnit(
+                grid, cell, new int[] {64 * 128 + 64}, new short[] {100}, new byte[] {0}, List.of(), 3);
         store.save(old);
         byte[] before = Files.readAllBytes(temp.resolve("units/0_0.eww"));
         assertThrows(
                 IOException.class,
-                () ->
-                        store.save(
-                                new WorldWaterUnit(
-                                        grid, cell, old.indices, new short[] {102}, old.lakes, List.of(), 4)));
+                () -> store.save(
+                        new WorldWaterUnit(grid, cell, old.indices, new short[] {102}, old.lakes, List.of(), 4)));
         assertArrayEquals(before, Files.readAllBytes(temp.resolve("units/0_0.eww")));
         assertEquals(3, store.loadUnit(cell).revision);
         int[] air = new int[4096], water = new int[4096];

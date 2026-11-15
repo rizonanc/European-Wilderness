@@ -49,18 +49,13 @@ public final class TilePrefetchSampler {
                 if (x != null && z != null) {
                     if (++this.ticks >= 20) {
                         this.ticks = 0;
-                        List<TilePrefetchPolicy.TileCoord> coords =
-                                this.completeWater
-                                        ? WaterPrefetchPolicy.candidates(
-                                                x,
-                                                z,
-                                                lastX == null ? 0 : x - lastX,
-                                                lastZ == null ? 0 : z - lastZ,
-                                                tileSize)
-                                        : this.lastX == null
-                                                ? List.of()
-                                                : TilePrefetchPolicy.candidates(
-                                                        x, z, x - this.lastX, z - this.lastZ, this.tileSize);
+                        List<TilePrefetchPolicy.TileCoord> coords = this.completeWater
+                                ? WaterPrefetchPolicy.candidates(
+                                        x, z, lastX == null ? 0 : x - lastX, lastZ == null ? 0 : z - lastZ, tileSize)
+                                : this.lastX == null
+                                        ? List.of()
+                                        : TilePrefetchPolicy.candidates(
+                                                x, z, x - this.lastX, z - this.lastZ, this.tileSize);
                         this.lastX = x;
                         this.lastZ = z;
                         if (!this.gate.mayStart()) {
@@ -69,9 +64,8 @@ public final class TilePrefetchSampler {
 
                         this.sink.accept(
                                 coords.stream()
-                                        .map(c ->
-                                                TerrainTileKey.ofTile(
-                                                        this.seed, c.x(), c.z(), this.tileSize, this.fingerprint))
+                                        .map(c -> TerrainTileKey.ofTile(
+                                                this.seed, c.x(), c.z(), this.tileSize, this.fingerprint))
                                         .toList(),
                                 this.gate.mayStart());
                     }

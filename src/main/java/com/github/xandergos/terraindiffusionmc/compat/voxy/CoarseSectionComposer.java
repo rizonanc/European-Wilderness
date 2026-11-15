@@ -96,16 +96,12 @@ public final class CoarseSectionComposer {
                 if (covered) protectedChildren |= 0x11 << ((x >>> 4) | ((z >>> 4) << 1));
                 var surface = field[p];
                 long[] materials = surface == null ? null : palette.apply(surface.biome());
-                int air =
-                        surface == null
-                                ? bottom
-                                : !covered
-                                        ? Math.max(
-                                                bottom,
-                                                Math.min(
-                                                        top,
-                                                        (int) Math.round(surface.firstAir() + adjustment.at(wx, wz))))
-                                        : surface.firstAir();
+                int air = surface == null
+                        ? bottom
+                        : !covered
+                                ? Math.max(bottom, Math.min(top, (int)
+                                        Math.round(surface.firstAir() + adjustment.at(wx, wz))))
+                                : surface.firstAir();
                 for (int y = 0; y < 32; y++) {
                     int index = (y << 10) + p, wy = sy * side + y * unit;
                     long old = original == null ? 0 : original[index], value = old;
@@ -117,20 +113,16 @@ public final class CoarseSectionComposer {
                             // like the exact water mip path, instead of exposing a sand platform.
                             if (air <= 62 && wy <= 62 && wy + unit > air) value = materials[6];
                             else if (wy <= bed)
-                                value =
-                                        materials[
-                                                wy + unit - 1 < bed - unit
-                                                        ? 1
-                                                        : bed < 62
-                                                                ? 4
-                                                                : surface.biome() == 32
-                                                                        ? 5
-                                                                        : (surface.biome() == 5
-                                                                                        || surface.biome() == 18)
-                                                                                ? 4
-                                                                                : surface.biome() == 35 || air > 500
-                                                                                        ? 1
-                                                                                        : 3];
+                                value = materials[
+                                        wy + unit - 1 < bed - unit
+                                                ? 1
+                                                : bed < 62
+                                                        ? 4
+                                                        : surface.biome() == 32
+                                                                ? 5
+                                                                : (surface.biome() == 5 || surface.biome() == 18)
+                                                                        ? 4
+                                                                        : surface.biome() == 35 || air > 500 ? 1 : 3];
                             else if (wy <= 62) value = materials[6];
                             else if (air > 63
                                     && surface.canopy() > 0
@@ -147,10 +139,7 @@ public final class CoarseSectionComposer {
                     }
                 }
             }
-        return new Result(
-                nonAir,
-                (byte) (level == 0 ? (nonAir == 0 ? 0 : 255) : children),
-                changed,
-                (byte) (level == 0 ? 0 : protectedChildren));
+        return new Result(nonAir, (byte) (level == 0 ? (nonAir == 0 ? 0 : 255) : children), changed, (byte)
+                (level == 0 ? 0 : protectedChildren));
     }
 }

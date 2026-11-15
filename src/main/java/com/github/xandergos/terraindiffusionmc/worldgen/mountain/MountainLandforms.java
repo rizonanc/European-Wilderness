@@ -1,13 +1,13 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.mountain;
 
-import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
 import com.github.xandergos.terraindiffusionmc.compat.roadweaver.RoadWeaverTerrain;
+import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
+import java.util.function.IntBinaryOperator;
 import net.minecraft.block.Blocks;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.StructureWorldAccess;
-import java.util.function.IntBinaryOperator;
 
 final class MountainLandforms {
     private MountainLandforms() {}
@@ -95,8 +95,8 @@ final class MountainLandforms {
                 if (radius > 25) continue;
                 var pos = new BlockPos(x + dx, level - 3, z + dz);
                 if (naturalOrAir(world.getBlockState(pos)))
-                    changed |=
-                            world.setBlockState(pos, RegionalGeology.rock(seed, x + dx, z + dz).getDefaultState(), 2);
+                    changed |= world.setBlockState(
+                            pos, RegionalGeology.rock(seed, x + dx, z + dz).getDefaultState(), 2);
                 for (int dy = -2; dy <= 6; dy++) {
                     var target = pos.up(3 + dy);
                     var material = radius > 16 && dy <= 0 ? Blocks.GRAVEL : dy <= 0 ? Blocks.WATER : Blocks.AIR;
@@ -203,7 +203,8 @@ final class MountainLandforms {
             for (int step = 5; step <= 6; step++) {
                 var inlet = new BlockPos(x, 0, z).offset(direction.getOpposite(), step);
                 var surface = inlet.withY(terrain.firstAir(inlet.getX(), inlet.getZ()) - 1);
-                if (naturalOrAir(world.getBlockState(surface)) && !world.getBlockState(surface).isAir()) {
+                if (naturalOrAir(world.getBlockState(surface))
+                        && !world.getBlockState(surface).isAir()) {
                     changed |= world.setBlockState(surface, Blocks.GRAVEL.getDefaultState(), 2);
                 }
             }

@@ -1,9 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.mountain;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import net.minecraft.util.math.Direction;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class KarstResurgenceTest {
     @Test

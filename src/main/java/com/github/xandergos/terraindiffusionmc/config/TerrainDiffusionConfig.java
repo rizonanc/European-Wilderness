@@ -179,11 +179,10 @@ public final class TerrainDiffusionConfig {
             return (int) parsed;
         }
 
-        System.err.println(
-                "Invalid performance.disk_quota_mb: "
-                        + configured
-                        + " (expected 1024..1048576), using default "
-                        + fallback);
+        System.err.println("Invalid performance.disk_quota_mb: "
+                + configured
+                + " (expected 1024..1048576), using default "
+                + fallback);
         return fallback;
     }
 

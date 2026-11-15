@@ -170,12 +170,11 @@ public final class CrossTileRiverTracer {
                 throw new IllegalStateException("cycle at (" + cx + "," + cz + ")");
             }
 
-            path.add(
-                    new CrossTileRiverTracer.WorldCell(
-                            this.plan.worldXOf(cx),
-                            this.plan.worldZOf(cz),
-                            this.plan.filledHeight(cx, cz),
-                            this.plan.accumulation(cx, cz)));
+            path.add(new CrossTileRiverTracer.WorldCell(
+                    this.plan.worldXOf(cx),
+                    this.plan.worldZOf(cz),
+                    this.plan.filledHeight(cx, cz),
+                    this.plan.accumulation(cx, cz)));
             int dir = this.plan.direction(cx, cz);
             if (dir == -1) {
                 this.plan.outletAt(cx, cz);
@@ -246,14 +245,12 @@ public final class CrossTileRiverTracer {
             int minimum = 63;
             long accumulation = plan.accumulation(x, z);
             if (accumulation >= 9L) {
-                minimum =
-                        Math.max(
-                                minimum,
-                                Math.subtractExact(
-                                        Math.addExact(
-                                                plan.filledHeight(x, z),
-                                                DrainagePlanner.channelDepthBlocks(accumulation)),
-                                        6));
+                minimum = Math.max(
+                        minimum,
+                        Math.subtractExact(
+                                Math.addExact(
+                                        plan.filledHeight(x, z), DrainagePlanner.channelDepthBlocks(accumulation)),
+                                6));
             }
 
             required[code] = Math.max(required[code], minimum);
@@ -293,10 +290,9 @@ public final class CrossTileRiverTracer {
             if (downstream < 0) {
                 BasinOutlet outlet = plan.outletAt(x, z);
                 if (outlet.waterY() < required[code]) {
-                    throw new IllegalStateException(
-                            "tributary cannot reach frozen outlet "
-                                    + outlet.canonId()
-                                    + " within the six-block carve limit");
+                    throw new IllegalStateException("tributary cannot reach frozen outlet "
+                            + outlet.canonId()
+                            + " within the six-block carve limit");
                 }
 
                 water[code] = outlet.waterY();
@@ -323,10 +319,9 @@ public final class CrossTileRiverTracer {
         long accumulation = plan.accumulation(x, z);
         if (accumulation >= 9L) {
             int ground = plan.filledHeight(x, z);
-            int bed =
-                    Math.min(
-                            Math.subtractExact(ground, 1),
-                            Math.subtractExact(waterY, DrainagePlanner.channelDepthBlocks(accumulation)));
+            int bed = Math.min(
+                    Math.subtractExact(ground, 1),
+                    Math.subtractExact(waterY, DrainagePlanner.channelDepthBlocks(accumulation)));
             if ((long) ground - bed > 6L) {
                 throw new IllegalStateException("tributary incision exceeds six blocks at (" + x + "," + z + ")");
             }

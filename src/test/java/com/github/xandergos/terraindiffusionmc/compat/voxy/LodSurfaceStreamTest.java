@@ -1,9 +1,10 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.github.xandergos.terraindiffusionmc.worldgen.tree.TreeSpecies;
 import java.util.*;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class LodSurfaceStreamTest {
     private LodColumn ground(int x, int z) {
@@ -19,24 +20,23 @@ class LodSurfaceStreamTest {
         builder.set(-20, 140, 40, TreeSpecies.OAK, false);
         var column = builder.build();
         List<Integer> order = new ArrayList<>();
-        var sink =
-                new LodPublisher.Sink() {
-                    public boolean active() {
-                        return true;
-                    }
+        var sink = new LodPublisher.Sink() {
+            public boolean active() {
+                return true;
+            }
 
-                    public boolean occupied(int x, int y, int z) {
-                        return false;
-                    }
+            public boolean occupied(int x, int y, int z) {
+                return false;
+            }
 
-                    public boolean existing(int x, int y, int z) {
-                        return y == 9;
-                    }
+            public boolean existing(int x, int y, int z) {
+                return y == 9;
+            }
 
-                    public void write(LodColumn c, int y) {
-                        order.add(y);
-                    }
-                };
+            public void write(LodColumn c, int y) {
+                order.add(y);
+            }
+        };
         var cursor = LodPublisher.Cursor.visible(column, 9);
         while (!cursor.step(sink, () -> true).complete()) {}
         assertEquals(List.of(4, 3, 2, 9), order);
@@ -58,20 +58,19 @@ class LodSurfaceStreamTest {
         var column = ground(0, 0).awaitingForest();
         var cursor = LodPublisher.Cursor.visible(column, -3);
         List<Integer> order = new ArrayList<>();
-        var sink =
-                new LodPublisher.Sink() {
-                    public boolean active() {
-                        return true;
-                    }
+        var sink = new LodPublisher.Sink() {
+            public boolean active() {
+                return true;
+            }
 
-                    public boolean occupied(int x, int y, int z) {
-                        return false;
-                    }
+            public boolean occupied(int x, int y, int z) {
+                return false;
+            }
 
-                    public void write(LodColumn c, int y) {
-                        order.add(y);
-                    }
-                };
+            public void write(LodColumn c, int y) {
+                order.add(y);
+            }
+        };
         while (!cursor.step(sink, () -> true).complete()) {}
         assertTrue(cursor.progress().forestPending());
         var trees = new LodColumn.ForestBuilder(ground(0, 0));
@@ -88,28 +87,27 @@ class LodSurfaceStreamTest {
         var cursor = LodPublisher.Cursor.visible(column, 9);
         Set<Integer> stale = new HashSet<>(List.of(5, 7, 9));
         List<Integer> writes = new ArrayList<>();
-        var sink =
-                new LodPublisher.Sink() {
-                    public boolean active() {
-                        return true;
-                    }
+        var sink = new LodPublisher.Sink() {
+            public boolean active() {
+                return true;
+            }
 
-                    public boolean occupied(int x, int y, int z) {
-                        return false;
-                    }
+            public boolean occupied(int x, int y, int z) {
+                return false;
+            }
 
-                    public boolean existing(int x, int y, int z) {
-                        return stale.contains(y);
-                    }
+            public boolean existing(int x, int y, int z) {
+                return stale.contains(y);
+            }
 
-                    public void write(LodColumn c, int y) {
-                        writes.add(y);
-                        if (y > 3) {
-                            assertEquals(LodColumn.Kind.AIR, c.kind(0, y * 32, 0));
-                            stale.remove(y);
-                        }
-                    }
-                };
+            public void write(LodColumn c, int y) {
+                writes.add(y);
+                if (y > 3) {
+                    assertEquals(LodColumn.Kind.AIR, c.kind(0, y * 32, 0));
+                    stale.remove(y);
+                }
+            }
+        };
         cursor.step(sink, () -> true);
         assertFalse(cursor.step(sink, () -> false).complete());
         while (!cursor.step(sink, () -> true).complete()) {}

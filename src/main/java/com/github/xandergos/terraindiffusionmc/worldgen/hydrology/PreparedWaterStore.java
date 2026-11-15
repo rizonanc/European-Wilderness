@@ -23,7 +23,9 @@ public final class PreparedWaterStore {
         if (!Files.exists(directory)) return List.of();
         List<Path> paths;
         try (var files = Files.list(directory)) {
-            paths = files.filter(p -> p.getFileName().toString().endsWith(".ewh")).sorted().toList();
+            paths = files.filter(p -> p.getFileName().toString().endsWith(".ewh"))
+                    .sorted()
+                    .toList();
         }
         if (paths.size() > MAX_AREAS) throw new IOException("Too many prepared water areas");
         List<PreparedWaterArea> result = new ArrayList<>();
@@ -89,16 +91,15 @@ public final class PreparedWaterStore {
                 int count = in.readInt();
                 if (count < 0 || count > 1) throw new IOException("Invalid waterfall count");
                 for (int i = 0; i < count; i++)
-                    falls.add(
-                            new Waterfall(
-                                    in.readInt(),
-                                    in.readInt(),
-                                    in.readInt(),
-                                    in.readInt(),
-                                    in.readInt(),
-                                    in.readInt(),
-                                    in.readInt(),
-                                    in.readInt()));
+                    falls.add(new Waterfall(
+                            in.readInt(),
+                            in.readInt(),
+                            in.readInt(),
+                            in.readInt(),
+                            in.readInt(),
+                            in.readInt(),
+                            in.readInt(),
+                            in.readInt()));
             }
             short[] currents = version >= 3 ? RiverCurrent.read(in, water.length) : null;
             if (in.read() != -1) throw new IOException("Trailing water area data"); // also checks gzip CRC

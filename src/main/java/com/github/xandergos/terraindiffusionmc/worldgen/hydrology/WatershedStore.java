@@ -35,7 +35,8 @@ public final class WatershedStore {
     private final Path directory;
 
     public WatershedStore(Path directory) {
-        this.directory = Objects.requireNonNull(directory, "directory").toAbsolutePath().normalize();
+        this.directory =
+                Objects.requireNonNull(directory, "directory").toAbsolutePath().normalize();
     }
 
     public Path sidecarPath(WatershedStore.WatershedKey key) {
@@ -46,20 +47,19 @@ public final class WatershedStore {
 
     public Path unitSidecarPath(WatershedStore.UnitKey key) {
         Objects.requireNonNull(key, "key");
-        return this.directory.resolve(
-                "wsu_"
-                        + key.seed()
-                        + "_"
-                        + key.tileSizeBlocks()
-                        + "_"
-                        + key.originX()
-                        + "_"
-                        + key.originZ()
-                        + "_"
-                        + key.width()
-                        + "x"
-                        + key.height()
-                        + ".wss");
+        return this.directory.resolve("wsu_"
+                + key.seed()
+                + "_"
+                + key.tileSizeBlocks()
+                + "_"
+                + key.originX()
+                + "_"
+                + key.originZ()
+                + "_"
+                + key.width()
+                + "x"
+                + key.height()
+                + ".wss");
     }
 
     public Path unitJournalPath(WatershedStore.UnitKey key) {
@@ -91,9 +91,8 @@ public final class WatershedStore {
             List<TerrainTileKey> daughterTiles,
             Set<Long> contractedOutletIds)
             throws IOException {
-        WatershedPlan unit =
-                HydroPrepareService.prepareUnit(
-                        seed, unitOriginX, unitOriginZ, parentCoarseW, parentCoarseH, parentBases);
+        WatershedPlan unit = HydroPrepareService.prepareUnit(
+                seed, unitOriginX, unitOriginZ, parentCoarseW, parentCoarseH, parentBases);
         this.saveUnitAtomic(unit, key, daughterTiles, contractedOutletIds);
         return unit;
     }
@@ -113,11 +112,10 @@ public final class WatershedStore {
         }
 
         if (unit.generatorVersion() != key.generatorVersion()) {
-            throw new IllegalArgumentException(
-                    "unit version "
-                            + unit.generatorVersion()
-                            + " does not match key version "
-                            + key.generatorVersion());
+            throw new IllegalArgumentException("unit version "
+                    + unit.generatorVersion()
+                    + " does not match key version "
+                    + key.generatorVersion());
         }
 
         if (unit.coarseOriginX() != key.originX()
@@ -296,11 +294,10 @@ public final class WatershedStore {
         Objects.requireNonNull(plan, "plan");
         Objects.requireNonNull(key, "key");
         if (plan.generatorVersion() != key.generatorVersion()) {
-            throw new IllegalArgumentException(
-                    "plan version "
-                            + plan.generatorVersion()
-                            + " does not match key version "
-                            + key.generatorVersion());
+            throw new IllegalArgumentException("plan version "
+                    + plan.generatorVersion()
+                    + " does not match key version "
+                    + key.generatorVersion());
         }
 
         byte[] fingerprint = key.fingerprint().getBytes(StandardCharsets.UTF_8);
@@ -695,9 +692,8 @@ public final class WatershedStore {
             if (in.available() != 4 || in.readInt() != (int) crc.getValue()) {
                 throw new IllegalStateException("Corrupt watershed unit: " + path);
             } else {
-                WatershedPlan plan =
-                        WatershedPlan.planExtent(
-                                key.seed(), key.originX(), key.originZ(), key.width(), key.height(), base);
+                WatershedPlan plan = WatershedPlan.planExtent(
+                        key.seed(), key.originX(), key.originZ(), key.width(), key.height(), base);
                 if (plan.generatorVersion() != key.generatorVersion()) {
                     throw new IllegalStateException("Watershed unit version drift (no silent mixing): " + path);
                 } else {

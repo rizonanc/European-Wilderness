@@ -74,15 +74,12 @@ public final class SpawnSelector {
         int scale = session.profile().worldScale();
         int maxY = WorldHeightProfile.surfaceCapYForScale(scale);
         var water = session.riverOverlay();
-        var selected =
-                findNearby(
-                        choice,
-                        data,
-                        scale,
-                        maxY,
-                        (x, z) ->
-                                water == null
-                                        || water.waterY(x, z) == Integer.MIN_VALUE && water.waterfallAt(x, z) == null);
+        var selected = findNearby(
+                choice,
+                data,
+                scale,
+                maxY,
+                (x, z) -> water == null || water.waterY(x, z) == Integer.MIN_VALUE && water.waterfallAt(x, z) == null);
         if (selected != null) return selected;
         LOG.warn("Selected spawn {} did not match safe terrain within 32 blocks; using normal search", choice);
         return findSpawnBlockPos();

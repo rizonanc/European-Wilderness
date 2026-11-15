@@ -1,8 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
-import org.junit.jupiter.api.Test;
-import org.joml.Matrix4f;
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.joml.Matrix4f;
+import org.junit.jupiter.api.Test;
 
 class VoxyFramePointTest {
     @Test

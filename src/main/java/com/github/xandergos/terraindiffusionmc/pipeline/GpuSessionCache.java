@@ -117,18 +117,17 @@ final class GpuSessionCache<K, V> {
     }
 
     private void publishSnapshot() {
-        snapshot =
-                "resident="
-                        + entries.size()
-                        + " hits="
-                        + hits
-                        + " created="
-                        + created
-                        + " evicted="
-                        + evicted
-                        + " memoryFallbacks="
-                        + memoryFallbacks
-                        + " memoryLimited="
-                        + memoryLimited;
+        snapshot = "resident="
+                + entries.size()
+                + " hits="
+                + hits
+                + " created="
+                + created
+                + " evicted="
+                + evicted
+                + " memoryFallbacks="
+                + memoryFallbacks
+                + " memoryLimited="
+                + memoryLimited;
     }
 }

@@ -1,16 +1,16 @@
 package com.github.xandergos.terraindiffusionmc.pipeline;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import ai.onnxruntime.*;
 import java.util.*;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class OnnxInputBuffersTest {
     // Self-authored ONNX Identity graph, dynamic float vector, IR8/opset13. No downloaded model.
-    static final byte[] MODEL =
-            Base64.getDecoder()
-                    .decode(
-                            "CAgSFnRlcnJhaW4tZGlmZnVzaW9uLXRlc3Q6SAoQCgF4EgF5IghJZGVudGl0eRIQaW5wdXQtcmV1c2UtdGVzdFoQCgF4EgsKCQgBEgUKAxIBbmIQCgF5EgsKCQgBEgUKAxIBbkICEA0=");
+    static final byte[] MODEL = Base64.getDecoder()
+            .decode(
+                    "CAgSFnRlcnJhaW4tZGlmZnVzaW9uLXRlc3Q6SAoQCgF4EgF5IghJZGVudGl0eRIQaW5wdXQtcmV1c2UtdGVzdFoQCgF4EgsKCQgBEgUKAxIBbmIQCgF5EgsKCQgBEgUKAxIBbkICEA0=");
 
     private Object[][] input(float[] values) {
         return new Object[][] {{"x", values, new long[] {values.length}}};
@@ -83,18 +83,16 @@ class OnnxInputBuffersTest {
                     () -> pool.prepare(env, new Object[][] {{"x", new float[3], new long[] {4}}}));
             assertThrows(
                     IllegalArgumentException.class,
-                    () ->
-                            pool.prepare(
-                                    env,
-                                    new Object[][] {
-                                        {"x", new float[1], new long[] {1}}, {"x", new float[1], new long[] {1}}
-                                    }));
+                    () -> pool.prepare(env, new Object[][] {
+                        {"x", new float[1], new long[] {1}}, {"x", new float[1], new long[] {1}}
+                    }));
             try (var lease = pool.prepare(env, input(new float[] {7}))) {
                 assertThrows(IllegalStateException.class, () -> pool.prepare(env, input(new float[] {9})));
                 assertThrows(IllegalStateException.class, pool::close);
                 assertThrows(OrtException.class, () -> session.run(Map.of()));
                 try (var result = session.run(lease.feed())) {
-                    assertEquals(7f, ((OnnxTensor) result.get(0)).getFloatBuffer().get());
+                    assertEquals(
+                            7f, ((OnnxTensor) result.get(0)).getFloatBuffer().get());
                 }
             }
             try (var lease = pool.prepare(env, input(new float[] {11}));

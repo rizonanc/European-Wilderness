@@ -35,15 +35,14 @@ public final class EuropeanEcology {
 
     public static short varyBiome(long seed, int x, int z, short biome, int percent) {
         if (percent == 0) return biome;
-        short variant =
-                (short)
-                        switch (biome) {
-                            case 8, 208 -> 108;
-                            case 209 -> 208;
-                            case 15, 215, 216 -> 115;
-                            case 16 -> 116;
-                            default -> biome;
-                        };
+        short variant = (short)
+                switch (biome) {
+                    case 8, 208 -> 108;
+                    case 209 -> 208;
+                    case 15, 215, 216 -> 115;
+                    case 16 -> 116;
+                    default -> biome;
+                };
         if (variant == biome) return biome;
         return valueNoise(seed, x & ~3, z & ~3, 17, 320) > 1.0 - percent * 0.005 ? variant : biome;
     }

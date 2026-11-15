@@ -1,8 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.infinitetensor;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class CoarseIncrementalTest {
     private InfiniteTensor stage(AtomicInteger calls) {

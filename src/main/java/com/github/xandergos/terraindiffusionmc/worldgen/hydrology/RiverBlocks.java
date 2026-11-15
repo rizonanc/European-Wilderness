@@ -25,12 +25,10 @@ public final class RiverBlocks {
 
     private static SlabBlock register(String name, BlockSoundGroup sound) {
         Identifier id = Identifier.of("terrain-diffusion-mc", name);
-        var block =
-                new SlabBlock(
-                        AbstractBlock.Settings.create()
-                                .strength(.5F)
-                                .sounds(sound)
-                                .registryKey(RegistryKey.of(RegistryKeys.BLOCK, id)));
+        var block = new SlabBlock(AbstractBlock.Settings.create()
+                .strength(.5F)
+                .sounds(sound)
+                .registryKey(RegistryKey.of(RegistryKeys.BLOCK, id)));
         Registry.register(Registries.BLOCK, id, block);
         Items.register(
                 RegistryKey.of(RegistryKeys.ITEM, id),

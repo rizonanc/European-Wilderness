@@ -10,9 +10,9 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
-import java.util.Map.Entry;
 
 public final class SeamContract {
     private final WatershedPlan plan;
@@ -81,21 +81,18 @@ public final class SeamContract {
                                 int toCode = nz * width + nx;
                                 int fromWater = profileWater(plan, profiles, x, z);
                                 int toWater = profileWater(plan, profiles, nx, nz);
-                                int fromBed =
-                                        Math.min(
-                                                Math.subtractExact(plan.filledHeight(x, z), 1),
-                                                Math.subtractExact(
-                                                        fromWater,
-                                                        DrainagePlanner.channelDepthBlocks(plan.accumulation(x, z))));
-                                int toBed =
-                                        Math.min(
-                                                Math.subtractExact(plan.filledHeight(nx, nz), 1),
-                                                Math.subtractExact(
-                                                        toWater,
-                                                        DrainagePlanner.channelDepthBlocks(plan.accumulation(nx, nz))));
-                                SeamContract.RiverCrossing crossing =
-                                        new SeamContract.RiverCrossing(
-                                                fromX, fromZ, toX, toZ, fromWater, toWater, fromBed, toBed);
+                                int fromBed = Math.min(
+                                        Math.subtractExact(plan.filledHeight(x, z), 1),
+                                        Math.subtractExact(
+                                                fromWater,
+                                                DrainagePlanner.channelDepthBlocks(plan.accumulation(x, z))));
+                                int toBed = Math.min(
+                                        Math.subtractExact(plan.filledHeight(nx, nz), 1),
+                                        Math.subtractExact(
+                                                toWater,
+                                                DrainagePlanner.channelDepthBlocks(plan.accumulation(nx, nz))));
+                                SeamContract.RiverCrossing crossing = new SeamContract.RiverCrossing(
+                                        fromX, fromZ, toX, toZ, fromWater, toWater, fromBed, toBed);
                                 freeze(crossingWater, crossingBed, fromCode, fromWater, fromBed);
                                 freeze(crossingWater, crossingBed, toCode, toWater, toBed);
                                 byTile.computeIfAbsent(tileCode(fromTileX, fromTileZ), unused -> new ArrayList<>())
@@ -112,11 +109,10 @@ public final class SeamContract {
 
             for (Entry<Long, List<SeamContract.RiverCrossing>> entry : byTile.entrySet()) {
                 entry.getValue()
-                        .sort(
-                                Comparator.comparingInt(SeamContract.RiverCrossing::fromWorldZ)
-                                        .thenComparingInt(SeamContract.RiverCrossing::fromWorldX)
-                                        .thenComparingInt(SeamContract.RiverCrossing::toWorldZ)
-                                        .thenComparingInt(SeamContract.RiverCrossing::toWorldX));
+                        .sort(Comparator.comparingInt(SeamContract.RiverCrossing::fromWorldZ)
+                                .thenComparingInt(SeamContract.RiverCrossing::fromWorldX)
+                                .thenComparingInt(SeamContract.RiverCrossing::toWorldZ)
+                                .thenComparingInt(SeamContract.RiverCrossing::toWorldX));
                 immutable.put(entry.getKey(), List.copyOf(entry.getValue()));
             }
 
@@ -239,11 +235,10 @@ public final class SeamContract {
             }
 
             List<SeamContract.RiverCrossing> ordered = new ArrayList<>(shared);
-            ordered.sort(
-                    Comparator.comparingInt(SeamContract.RiverCrossing::fromWorldZ)
-                            .thenComparingInt(SeamContract.RiverCrossing::fromWorldX)
-                            .thenComparingInt(SeamContract.RiverCrossing::toWorldZ)
-                            .thenComparingInt(SeamContract.RiverCrossing::toWorldX));
+            ordered.sort(Comparator.comparingInt(SeamContract.RiverCrossing::fromWorldZ)
+                    .thenComparingInt(SeamContract.RiverCrossing::fromWorldX)
+                    .thenComparingInt(SeamContract.RiverCrossing::toWorldZ)
+                    .thenComparingInt(SeamContract.RiverCrossing::toWorldX));
             return List.copyOf(ordered);
         } else {
             throw new IllegalArgumentException(
@@ -265,27 +260,23 @@ public final class SeamContract {
 
         return switch (side) {
             case WEST ->
-                    inTileRows(fromTileZ, toTileZ, parentTileZ, parentTilesH)
-                            && (insideParent(fromTileX, parentTileX, parentTilesW) && toTileX == parentTileX - 1
-                                    || insideParent(toTileX, parentTileX, parentTilesW)
-                                            && fromTileX == parentTileX - 1);
+                inTileRows(fromTileZ, toTileZ, parentTileZ, parentTilesH)
+                        && (insideParent(fromTileX, parentTileX, parentTilesW) && toTileX == parentTileX - 1
+                                || insideParent(toTileX, parentTileX, parentTilesW) && fromTileX == parentTileX - 1);
             case EAST ->
-                    inTileRows(fromTileZ, toTileZ, parentTileZ, parentTilesH)
-                            && (insideParent(fromTileX, parentTileX, parentTilesW)
-                                            && toTileX == parentTileX + parentTilesW
-                                    || insideParent(toTileX, parentTileX, parentTilesW)
-                                            && fromTileX == parentTileX + parentTilesW);
+                inTileRows(fromTileZ, toTileZ, parentTileZ, parentTilesH)
+                        && (insideParent(fromTileX, parentTileX, parentTilesW) && toTileX == parentTileX + parentTilesW
+                                || insideParent(toTileX, parentTileX, parentTilesW)
+                                        && fromTileX == parentTileX + parentTilesW);
             case NORTH ->
-                    inTileCols(fromTileX, toTileX, parentTileX, parentTilesW)
-                            && (insideParent(fromTileZ, parentTileZ, parentTilesH) && toTileZ == parentTileZ - 1
-                                    || insideParent(toTileZ, parentTileZ, parentTilesH)
-                                            && fromTileZ == parentTileZ - 1);
+                inTileCols(fromTileX, toTileX, parentTileX, parentTilesW)
+                        && (insideParent(fromTileZ, parentTileZ, parentTilesH) && toTileZ == parentTileZ - 1
+                                || insideParent(toTileZ, parentTileZ, parentTilesH) && fromTileZ == parentTileZ - 1);
             case SOUTH ->
-                    inTileCols(fromTileX, toTileX, parentTileX, parentTilesW)
-                            && (insideParent(fromTileZ, parentTileZ, parentTilesH)
-                                            && toTileZ == parentTileZ + parentTilesH
-                                    || insideParent(toTileZ, parentTileZ, parentTilesH)
-                                            && fromTileZ == parentTileZ + parentTilesH);
+                inTileCols(fromTileX, toTileX, parentTileX, parentTilesW)
+                        && (insideParent(fromTileZ, parentTileZ, parentTilesH) && toTileZ == parentTileZ + parentTilesH
+                                || insideParent(toTileZ, parentTileZ, parentTilesH)
+                                        && fromTileZ == parentTileZ + parentTilesH);
         };
     }
 
@@ -320,18 +311,17 @@ public final class SeamContract {
                             && cellZ < blockZ1
                             && this.exitsParentThrough(x, z, blockX0, blockZ0, blockX1, blockZ1, side)
                             && this.plan.isChannelCell(x, z)) {
-                        throw new IllegalStateException(
-                                "dry "
-                                        + side
-                                        + " border of parent ("
-                                        + parentTileX
-                                        + ","
-                                        + parentTileZ
-                                        + ") would leave a hanging channel at world ("
-                                        + cellX
-                                        + ","
-                                        + cellZ
-                                        + "): resolve as a contained lake or another outlet before publication");
+                        throw new IllegalStateException("dry "
+                                + side
+                                + " border of parent ("
+                                + parentTileX
+                                + ","
+                                + parentTileZ
+                                + ") would leave a hanging channel at world ("
+                                + cellX
+                                + ","
+                                + cellZ
+                                + "): resolve as a contained lake or another outlet before publication");
                     }
                 }
             }
@@ -399,31 +389,29 @@ public final class SeamContract {
                         "cross-parent seam drift at (" + crossing.fromWorldX() + "," + crossing.fromWorldZ() + ")");
             }
 
-            throw new IllegalStateException(
-                    "cross-parent join over non-channel cells from ("
-                            + crossing.fromWorldX()
-                            + ","
-                            + crossing.fromWorldZ()
-                            + ") to ("
-                            + crossing.toWorldX()
-                            + ","
-                            + crossing.toWorldZ()
-                            + "): a dry boundary must not carry a carved river");
+            throw new IllegalStateException("cross-parent join over non-channel cells from ("
+                    + crossing.fromWorldX()
+                    + ","
+                    + crossing.fromWorldZ()
+                    + ") to ("
+                    + crossing.toWorldX()
+                    + ","
+                    + crossing.toWorldZ()
+                    + "): a dry boundary must not carry a carved river");
         }
     }
 
     private void checkJoinColumn(int x, int z, int waterY, int bedY) {
         int ground = this.plan.filledHeight(x, z);
         if ((long) ground - bedY > 6L) {
-            throw new IllegalStateException(
-                    "cross-parent join exceeds the six-block carve budget at ("
-                            + x
-                            + ","
-                            + z
-                            + "): ground "
-                            + ground
-                            + ", bed "
-                            + bedY);
+            throw new IllegalStateException("cross-parent join exceeds the six-block carve budget at ("
+                    + x
+                    + ","
+                    + z
+                    + "): ground "
+                    + ground
+                    + ", bed "
+                    + bedY);
         }
 
         if ((long) waterY - bedY > 4L) {

@@ -23,11 +23,9 @@ final class TreePlacementValidator {
         int lowest = Integer.MAX_VALUE;
         for (var voxel : shape.voxels())
             if (voxel.log() && voxel.y() == 0)
-                lowest =
-                        Math.min(
-                                lowest,
-                                firstAir.applyAsInt(
-                                        Math.addExact(originX, voxel.x()), Math.addExact(originZ, voxel.z())));
+                lowest = Math.min(
+                        lowest,
+                        firstAir.applyAsInt(Math.addExact(originX, voxel.x()), Math.addExact(originZ, voxel.z())));
         if (lowest == Integer.MAX_VALUE) throw new IllegalArgumentException("Tree has no rooted trunk");
         return Math.subtractExact(lowest, 1);
     }

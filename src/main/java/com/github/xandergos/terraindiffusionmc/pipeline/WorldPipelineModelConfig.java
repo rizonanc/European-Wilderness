@@ -76,9 +76,8 @@ public final class WorldPipelineModelConfig {
             Path configPath = ModelAssetManager.resolveAssetPath("world_pipeline_config.json");
 
             try (Reader configReader = Files.newBufferedReader(configPath, StandardCharsets.UTF_8)) {
-                WorldPipelineModelConfig.ConfigJson config =
-                        (WorldPipelineModelConfig.ConfigJson)
-                                GSON.fromJson(configReader, WorldPipelineModelConfig.ConfigJson.class);
+                WorldPipelineModelConfig.ConfigJson config = (WorldPipelineModelConfig.ConfigJson)
+                        GSON.fromJson(configReader, WorldPipelineModelConfig.ConfigJson.class);
                 validateConfig(config);
                 return config;
             }

@@ -29,8 +29,9 @@ abstract class DecorationFrequencyMixin {
             CallbackInfoReturnable<Boolean> result) {
         if (!OptionalBiomeDecorations.hasFrequencyOverride()
                 || !(generator.getBiomeSource() instanceof TerrainDiffusionBiomeSource)) return;
-        var id =
-                world.getRegistryManager().getOrThrow(RegistryKeys.PLACED_FEATURE).getId((PlacedFeature) (Object) this);
+        var id = world.getRegistryManager()
+                .getOrThrow(RegistryKeys.PLACED_FEATURE)
+                .getId((PlacedFeature) (Object) this);
         if (id == null) return;
         int frequency = OptionalBiomeDecorations.frequencyFor(id);
         if (frequency < 100

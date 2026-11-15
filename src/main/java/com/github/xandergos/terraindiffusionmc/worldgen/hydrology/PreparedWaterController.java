@@ -16,12 +16,11 @@ public final class PreparedWaterController implements WorldSession.RiverOverlay,
     private final WorldSession session;
     private final PreparedWaterStore store;
     private final int surfaceCapY;
-    private final ExecutorService worker =
-            Executors.newSingleThreadExecutor(r -> {
-                Thread t = new Thread(r, "prepared-water");
-                t.setDaemon(true);
-                return t;
-            });
+    private final ExecutorService worker = Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "prepared-water");
+        t.setDaemon(true);
+        return t;
+    });
     private final AtomicBoolean running = new AtomicBoolean();
     private volatile boolean closed;
     private volatile List<PreparedWaterArea> areas;
@@ -116,28 +115,26 @@ public final class PreparedWaterController implements WorldSession.RiverOverlay,
                             z1 = Math.min(bounds.z() + bounds.side(), (tz + 1) * ts);
                     for (int z = z0; z < z1; z++)
                         for (int x = x0; x < x1; x++)
-                            raw[z - bounds.z()][x - bounds.x()] =
-                                    MountainHeightField.sample(
-                                                    session.worldSeed(),
-                                                    x,
-                                                    z,
-                                                    tile.heightAt(Math.floorMod(x, ts), Math.floorMod(z, ts)),
-                                                    session.profile().worldScale(),
-                                                    surfaceCapY,
-                                                    session.profile().mountainRelief())
-                                            .surfaceY();
+                            raw[z - bounds.z()][x - bounds.x()] = MountainHeightField.sample(
+                                            session.worldSeed(),
+                                            x,
+                                            z,
+                                            tile.heightAt(Math.floorMod(x, ts), Math.floorMod(z, ts)),
+                                            session.profile().worldScale(),
+                                            surfaceCapY,
+                                            session.profile().mountainRelief())
+                                    .surfaceY();
                     status = "Подготовка воды: рельеф " + (++done) + " / " + total;
                 }
             requireActive();
             status = "Подготовка воды: расчёт рек и озёр";
-            PreparedWaterArea area =
-                    PreparedWaterArea.plan(
-                            session.worldSeed(),
-                            bounds.x(),
-                            bounds.z(),
-                            raw,
-                            session.profile().water(),
-                            session.profile().worldScale());
+            PreparedWaterArea area = PreparedWaterArea.plan(
+                    session.worldSeed(),
+                    bounds.x(),
+                    bounds.z(),
+                    raw,
+                    session.profile().water(),
+                    session.profile().worldScale());
             requireActive();
             if (area.wetColumns() == 0) {
                 status =
@@ -153,20 +150,19 @@ public final class PreparedWaterController implements WorldSession.RiverOverlay,
                     List<PreparedWaterArea> next = new ArrayList<>(areas);
                     next.add(area);
                     areas = List.copyOf(next);
-                    status =
-                            "Вода готова: от ("
-                                    + area.x()
-                                    + ", "
-                                    + area.z()
-                                    + ") до ("
-                                    + (area.x() + area.side() - 1)
-                                    + ", "
-                                    + (area.z() + area.side() - 1)
-                                    + "), водных колонок: "
-                                    + area.wetColumns()
-                                    + ", водопадов: "
-                                    + area.waterfalls().size()
-                                    + ". Координаты: /td-water falls";
+                    status = "Вода готова: от ("
+                            + area.x()
+                            + ", "
+                            + area.z()
+                            + ") до ("
+                            + (area.x() + area.side() - 1)
+                            + ", "
+                            + (area.z() + area.side() - 1)
+                            + "), водных колонок: "
+                            + area.wetColumns()
+                            + ", водопадов: "
+                            + area.waterfalls().size()
+                            + ". Координаты: /td-water falls";
                     commit.complete(null);
                 } catch (Exception error) {
                     commit.completeExceptionally(error);

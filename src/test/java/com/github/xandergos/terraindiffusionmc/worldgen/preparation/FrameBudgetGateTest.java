@@ -1,7 +1,8 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.preparation;
 
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 class FrameBudgetGateTest {
     private long now = 1_000_000_000L;

@@ -1,21 +1,21 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.hydrology;
 
-import com.github.xandergos.terraindiffusionmc.worldgen.settings.WaterGenerationOptions;
+import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors.*;
+import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.WorkTimeline.Stage.*;
 
+import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors;
+import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.PerformanceDiagnostics;
+import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.StageTimings;
+import com.github.xandergos.terraindiffusionmc.worldgen.mountain.MountainHeightField;
+import com.github.xandergos.terraindiffusionmc.worldgen.settings.WaterGenerationOptions;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
 import com.github.xandergos.terraindiffusionmc.worldgen.terrain.*;
-import com.github.xandergos.terraindiffusionmc.worldgen.mountain.MountainHeightField;
 import java.io.*;
 import java.nio.file.Path;
 import java.util.*;
-import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors;
-import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors.*;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BooleanSupplier;
-import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.StageTimings;
-import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.PerformanceDiagnostics;
-import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.WorkTimeline.Stage.*;
 
 /** On-demand, persistent global water. Dependency graph is core -> unit -> raw terrain only. */
 public final class WorldWaterController implements WorldSession.RiverOverlay, AutoCloseable {
@@ -78,9 +78,8 @@ public final class WorldWaterController implements WorldSession.RiverOverlay, Au
                     prepareAheadStep(grid.x(key), grid.z(key), allowed);
                     return false;
                 }
-        try (var ignored =
-                com.github.xandergos.terraindiffusionmc.pipeline.InferenceDemand.scope(
-                        com.github.xandergos.terraindiffusionmc.pipeline.InferenceDemand.Priority.DISTANT)) {
+        try (var ignored = com.github.xandergos.terraindiffusionmc.pipeline.InferenceDemand.scope(
+                com.github.xandergos.terraindiffusionmc.pipeline.InferenceDemand.Priority.DISTANT)) {
             return prepareStep(x, z, allowed);
         }
     }
@@ -111,15 +110,13 @@ public final class WorldWaterController implements WorldSession.RiverOverlay, Au
         this.cap = surfaceCapY;
         this.grid = grid;
         store = new WorldWaterStore(directory, ticket.worldSeed(), ticket.fingerprint(), repository.tileSize(), grid);
-        writer =
-                com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfig.waterWriteBehind()
-                        ? new WaterWriteBehind(store, 16)
-                        : null;
+        writer = com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfig.waterWriteBehind()
+                ? new WaterWriteBehind(store, 16)
+                : null;
         tiles = new WaterPlanCache<>(tileCache);
         units = new WaterPlanCache<>(unitCache);
-        heights =
-                new WaterPlanCache<>(
-                        Math.max(1, 8 * 1024 * 1024 / (repository.tileSize() * repository.tileSize() * 4)));
+        heights = new WaterPlanCache<>(
+                Math.max(1, 8 * 1024 * 1024 / (repository.tileSize() * repository.tileSize() * 4)));
     }
 
     public void ensureColumn(int x, int z) {
@@ -147,19 +144,13 @@ public final class WorldWaterController implements WorldSession.RiverOverlay, Au
         var ready = tiles.peek(key);
         if (ready == null) {
             if (!store.hasTile(key)) return null;
-            ready =
-                    tiles.get(
-                            key,
-                            () -> {
-                                requirePlanning();
-                                var saved = store.loadTile(key);
-                                if (saved == null) throw new IOException("Frozen core disappeared during LOD export");
-                                requireRawPresent(
-                                        grid.x(key) - grid.renderHalo(),
-                                        grid.z(key) - grid.renderHalo(),
-                                        grid.renderSide());
-                                return saved;
-                            });
+            ready = tiles.get(key, () -> {
+                requirePlanning();
+                var saved = store.loadTile(key);
+                if (saved == null) throw new IOException("Frozen core disappeared during LOD export");
+                requireRawPresent(grid.x(key) - grid.renderHalo(), grid.z(key) - grid.renderHalo(), grid.renderSide());
+                return saved;
+            });
         }
         WorldSession.requireActive(ticket);
         return ready.export();
@@ -168,9 +159,8 @@ public final class WorldWaterController implements WorldSession.RiverOverlay, Au
     /** One raw tile OR one already-fed watershed OR one final core per admission.
      * Never installs a shared core future and then suspends it for foreground work. */
     public boolean prepareAheadStep(int x, int z, BooleanSupplier allowed) throws Exception {
-        try (var ignored =
-                com.github.xandergos.terraindiffusionmc.pipeline.InferenceDemand.scope(
-                        com.github.xandergos.terraindiffusionmc.pipeline.InferenceDemand.Priority.NEAR)) {
+        try (var ignored = com.github.xandergos.terraindiffusionmc.pipeline.InferenceDemand.scope(
+                com.github.xandergos.terraindiffusionmc.pipeline.InferenceDemand.Priority.NEAR)) {
             return prepareStep(x, z, allowed);
         }
     }
@@ -289,20 +279,15 @@ public final class WorldWaterController implements WorldSession.RiverOverlay, Au
     }
 
     private DiagnosticErrors.Context waterContext(String stage, WorldWaterGrid.Cell cell) {
-        var outer =
-                DiagnosticErrors.context(
-                        stage,
-                        "waterCell=("
-                                + cell.x()
-                                + ","
-                                + cell.z()
-                                + ") blocks=("
-                                + grid.x(cell)
-                                + ","
-                                + grid.z(cell)
-                                + ")");
+        var outer = DiagnosticErrors.context(
+                stage,
+                "waterCell=(" + cell.x() + "," + cell.z() + ") blocks=(" + grid.x(cell) + "," + grid.z(cell) + ")");
         return new DiagnosticErrors.Context(
-                outer.requestId(), stage, ticket.diagnosticDimension(), ticket.id().toString(), outer.coordinates());
+                outer.requestId(),
+                stage,
+                ticket.diagnosticDimension(),
+                ticket.id().toString(),
+                outer.coordinates());
     }
 
     private WorldWaterTile loadTile(WorldWaterGrid.Cell cell) throws Exception {
@@ -438,39 +423,31 @@ public final class WorldWaterController implements WorldSession.RiverOverlay, Au
             for (int tx = Math.floorDiv(x, ts); tx <= Math.floorDiv(x + side - 1, ts); tx++) {
                 requirePlanning();
                 var key = TerrainTileKey.ofTile(ticket.worldSeed(), tx, tz, ts, ticket.fingerprint());
-                int[] converted =
-                        heights.get(
-                                key,
-                                () -> {
-                                    var tile =
-                                            frozenOnly
-                                                    ? repository
-                                                            .peek(key)
-                                                            .orElseThrow(() ->
-                                                                    new IOException("Missing frozen terrain " + key))
-                                                    : source(key);
-                                    int[] value = new int[ts * ts];
-                                    long start = System.nanoTime();
-                                    long trace = PerformanceDiagnostics.begin(WATER_HEIGHT);
-                                    try {
-                                        for (int lz = 0; lz < ts; lz++)
-                                            for (int lx = 0; lx < ts; lx++)
-                                                value[lz * ts + lx] =
-                                                        MountainHeightField.sample(
-                                                                        ticket.worldSeed(),
-                                                                        key.blockStartX() + lx,
-                                                                        key.blockStartZ() + lz,
-                                                                        tile.heightAt(lx, lz),
-                                                                        ticket.profile().worldScale(),
-                                                                        cap,
-                                                                        ticket.profile().mountainRelief())
-                                                                .surfaceY();
-                                        return value;
-                                    } finally {
-                                        PerformanceDiagnostics.end(trace);
-                                        timings.record("heightTransform", System.nanoTime() - start);
-                                    }
-                                });
+                int[] converted = heights.get(key, () -> {
+                    var tile = frozenOnly
+                            ? repository.peek(key).orElseThrow(() -> new IOException("Missing frozen terrain " + key))
+                            : source(key);
+                    int[] value = new int[ts * ts];
+                    long start = System.nanoTime();
+                    long trace = PerformanceDiagnostics.begin(WATER_HEIGHT);
+                    try {
+                        for (int lz = 0; lz < ts; lz++)
+                            for (int lx = 0; lx < ts; lx++)
+                                value[lz * ts + lx] = MountainHeightField.sample(
+                                                ticket.worldSeed(),
+                                                key.blockStartX() + lx,
+                                                key.blockStartZ() + lz,
+                                                tile.heightAt(lx, lz),
+                                                ticket.profile().worldScale(),
+                                                cap,
+                                                ticket.profile().mountainRelief())
+                                        .surfaceY();
+                        return value;
+                    } finally {
+                        PerformanceDiagnostics.end(trace);
+                        timings.record("heightTransform", System.nanoTime() - start);
+                    }
+                });
                 for (int wz = Math.max(z, tz * ts); wz < Math.min(z + side, (tz + 1) * ts); wz++) {
                     int wx = Math.max(x, tx * ts), end = Math.min(x + side, (tx + 1) * ts);
                     System.arraycopy(
@@ -571,19 +548,15 @@ public final class WorldWaterController implements WorldSession.RiverOverlay, Au
             if (unit == null) continue;
             if (unit.revision < 6 && unit.hasRiverIn(grid, tile)) {
                 var frozen = unit;
-                unit =
-                        restoredUnits.get(
-                                key,
-                                () -> {
-                                    unitMemory.acquire();
-                                    try {
-                                        int x = grid.x(key) - grid.unitHalo(), z = grid.z(key) - grid.unitHalo();
-                                        return frozen.restoreCurrents(
-                                                ticket.worldSeed(), grid, loadRaw(x, z, grid.unitSide(), true));
-                                    } finally {
-                                        unitMemory.release();
-                                    }
-                                });
+                unit = restoredUnits.get(key, () -> {
+                    unitMemory.acquire();
+                    try {
+                        int x = grid.x(key) - grid.unitHalo(), z = grid.z(key) - grid.unitHalo();
+                        return frozen.restoreCurrents(ticket.worldSeed(), grid, loadRaw(x, z, grid.unitSide(), true));
+                    } finally {
+                        unitMemory.release();
+                    }
+                });
                 restored = true;
             }
             contributors.add(unit);

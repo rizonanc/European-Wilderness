@@ -1,8 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.hydrology;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.*;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class RiverCurvesTest {
     private record Point(int x, int z, int y) {}
@@ -46,12 +47,11 @@ class RiverCurvesTest {
         assertEquals(new Point(16, 8, 200), paths.get(4 * 32 + 8).getFirst());
         assertEquals(new Point(62, 40, 122), paths.get(20 * 32 + 30).getLast());
         assertTrue(
-                paths.entrySet().stream()
-                        .anyMatch(e -> {
-                            Point first = e.getValue().getFirst();
-                            int c = e.getKey();
-                            return Math.hypot(first.x - c % 32 * 2, first.z - c / 32 * 2) > 2;
-                        }),
+                paths.entrySet().stream().anyMatch(e -> {
+                    Point first = e.getValue().getFirst();
+                    int c = e.getKey();
+                    return Math.hypot(first.x - c % 32 * 2, first.z - c / 32 * 2) > 2;
+                }),
                 "a bend should actually move away from the old angular centreline");
         for (var entry : paths.entrySet()) {
             Point first = entry.getValue().getFirst();
@@ -74,7 +74,8 @@ class RiverCurvesTest {
             }
             int c = entry.getKey(), d = f.plan.direction(c % 32, c / 32);
             int next = (c / 32 + DrainagePlanner.DZ[d]) * 32 + c % 32 + DrainagePlanner.DX[d];
-            if (paths.containsKey(next)) assertEquals(points.getLast(), paths.get(next).getFirst());
+            if (paths.containsKey(next))
+                assertEquals(points.getLast(), paths.get(next).getFirst());
         }
     }
 
@@ -105,7 +106,8 @@ class RiverCurvesTest {
         for (var entry : paths.entrySet()) {
             int c = entry.getKey(), d = plan.direction(c % 32, c / 32);
             int target = (c / 32 + DrainagePlanner.DZ[d]) * 32 + c % 32 + DrainagePlanner.DX[d];
-            ends.computeIfAbsent(target, key -> new ArrayList<>()).add(entry.getValue().getLast());
+            ends.computeIfAbsent(target, key -> new ArrayList<>())
+                    .add(entry.getValue().getLast());
             for (var point : entry.getValue()) assertTrue(point.x >= 0 && point.x < 64 && point.z >= 0 && point.z < 64);
         }
         boolean testedConfluence = false;
@@ -114,7 +116,8 @@ class RiverCurvesTest {
                 testedConfluence = true;
                 var junction = entry.getValue().getFirst();
                 for (var endpoint : entry.getValue()) assertEquals(junction, endpoint);
-                if (paths.containsKey(entry.getKey())) assertEquals(junction, paths.get(entry.getKey()).getFirst());
+                if (paths.containsKey(entry.getKey()))
+                    assertEquals(junction, paths.get(entry.getKey()).getFirst());
             }
         assertTrue(testedConfluence);
     }

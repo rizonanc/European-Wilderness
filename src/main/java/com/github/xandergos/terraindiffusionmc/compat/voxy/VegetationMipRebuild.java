@@ -10,12 +10,11 @@ import net.minecraft.text.Text;
 
 /** Explicit bounded migration of existing LOD data, independent of Chunky terrain generation. */
 public final class VegetationMipRebuild {
-    private static final ExecutorService WORKER =
-            Executors.newSingleThreadExecutor(r -> {
-                Thread thread = new Thread(r, "td-grass-lod-rebuild");
-                thread.setDaemon(true);
-                return thread;
-            });
+    private static final ExecutorService WORKER = Executors.newSingleThreadExecutor(r -> {
+        Thread thread = new Thread(r, "td-grass-lod-rebuild");
+        thread.setDaemon(true);
+        return thread;
+    });
     private static final AtomicBoolean RUNNING = new AtomicBoolean();
     private static volatile boolean cancelled;
     private static volatile String status = "grass-mips: пересчёт не запущен";
@@ -88,30 +87,28 @@ public final class VegetationMipRebuild {
                             checked++;
                             changed += updates;
                             if ((checked & 63) == 0 || updates != 0)
-                                status =
-                                        "grass-mips: колонки "
-                                                + columns
-                                                + "/"
-                                                + total
-                                                + ", секций "
-                                                + checked
-                                                + ", обновлений LOD "
-                                                + changed;
+                                status = "grass-mips: колонки "
+                                        + columns
+                                        + "/"
+                                        + total
+                                        + ", секций "
+                                        + checked
+                                        + ", обновлений LOD "
+                                        + changed;
                             if (updates != 0) LockSupport.parkNanos(1_000_000L);
                         }
                         columns++;
                     }
-                end =
-                        "grass-mips: "
-                                + (columns == total ? "готово" : "остановлено")
-                                + ", колонки "
-                                + columns
-                                + "/"
-                                + total
-                                + ", секций "
-                                + checked
-                                + ", обновлений LOD "
-                                + changed;
+                end = "grass-mips: "
+                        + (columns == total ? "готово" : "остановлено")
+                        + ", колонки "
+                        + columns
+                        + "/"
+                        + total
+                        + ", секций "
+                        + checked
+                        + ", обновлений LOD "
+                        + changed;
             } catch (Exception | LinkageError failure) {
                 end = "grass-mips: ошибка " + failure.getClass().getSimpleName();
                 org.slf4j.LoggerFactory.getLogger(VegetationMipRebuild.class).warn("Water LOD rebuild failed", failure);

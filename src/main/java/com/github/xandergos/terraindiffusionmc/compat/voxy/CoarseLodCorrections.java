@@ -1,8 +1,8 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
+import it.unimi.dsi.fastutil.longs.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReferenceArray;
-import it.unimi.dsi.fastutil.longs.*;
 
 /** Smooth, bounded preview-only residual field around exact terrain.
  * Grid vertices are 16 blocks apart. Render workers only read immutable values. */

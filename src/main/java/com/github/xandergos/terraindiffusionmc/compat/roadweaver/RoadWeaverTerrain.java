@@ -1,19 +1,19 @@
 package com.github.xandergos.terraindiffusionmc.compat.roadweaver;
 
-import com.github.xandergos.terraindiffusionmc.pipeline.InferenceDemand;
 import com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfig;
+import com.github.xandergos.terraindiffusionmc.pipeline.InferenceDemand;
 import com.github.xandergos.terraindiffusionmc.world.TerrainDiffusionBiomeSource;
 import com.github.xandergos.terraindiffusionmc.world.TerrainDiffusionDensityFunction;
 import com.github.xandergos.terraindiffusionmc.world.WorldSessionBinding;
 import com.github.xandergos.terraindiffusionmc.worldgen.hydrology.PreparedWaterArea;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.StructureWorldAccess;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 
 public final class RoadWeaverTerrain {
     public static final String SUPPORTED_VERSION = "2.2.0-1.21.11";

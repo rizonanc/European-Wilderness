@@ -23,10 +23,9 @@ public final class VoxyWaterDiagnostics {
     public static String snapshot() {
         try {
             if (!Voxy016Api.runtimeReady()) return "water-model: Voxy runtime not ready";
-            Object renderer =
-                    Class.forName("me.cortex.voxy.client.core.IGetVoxyRenderSystem")
-                            .getMethod("getNullable")
-                            .invoke(null);
+            Object renderer = Class.forName("me.cortex.voxy.client.core.IGetVoxyRenderSystem")
+                    .getMethod("getNullable")
+                    .invoke(null);
             if (renderer == null) return "water-model: no active Voxy renderer";
             Object engine = renderer.getClass().getMethod("getEngine").invoke(renderer);
             Object mapper = engine.getClass().getMethod("getMapper").invoke(engine);
@@ -37,7 +36,8 @@ public final class VoxyWaterDiagnostics {
             var modelId = factoryType.getMethod("getModelId", int.class);
             var metadata = factoryType.getMethod("getModelMetadataFromClientId", int.class);
             // Enumerate existing entries only. Never register states or request a bake.
-            Object[] entries = (Object[]) mapper.getClass().getMethod("getStateEntries").invoke(mapper);
+            Object[] entries =
+                    (Object[]) mapper.getClass().getMethod("getStateEntries").invoke(mapper);
             int states = 0, baked = 0, missingTop = 0;
             var details = new ArrayList<String>();
             for (Object entry : entries) {

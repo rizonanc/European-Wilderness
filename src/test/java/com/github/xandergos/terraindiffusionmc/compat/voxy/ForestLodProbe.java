@@ -1,27 +1,26 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
 import com.github.xandergos.terraindiffusionmc.worldgen.tree.*;
-import java.util.*;
 import java.lang.management.ManagementFactory;
+import java.util.*;
 
 /** Pure planning/voxelisation probe: excludes disk, Voxy renderer and GPU. */
 public final class ForestLodProbe {
-    private static final TreeLodPreview.Field FIELD =
-            new TreeLodPreview.Field() {
-                final TreeLodPreview.Climate climate = new TreeLodPreview.Climate((short) 215, (short) 300, 12, 900);
+    private static final TreeLodPreview.Field FIELD = new TreeLodPreview.Field() {
+        final TreeLodPreview.Climate climate = new TreeLodPreview.Climate((short) 215, (short) 300, 12, 900);
 
-                public TreeLodPreview.Climate climate(int x, int z) {
-                    return climate;
-                }
+        public TreeLodPreview.Climate climate(int x, int z) {
+            return climate;
+        }
 
-                public int firstAir(int x, int z) {
-                    return 101;
-                }
+        public int firstAir(int x, int z) {
+            return 101;
+        }
 
-                public int waterY(int x, int z) {
-                    return Integer.MIN_VALUE;
-                }
-            };
+        public int waterY(int x, int z) {
+            return Integer.MIN_VALUE;
+        }
+    };
 
     private static long paint(int count) throws Exception {
         long checksum = 0;

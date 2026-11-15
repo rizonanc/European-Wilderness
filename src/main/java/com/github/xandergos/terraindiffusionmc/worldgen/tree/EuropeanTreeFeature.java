@@ -1,12 +1,15 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.tree;
 
+import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.WorkTimeline.Stage.TREE_DECORATION;
+
 import com.github.xandergos.terraindiffusionmc.compat.roadweaver.RoadWeaverTerrain;
 import com.github.xandergos.terraindiffusionmc.world.TerrainDiffusionBiomeSource;
+import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.PerformanceDiagnostics;
 import com.github.xandergos.terraindiffusionmc.worldgen.ecology.EuropeanEcology;
 import com.github.xandergos.terraindiffusionmc.worldgen.ecology.ForestTrail;
+import com.github.xandergos.terraindiffusionmc.worldgen.settings.GenerationProfile;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.PerformanceProfile;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
-import com.github.xandergos.terraindiffusionmc.worldgen.settings.GenerationProfile;
 import com.github.xandergos.terraindiffusionmc.worldgen.terrain.PreparedFallback;
 import com.github.xandergos.terraindiffusionmc.worldgen.terrain.TerrainRepository;
 import java.util.ArrayList;
@@ -27,8 +30,6 @@ import net.minecraft.world.StructureWorldAccess;
 import net.minecraft.world.gen.feature.DefaultFeatureConfig;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.util.FeatureContext;
-import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.PerformanceDiagnostics;
-import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.WorkTimeline.Stage.TREE_DECORATION;
 
 public final class EuropeanTreeFeature extends Feature<DefaultFeatureConfig> {
     static boolean acceptsBiome(short biomeId) {
@@ -58,14 +59,13 @@ public final class EuropeanTreeFeature extends Feature<DefaultFeatureConfig> {
         int chunkZ = Math.floorDiv(context.getOrigin().getZ(), 16);
         int scale = session.profile().worldScale();
         PerformanceProfile.PreparationMode mode = PreparedFallback.mode();
-        TreeTerrainView terrain =
-                new TreeTerrainView(
-                        repository.tileSize(),
-                        seed,
-                        session.fingerprint(),
-                        scale,
-                        world.getTopYInclusive(),
-                        TreeTerrainView.adaptChecked(PreparedFallback.requiredTilesFor(repository, mode)::get));
+        TreeTerrainView terrain = new TreeTerrainView(
+                repository.tileSize(),
+                seed,
+                session.fingerprint(),
+                scale,
+                world.getTopYInclusive(),
+                TreeTerrainView.adaptChecked(PreparedFallback.requiredTilesFor(repository, mode)::get));
 
         long trace = PerformanceDiagnostics.begin(TREE_DECORATION);
         try {
@@ -89,38 +89,30 @@ public final class EuropeanTreeFeature extends Feature<DefaultFeatureConfig> {
             GenerationProfile profile) {
         Map<TreeCandidates.Candidate, EuropeanTreePlanner.PreparedTree> prepared = new HashMap<>();
         Set<TreeCandidates.Candidate> rejected = new HashSet<>();
-        Function<TreeCandidates.Candidate, EuropeanTreePlanner.PreparedTree> prepare =
-                candidate -> {
-                    EuropeanTreePlanner.PreparedTree cached = prepared.get(candidate);
-                    if (cached == null && !rejected.contains(candidate)) {
-                        EuropeanTreePlanner.PreparedTree evaluated =
-                                prepare(
-                                        candidate,
-                                        seed,
-                                        terrain,
-                                        world.getBottomY(),
-                                        world.getTopYInclusive(),
-                                        profile);
-                        if (evaluated != null) {
-                            int baseY = evaluated.baseY();
-                            if (!TreePlacementValidator.rootsAvoid(
-                                    evaluated.shape(),
-                                    candidate.x(),
-                                    candidate.z(),
-                                    (x, z) -> RoadWeaverTerrain.isOnRoad(world, new BlockPos(x, baseY, z))))
-                                evaluated = null;
-                        }
-                        if (evaluated == null) {
-                            rejected.add(candidate);
-                        } else {
-                            prepared.put(candidate, evaluated);
-                        }
+        Function<TreeCandidates.Candidate, EuropeanTreePlanner.PreparedTree> prepare = candidate -> {
+            EuropeanTreePlanner.PreparedTree cached = prepared.get(candidate);
+            if (cached == null && !rejected.contains(candidate)) {
+                EuropeanTreePlanner.PreparedTree evaluated =
+                        prepare(candidate, seed, terrain, world.getBottomY(), world.getTopYInclusive(), profile);
+                if (evaluated != null) {
+                    int baseY = evaluated.baseY();
+                    if (!TreePlacementValidator.rootsAvoid(
+                            evaluated.shape(),
+                            candidate.x(),
+                            candidate.z(),
+                            (x, z) -> RoadWeaverTerrain.isOnRoad(world, new BlockPos(x, baseY, z)))) evaluated = null;
+                }
+                if (evaluated == null) {
+                    rejected.add(candidate);
+                } else {
+                    prepared.put(candidate, evaluated);
+                }
 
-                        return evaluated;
-                    } else {
-                        return cached;
-                    }
-                };
+                return evaluated;
+            } else {
+                return cached;
+            }
+        };
         Predicate<TreeCandidates.Candidate> accepted = candidate -> prepare.apply(candidate) != null;
         ArrayList<TreeCandidates.Candidate> candidates =
                 new ArrayList<>(TreeCandidates.adultRootsForChunk(seed, chunkX, chunkZ, accepted));
@@ -136,55 +128,44 @@ public final class EuropeanTreeFeature extends Feature<DefaultFeatureConfig> {
             }
         }
 
-        trees.removeIf(treex ->
-                !TreePlacementValidator.isWholeTreeWorldSupported(
-                        treex.shape(),
-                        treex.candidate().x(),
-                        treex.baseY(),
-                        treex.candidate().z(),
-                        (x, z) -> worldFirstAir(world, x, treex.baseY(), z, world.getBottomY())));
+        trees.removeIf(treex -> !TreePlacementValidator.isWholeTreeWorldSupported(
+                treex.shape(),
+                treex.candidate().x(),
+                treex.baseY(),
+                treex.candidate().z(),
+                (x, z) -> worldFirstAir(world, x, treex.baseY(), z, world.getBottomY())));
         EuropeanTreePlanner.ChunkPlan treePlan =
-                EuropeanTreePlanner.planRootChunk(
-                        trees,
-                        chunkX,
-                        chunkZ,
-                        (tree, voxel) -> {
-                            BlockPos pos = new BlockPos(voxel.x(), voxel.y(), voxel.z());
-                            if (!world.isValidForSetBlock(pos)) return false;
-                            BlockState old = world.getBlockState(pos);
-                            boolean soft =
-                                    old.isAir()
-                                            || old.isIn(BlockTags.REPLACEABLE_BY_TREES)
-                                            || old.isIn(BlockTags.LEAVES);
-                            return TreePlacementValidator.mayPlaceWholeVoxel(
-                                    voxel.log(),
-                                    voxel.y() - tree.baseY(),
-                                    !old.getFluidState().isEmpty(),
-                                    soft,
-                                    old.isIn(BlockTags.LOGS),
-                                    naturalRootGround(old));
-                        });
+                EuropeanTreePlanner.planRootChunk(trees, chunkX, chunkZ, (tree, voxel) -> {
+                    BlockPos pos = new BlockPos(voxel.x(), voxel.y(), voxel.z());
+                    if (!world.isValidForSetBlock(pos)) return false;
+                    BlockState old = world.getBlockState(pos);
+                    boolean soft =
+                            old.isAir() || old.isIn(BlockTags.REPLACEABLE_BY_TREES) || old.isIn(BlockTags.LEAVES);
+                    return TreePlacementValidator.mayPlaceWholeVoxel(
+                            voxel.log(),
+                            voxel.y() - tree.baseY(),
+                            !old.getFluidState().isEmpty(),
+                            soft,
+                            old.isIn(BlockTags.LOGS),
+                            naturalRootGround(old));
+                });
         List<EuropeanTreeFeature.TrailPlacement> trails = planTrails(world, terrain, seed, chunkX, chunkZ);
         return new EuropeanTreeFeature.DecorationPlan(treePlan, trails);
     }
 
     private static boolean writeDecoration(StructureWorldAccess world, EuropeanTreeFeature.DecorationPlan plan) {
-        int written =
-                EuropeanTreePlanner.place(
-                        plan.trees(),
-                        voxel -> {
-                            BlockPos pos = new BlockPos(voxel.x(), voxel.y(), voxel.z());
-                            BlockState old = world.getBlockState(pos);
-                            if (old.isIn(BlockTags.LOGS) || !old.getFluidState().isEmpty()) return false;
-                            Block block = voxel.log() ? log(voxel.species()) : leaf(voxel.species());
-                            BlockState state =
-                                    voxel.log()
-                                            ? block.getDefaultState()
-                                            : block.getDefaultState()
-                                                    .with(LeavesBlock.DISTANCE, voxel.leafDistance())
-                                                    .with(LeavesBlock.PERSISTENT, false);
-                            return world.setBlockState(pos, state, 2);
-                        });
+        int written = EuropeanTreePlanner.place(plan.trees(), voxel -> {
+            BlockPos pos = new BlockPos(voxel.x(), voxel.y(), voxel.z());
+            BlockState old = world.getBlockState(pos);
+            if (old.isIn(BlockTags.LOGS) || !old.getFluidState().isEmpty()) return false;
+            Block block = voxel.log() ? log(voxel.species()) : leaf(voxel.species());
+            BlockState state = voxel.log()
+                    ? block.getDefaultState()
+                    : block.getDefaultState()
+                            .with(LeavesBlock.DISTANCE, voxel.leafDistance())
+                            .with(LeavesBlock.PERSISTENT, false);
+            return world.setBlockState(pos, state, 2);
+        });
         int trailsWritten = placeTrails(world, plan.trails());
         return written > 0 || trailsWritten > 0;
     }
@@ -195,11 +176,10 @@ public final class EuropeanTreeFeature extends Feature<DefaultFeatureConfig> {
         for (int y = Math.addExact(baseY, 1); y >= floor; y--) {
             BlockState old = world.getBlockState(new BlockPos(x, y, z));
             if (old.getFluidState().isEmpty()) {
-                boolean soft =
-                        old.isAir()
-                                || old.isIn(BlockTags.REPLACEABLE_BY_TREES)
-                                || old.isIn(BlockTags.LEAVES)
-                                || old.isIn(BlockTags.LOGS);
+                boolean soft = old.isAir()
+                        || old.isIn(BlockTags.REPLACEABLE_BY_TREES)
+                        || old.isIn(BlockTags.LEAVES)
+                        || old.isIn(BlockTags.LOGS);
                 if (!soft) {
                     return Math.addExact(y, 1);
                 }
@@ -220,7 +200,8 @@ public final class EuropeanTreeFeature extends Feature<DefaultFeatureConfig> {
                 int x = Math.addExact(baseX, dx);
                 int z = Math.addExact(baseZ, dz);
                 ForestTrail.Kind kind = ForestTrail.kind(seed, x, z);
-                if (kind != ForestTrail.Kind.NONE && acceptsBiome(terrain.sample(x, z).biome())) {
+                if (kind != ForestTrail.Kind.NONE
+                        && acceptsBiome(terrain.sample(x, z).biome())) {
                     int groundY = Math.subtractExact(terrain.firstAir(x, z), 1);
                     if (groundY >= world.getBottomY()) {
                         BlockPos groundPos = new BlockPos(x, groundY, z);
@@ -241,7 +222,8 @@ public final class EuropeanTreeFeature extends Feature<DefaultFeatureConfig> {
 
         for (EuropeanTreeFeature.TrailPlacement placement : placements) {
             if (world.getBlockState(placement.position()).isOf(Blocks.GRASS_BLOCK)
-                    && world.setBlockState(placement.position(), placement.block().getDefaultState(), 2)) {
+                    && world.setBlockState(
+                            placement.position(), placement.block().getDefaultState(), 2)) {
                 placed++;
             }
         }
@@ -268,22 +250,20 @@ public final class EuropeanTreeFeature extends Feature<DefaultFeatureConfig> {
         } else {
             double dx = (terrain.firstAir(Math.addExact(x, 1), z) - terrain.firstAir(Math.addExact(x, -1), z)) / 2.0;
             double dz = (terrain.firstAir(x, Math.addExact(z, 1)) - terrain.firstAir(x, Math.addExact(z, -1))) / 2.0;
-            EuropeanEcology.ForestCondition ecology =
-                    EuropeanEcology.evaluate(
-                            seed,
-                            sample.temperatureC(),
-                            sample.precipitationMm(),
-                            sample.heightMeters(),
-                            Math.hypot(dx, dz),
-                            Double.POSITIVE_INFINITY,
-                            x,
-                            z,
-                            profile.largerLandscapes(),
-                            profile.biomeBalance());
-            boolean accepted =
-                    candidate.age() == TreeAge.YOUNG
-                            ? VegetationDistribution.acceptsYoung(candidate, seed, ecology)
-                            : VegetationDistribution.acceptsAdult(candidate, seed, ecology);
+            EuropeanEcology.ForestCondition ecology = EuropeanEcology.evaluate(
+                    seed,
+                    sample.temperatureC(),
+                    sample.precipitationMm(),
+                    sample.heightMeters(),
+                    Math.hypot(dx, dz),
+                    Double.POSITIVE_INFINITY,
+                    x,
+                    z,
+                    profile.largerLandscapes(),
+                    profile.biomeBalance());
+            boolean accepted = candidate.age() == TreeAge.YOUNG
+                    ? VegetationDistribution.acceptsYoung(candidate, seed, ecology)
+                    : VegetationDistribution.acceptsAdult(candidate, seed, ecology);
             if (!accepted) {
                 return null;
             } else {

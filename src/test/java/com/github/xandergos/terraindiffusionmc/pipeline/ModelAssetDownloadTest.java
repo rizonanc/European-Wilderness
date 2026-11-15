@@ -1,5 +1,7 @@
 package com.github.xandergos.terraindiffusionmc.pipeline;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.sun.net.httpserver.HttpServer;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -13,10 +15,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import static org.junit.jupiter.api.Assertions.*;
 
 class ModelAssetDownloadTest {
-    @TempDir Path directory;
+    @TempDir
+    Path directory;
 
     @Test
     void decompressesGzipAndBoundsTheInstalledSize() throws Exception {
@@ -27,14 +29,12 @@ class ModelAssetDownloadTest {
         }
         byte[] archive = compressed.toByteArray();
         var server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        server.createContext(
-                "/",
-                exchange -> {
-                    try (exchange) {
-                        exchange.sendResponseHeaders(200, archive.length);
-                        exchange.getResponseBody().write(archive);
-                    }
-                });
+        server.createContext("/", exchange -> {
+            try (exchange) {
+                exchange.sendResponseHeaders(200, archive.length);
+                exchange.getResponseBody().write(archive);
+            }
+        });
         server.start();
         try {
             var uri = URI.create("http://127.0.0.1:" + server.getAddress().getPort() + "/");
@@ -52,14 +52,12 @@ class ModelAssetDownloadTest {
     @Test
     void enforcesManifestSizeForChunkedResponses() throws Exception {
         var server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        server.createContext(
-                "/",
-                exchange -> {
-                    try (exchange) {
-                        exchange.sendResponseHeaders(200, 0);
-                        exchange.getResponseBody().write(new byte[] {1, 2, 3});
-                    }
-                });
+        server.createContext("/", exchange -> {
+            try (exchange) {
+                exchange.sendResponseHeaders(200, 0);
+                exchange.getResponseBody().write(new byte[] {1, 2, 3});
+            }
+        });
         server.start();
         try {
             Path file = directory.resolve("asset.tmp");
@@ -77,18 +75,16 @@ class ModelAssetDownloadTest {
     void timesOutWhenBodyStopsAfterHeaders() throws Exception {
         var release = new CountDownLatch(1);
         var server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        server.createContext(
-                "/",
-                exchange -> {
-                    try (exchange) {
-                        exchange.sendResponseHeaders(200, 0);
-                        exchange.getResponseBody().write(1);
-                        exchange.getResponseBody().flush();
-                        release.await(5, TimeUnit.SECONDS);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                });
+        server.createContext("/", exchange -> {
+            try (exchange) {
+                exchange.sendResponseHeaders(200, 0);
+                exchange.getResponseBody().write(1);
+                exchange.getResponseBody().flush();
+                release.await(5, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
         server.start();
         try {
             assertThrows(SocketTimeoutException.class, () -> download(server, directory.resolve("asset.tmp"), 2, 300));

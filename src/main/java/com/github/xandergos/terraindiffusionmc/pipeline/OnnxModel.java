@@ -1,5 +1,7 @@
 package com.github.xandergos.terraindiffusionmc.pipeline;
 
+import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors.*;
+
 import ai.onnxruntime.OnnxTensor;
 import ai.onnxruntime.OrtEnvironment;
 import ai.onnxruntime.OrtException;
@@ -12,7 +14,6 @@ import ai.onnxruntime.providers.CoreMLFlags;
 import ai.onnxruntime.providers.OrtCUDAProviderOptions;
 import com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfig;
 import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors;
-import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors.*;
 import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,7 +21,6 @@ import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.EnumSet;
-import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -121,9 +121,8 @@ public final class OnnxModel implements AutoCloseable {
 
     public OnnxModel(Path modelFilePath, String name) {
         this.name = name;
-        this.timings =
-                PROFILE.computeIfAbsent(
-                        name, k -> new com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.StageTimings());
+        this.timings = PROFILE.computeIfAbsent(
+                name, k -> new com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.StageTimings());
         BUFFERS.put(name, inputBuffers);
 
         try {
@@ -197,11 +196,9 @@ public final class OnnxModel implements AutoCloseable {
                         optimizedModelPath,
                         StandardCopyOption.REPLACE_EXISTING,
                         StandardCopyOption.ATOMIC_MOVE);
-                LOG.info(
-                        "Optimized ONNX model '{}' at runtime ({} KB -> {} KB)",
-                        new Object[] {
-                            this.name, sourceModelBytes.length / 1024, optimizedModelBytesFromDisk.length / 1024
-                        });
+                LOG.info("Optimized ONNX model '{}' at runtime ({} KB -> {} KB)", new Object[] {
+                    this.name, sourceModelBytes.length / 1024, optimizedModelBytesFromDisk.length / 1024
+                });
                 return new OnnxModel.OptimizedModelLoadResult(optimizedModelBytesFromDisk, optimizedModelPath, false);
             }
         } catch (Exception optimizationException) {
@@ -234,28 +231,26 @@ public final class OnnxModel implements AutoCloseable {
 
     private void initializeModelSession(byte[] modelBytes, long startMillis) throws OrtException {
         if ("cpu".equals(TerrainDiffusionConfig.inferenceDevice())) {
-            this.cpuSession =
-                    withSessionOptions(sessionOptions -> {
-                        sessionOptions.setOptimizationLevel(OptLevel.ALL_OPT);
-                        return createSession(modelBytes, sessionOptions);
-                    });
+            this.cpuSession = withSessionOptions(sessionOptions -> {
+                sessionOptions.setOptimizationLevel(OptLevel.ALL_OPT);
+                return createSession(modelBytes, sessionOptions);
+            });
             this.gpuSession = null;
             setResolvedProviderOnce("CPU");
             LOG.info(
                     "ONNX model '{}' loaded on CPU ({} KB) in {} ms",
                     new Object[] {this.name, modelBytes.length / 1024, System.currentTimeMillis() - startMillis});
         } else if (!TerrainDiffusionConfig.offloadModels()) {
-            this.gpuSession =
-                    withSessionOptions(sessionOptions -> {
-                        sessionOptions.setOptimizationLevel(OptLevel.ALL_OPT);
-                        addGpuProvider(sessionOptions);
-                        if ("CoreML".equals(resolvedInferenceProvider)) {
-                            throw new OrtException(
-                                    "inference.offload_models=false is not supported with CoreML. Set inference.offload_models=true in european-wilderness.properties.");
-                        } else {
-                            return createSession(modelBytes, sessionOptions);
-                        }
-                    });
+            this.gpuSession = withSessionOptions(sessionOptions -> {
+                sessionOptions.setOptimizationLevel(OptLevel.ALL_OPT);
+                addGpuProvider(sessionOptions);
+                if ("CoreML".equals(resolvedInferenceProvider)) {
+                    throw new OrtException(
+                            "inference.offload_models=false is not supported with CoreML. Set inference.offload_models=true in european-wilderness.properties.");
+                } else {
+                    return createSession(modelBytes, sessionOptions);
+                }
+            });
             this.cpuSession = null;
             LOG.info(
                     "ONNX model '{}' loaded on GPU ({} KB) in {} ms",
@@ -365,11 +360,7 @@ public final class OnnxModel implements AutoCloseable {
             synchronized (GPU_SESSIONS) {
                 timings.record("slotWait", System.nanoTime() - waiting);
                 return GPU_SESSIONS.execute(
-                        this,
-                        capacity,
-                        this::createGpuSession,
-                        session -> runWithSession(session, inputs),
-                        failure -> {
+                        this, capacity, this::createGpuSession, session -> runWithSession(session, inputs), failure -> {
                             boolean exhausted = isGpuMemoryExhaustion(failure);
                             if (exhausted)
                                 emit(
@@ -471,9 +462,8 @@ public final class OnnxModel implements AutoCloseable {
         }
 
         if (gpuRequired && !added) {
-            var unavailable =
-                    new OrtException(
-                            "inference.device=gpu but no GPU provider (CUDA, DirectML, CoreML) is available. Use the appropriate build for your platform or set inference.device=cpu.");
+            var unavailable = new OrtException(
+                    "inference.device=gpu but no GPU provider (CUDA, DirectML, CoreML) is available. Use the appropriate build for your platform or set inference.device=cpu.");
             failed(Code.INF_PROVIDER, "GPU_PROVIDER_INIT", unavailable);
             throw unavailable;
         }

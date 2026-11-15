@@ -30,16 +30,15 @@ public final class WaterMipRepairData {
                 for (int z = 0; z < next; z++)
                     for (int x = 0; x < next; x++) {
                         int i = source + (y * 2) * plane + (z * 2) * width + x * 2;
-                        values[target++] =
-                                mipper.reduce(
-                                        values[i],
-                                        values[i + 1],
-                                        values[i + width],
-                                        values[i + width + 1],
-                                        values[i + plane],
-                                        values[i + plane + 1],
-                                        values[i + plane + width],
-                                        values[i + plane + width + 1]);
+                        values[target++] = mipper.reduce(
+                                values[i],
+                                values[i + 1],
+                                values[i + width],
+                                values[i + width + 1],
+                                values[i + plane],
+                                values[i + plane + 1],
+                                values[i + plane + width],
+                                values[i + plane + width + 1]);
                     }
             source = start;
             width = next;

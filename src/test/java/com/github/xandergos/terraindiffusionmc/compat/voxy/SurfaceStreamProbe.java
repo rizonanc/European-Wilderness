@@ -1,8 +1,8 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
 import com.github.xandergos.terraindiffusionmc.worldgen.tree.TreeSpecies;
-import java.util.*;
 import java.nio.file.*;
+import java.util.*;
 
 /** Deterministic queue work comparison. No renderer, sleeps, GPU or model inference. */
 public final class SurfaceStreamProbe {
@@ -13,18 +13,17 @@ public final class SurfaceStreamProbe {
         var trees = new LodColumn.ForestBuilder(new LodColumn(0, 0, -64, 1967, air, water, new short[1024]));
         trees.set(16, 140, 16, TreeSpecies.OAK, false);
         var column = trees.build();
-        var sink =
-                new LodPublisher.Sink() {
-                    public boolean active() {
-                        return true;
-                    }
+        var sink = new LodPublisher.Sink() {
+            public boolean active() {
+                return true;
+            }
 
-                    public boolean occupied(int x, int y, int z) {
-                        return false;
-                    }
+            public boolean occupied(int x, int y, int z) {
+                return false;
+            }
 
-                    public void write(LodColumn c, int y) {}
-                };
+            public void write(LodColumn c, int y) {}
+        };
         int count = 128, oldSteps = 0, oldWrites = 0, newSteps = 0, newWrites = 0;
         for (int i = 0; i < count; i++) {
             var cursor = new LodPublisher.Cursor(column, true);
@@ -63,18 +62,17 @@ public final class SurfaceStreamProbe {
             } else if (complete) scan.completed(cell);
             else scan.surfaceCompleted(cell, cursor.progress());
         }
-        String result =
-                "{\"columns\":"
-                        + count
-                        + ",\"oldStepsUntilAllSurfaces\":"
-                        + oldSteps
-                        + ",\"newStepsUntilAllSurfaces\":"
-                        + newSteps
-                        + ",\"oldWrites\":"
-                        + oldWrites
-                        + ",\"newWrites\":"
-                        + newWrites
-                        + ",\"scope\":\"flat y100 with y140 crowns; sky empty; fixed queue operations, not measured game FPS\"}\n";
+        String result = "{\"columns\":"
+                + count
+                + ",\"oldStepsUntilAllSurfaces\":"
+                + oldSteps
+                + ",\"newStepsUntilAllSurfaces\":"
+                + newSteps
+                + ",\"oldWrites\":"
+                + oldWrites
+                + ",\"newWrites\":"
+                + newWrites
+                + ",\"scope\":\"flat y100 with y140 crowns; sky empty; fixed queue operations, not measured game FPS\"}\n";
         Files.writeString(Path.of(args[0]), result);
         System.out.print(result);
     }

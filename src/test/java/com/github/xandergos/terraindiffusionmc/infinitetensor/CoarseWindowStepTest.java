@@ -1,7 +1,8 @@
 package com.github.xandergos.terraindiffusionmc.infinitetensor;
 
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 class CoarseWindowStepTest {
     private static final int IN = 64, STRIDE = 32;

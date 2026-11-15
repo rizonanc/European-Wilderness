@@ -1,7 +1,7 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
-import java.util.*;
 import com.github.xandergos.terraindiffusionmc.worldgen.tree.TreeSpecies;
+import java.util.*;
 
 /** Pure 32-square surface and optional forest approximation, without real game chunks. */
 public final class LodColumn {

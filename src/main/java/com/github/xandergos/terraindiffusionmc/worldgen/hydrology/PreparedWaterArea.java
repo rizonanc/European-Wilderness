@@ -2,7 +2,6 @@ package com.github.xandergos.terraindiffusionmc.worldgen.hydrology;
 
 import com.github.xandergos.terraindiffusionmc.world.HeightConverter;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.WaterGenerationOptions;
-
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
 import java.util.ArrayDeque;
 import java.util.Arrays;
@@ -57,15 +56,14 @@ public final class PreparedWaterArea implements WorldSession.RiverOverlay {
                         || water[i] >= 4096
                         || water[i] < firstAir[i]
                         || (long) water[i] - firstAir[i] + 1 > MAX_DEPTH)
-                    throw new IllegalArgumentException(
-                            "Invalid water column at ("
-                                    + (x + lx)
-                                    + ", "
-                                    + (z + lz)
-                                    + "): firstAir="
-                                    + firstAir[i]
-                                    + ", water="
-                                    + water[i]);
+                    throw new IllegalArgumentException("Invalid water column at ("
+                            + (x + lx)
+                            + ", "
+                            + (z + lz)
+                            + "): firstAir="
+                            + firstAir[i]
+                            + ", water="
+                            + water[i]);
                 count++;
             }
         }
@@ -133,10 +131,9 @@ public final class PreparedWaterArea implements WorldSession.RiverOverlay {
             WaterGenerationOptions options,
             int scale) {
         // Use the same real-world foothill elevation at every world scale.
-        int riverCeiling =
-                options.mountainRivers()
-                        ? Integer.MAX_VALUE
-                        : HeightConverter.convertToMinecraftHeight(FOOTHILL_HEIGHT_METRES, scale);
+        int riverCeiling = options.mountainRivers()
+                ? Integer.MAX_VALUE
+                : HeightConverter.convertToMinecraftHeight(FOOTHILL_HEIGHT_METRES, scale);
         int side = rawFirstAir.length;
         if (side < 32 || side > MAX_SIDE || side % 2 != 0) throw new IllegalArgumentException("Invalid area size");
         int n = side / 2;
@@ -223,14 +220,13 @@ public final class PreparedWaterArea implements WorldSession.RiverOverlay {
                 }
                 // Revision 1 stopped at dry y=64 beaches. A real sea column starts at first-air <=62.
                 if (ground[cz][cx] <= (revision >= 2 ? 61 : 63)) {
-                    result =
-                            (byte)
-                                    ((owner == null || owner.contains(x + cx * 2, z + cz * 2))
-                                                    && (revision < 2
-                                                            || WaterFrequency.keep(
-                                                                    seed, x + cx * 2, z + cz * 2, false, revision))
-                                            ? 1
-                                            : 2);
+                    result = (byte)
+                            ((owner == null || owner.contains(x + cx * 2, z + cz * 2))
+                                            && (revision < 2
+                                                    || WaterFrequency.keep(
+                                                            seed, x + cx * 2, z + cz * 2, false, revision))
+                                    ? 1
+                                    : 2);
                     break;
                 }
                 if (lake[cursor]) {
@@ -261,12 +257,11 @@ public final class PreparedWaterArea implements WorldSession.RiverOverlay {
         for (int cz = 0; cz < n; cz++)
             for (int cx = 0; cx < n; cx++) {
                 int c = cz * n + cx;
-                candidates[c] =
-                        plan.filledHeight(cx, cz) <= riverCeiling
-                                && !lake[c]
-                                && destination[c] == 1
-                                && ground[cz][cx] >= (revision >= 2 ? 62 : 63)
-                                && plan.accumulation(cx, cz) >= RIVER_MIN_CATCHMENT_CELLS;
+                candidates[c] = plan.filledHeight(cx, cz) <= riverCeiling
+                        && !lake[c]
+                        && destination[c] == 1
+                        && ground[cz][cx] >= (revision >= 2 ? 62 : 63)
+                        && plan.accumulation(cx, cz) >= RIVER_MIN_CATCHMENT_CELLS;
             }
         boolean[] channels = RiverBranches.select(plan, candidates, seed, x, z);
         if (revision >= 4) channels = NaturalChannels.select(plan, channels, rawFirstAir);
@@ -286,48 +281,39 @@ public final class PreparedWaterArea implements WorldSession.RiverOverlay {
         short[] currents = liveCurrents ? new short[water.length] : null;
         byte[] nearest = liveCurrents ? new byte[water.length] : null;
         if (liveCurrents) Arrays.fill(nearest, Byte.MAX_VALUE);
-        RiverCurves.rasterize(
-                plan,
-                channels,
-                rawFirstAir,
-                (cell, px, pz, y, flowX, flowZ, slope) -> {
-                    if (y > riverCeiling) return;
-                    long accumulation = plan.accumulation(cell % n, cell / n);
-                    int radius = riverWidth(accumulation) / 2;
-                    if (varyGeometry)
-                        radius =
-                                Math.clamp(
-                                        radius
-                                                + (int)
-                                                        Math.round(
-                                                                2.0
-                                                                        * RiverBanks.relief(
-                                                                                seed ^ 0x7531L, x + px, z + pz)
-                                                                        * (options.widthVariation() / 100.0)),
-                                        1,
-                                        9);
-                    short current =
-                            liveCurrents
-                                    ? RiverCurrent.pack(flowX, flowZ, slope, accumulation, outletDistance[cell] / 12.0)
-                                    : 0;
-                    for (int dz = -radius; dz <= radius; dz++)
-                        for (int dx = -radius; dx <= radius; dx++) {
-                            int distance = dx * dx + dz * dz;
-                            int wx = px + dx, wz = pz + dz;
-                            if (distance > radius * radius + 1
-                                    || wx < COLLAR
-                                    || wz < COLLAR
-                                    || wx >= side - COLLAR
-                                    || wz >= side - COLLAR) continue;
-                            if (rawFirstAir[wz][wx] - 1 > riverCeiling) continue;
-                            int p = wz * side + wx;
-                            if (liveCurrents && (y > water[p] || y == water[p] && distance <= nearest[p])) {
-                                currents[p] = lake[(wz / 2) * n + wx / 2] ? 0 : current;
-                                nearest[p] = (byte) distance;
-                            }
-                            water[p] = Math.max(water[p], y);
-                        }
-                });
+        RiverCurves.rasterize(plan, channels, rawFirstAir, (cell, px, pz, y, flowX, flowZ, slope) -> {
+            if (y > riverCeiling) return;
+            long accumulation = plan.accumulation(cell % n, cell / n);
+            int radius = riverWidth(accumulation) / 2;
+            if (varyGeometry)
+                radius = Math.clamp(
+                        radius
+                                + (int) Math.round(2.0
+                                        * RiverBanks.relief(seed ^ 0x7531L, x + px, z + pz)
+                                        * (options.widthVariation() / 100.0)),
+                        1,
+                        9);
+            short current = liveCurrents
+                    ? RiverCurrent.pack(flowX, flowZ, slope, accumulation, outletDistance[cell] / 12.0)
+                    : 0;
+            for (int dz = -radius; dz <= radius; dz++)
+                for (int dx = -radius; dx <= radius; dx++) {
+                    int distance = dx * dx + dz * dz;
+                    int wx = px + dx, wz = pz + dz;
+                    if (distance > radius * radius + 1
+                            || wx < COLLAR
+                            || wz < COLLAR
+                            || wx >= side - COLLAR
+                            || wz >= side - COLLAR) continue;
+                    if (rawFirstAir[wz][wx] - 1 > riverCeiling) continue;
+                    int p = wz * side + wx;
+                    if (liveCurrents && (y > water[p] || y == water[p] && distance <= nearest[p])) {
+                        currents[p] = lake[(wz / 2) * n + wx / 2] ? 0 : current;
+                        nearest[p] = (byte) distance;
+                    }
+                    water[p] = Math.max(water[p], y);
+                }
+        });
         ShoreAlcoves.extend(seed, x, z, side, air, water);
         if (revision >= 2) RiverMouths.connect(plan, channels, rawFirstAir, water);
         if (liveCurrents) addLakeThroughflow(plan, channels, lake, water, currents, side);

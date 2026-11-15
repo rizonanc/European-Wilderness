@@ -1,8 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.*;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class CoarseUpdateQueueTest {
     private static long key(int level, int n) {
@@ -74,15 +75,11 @@ class CoarseUpdateQueueTest {
         var queue = new CoarseUpdateQueue(4000, 1);
         for (int i = 0; i < 1000; i++) queue.offer(key(4, i), false);
         var calls = new java.util.concurrent.atomic.AtomicInteger();
-        assertTrue(
-                queue.select(
-                                64,
-                                k -> true,
-                                k -> {
-                                    calls.incrementAndGet();
-                                    return false;
-                                })
-                        .isEmpty());
+        assertTrue(queue.select(64, k -> true, k -> {
+                    calls.incrementAndGet();
+                    return false;
+                })
+                .isEmpty());
         assertEquals(512, calls.get());
         queue.select(64, k -> false, k -> true);
         assertTrue(queue.size() > 0);
@@ -111,15 +108,16 @@ class CoarseUpdateQueueTest {
             var jobs = new ArrayList<java.util.concurrent.Future<?>>();
             for (int n = 0; n < 4; n++) {
                 final boolean forced = n % 2 == 0;
-                jobs.add(
-                        threads.submit(() -> {
-                            for (int i = 0; i < 4000; i++) queue.offer(key(i % 5, i % 2000), forced);
-                        }));
+                jobs.add(threads.submit(() -> {
+                    for (int i = 0; i < 4000; i++) queue.offer(key(i % 5, i % 2000), forced);
+                }));
             }
             for (var job : jobs) job.get();
         }
         assertEquals(1000, queue.size());
-        assertEquals(1000, java.util.stream.IntStream.range(0, 5).map(queue::levelSize).sum());
+        assertEquals(
+                1000,
+                java.util.stream.IntStream.range(0, 5).map(queue::levelSize).sum());
         for (int n = 0; n < 100 && queue.size() > 0; n++)
             for (var task : queue.select(64, k -> true, k -> true)) assertTrue(queue.complete(task));
         assertEquals(0, queue.size());

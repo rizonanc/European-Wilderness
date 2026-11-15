@@ -17,7 +17,8 @@ abstract class MountainWeatherMixin {
         if (result.getReturnValue() == Biome.Precipitation.RAIN
                 && TerrainWeather.applies(world)
                 && TerrainWeather.snow(
-                        pos.getY() - world.getSeaLevel(), world.getBiome(pos).value().getTemperature())) {
+                        pos.getY() - world.getSeaLevel(),
+                        world.getBiome(pos).value().getTemperature())) {
             result.setReturnValue(Biome.Precipitation.SNOW);
         }
     }

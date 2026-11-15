@@ -14,16 +14,15 @@ public final class ChunkyApiAdapter {
             throw new IllegalStateException("Unsupported Chunky API version");
         running = type.getMethod("isRunning", String.class);
         pause = type.getMethod("pauseTask", String.class);
-        start =
-                type.getMethod(
-                        "startTask",
-                        String.class,
-                        String.class,
-                        double.class,
-                        double.class,
-                        double.class,
-                        double.class,
-                        String.class);
+        start = type.getMethod(
+                "startTask",
+                String.class,
+                String.class,
+                double.class,
+                double.class,
+                double.class,
+                double.class,
+                String.class);
     }
 
     public boolean running(String world) throws ReflectiveOperationException {
@@ -44,7 +43,9 @@ public final class ChunkyApiAdapter {
     }
 
     public static ChunkyApiAdapter installed() throws ReflectiveOperationException {
-        Object chunky = Class.forName("org.popcraft.chunky.ChunkyProvider").getMethod("get").invoke(null);
+        Object chunky = Class.forName("org.popcraft.chunky.ChunkyProvider")
+                .getMethod("get")
+                .invoke(null);
         return new ChunkyApiAdapter(chunky.getClass().getMethod("getApi").invoke(chunky));
     }
 }

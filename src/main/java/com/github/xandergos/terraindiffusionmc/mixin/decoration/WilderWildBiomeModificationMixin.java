@@ -13,7 +13,9 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(value = BiomeModification.class, remap = false)
 abstract class WilderWildBiomeModificationMixin {
-    @Shadow @Final private Identifier id;
+    @Shadow
+    @Final
+    private Identifier id;
 
     @ModifyVariable(
             method = {

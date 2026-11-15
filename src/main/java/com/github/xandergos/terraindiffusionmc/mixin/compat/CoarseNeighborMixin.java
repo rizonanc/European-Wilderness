@@ -19,9 +19,8 @@ public abstract class CoarseNeighborMixin {
             remap = false)
     private WorldSection ewh$neighbor(WorldEngine engine, int level, int x, int y, int z) {
         var original = engine.acquire(level, x, y, z);
-        var preview =
-                (WorldSection)
-                        CoarseRenderHooks.neighbor(engine, WorldEngine.getWorldSectionId(level, x, y, z), original);
+        var preview = (WorldSection)
+                CoarseRenderHooks.neighbor(engine, WorldEngine.getWorldSectionId(level, x, y, z), original);
         if (preview != original) original.release();
         return preview;
     }

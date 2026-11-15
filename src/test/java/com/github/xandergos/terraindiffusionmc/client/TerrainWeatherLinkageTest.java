@@ -1,15 +1,14 @@
 package com.github.xandergos.terraindiffusionmc.client;
 
-import org.junit.jupiter.api.Test;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.MethodInsnNode;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.MethodInsnNode;
 
 class TerrainWeatherLinkageTest {
     @Test

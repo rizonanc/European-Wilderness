@@ -1,7 +1,8 @@
 package com.github.xandergos.terraindiffusionmc.pipeline;
 
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 class BatchBuffersTest {
     private static final int PER_BATCH = 5 * 64 * 64;

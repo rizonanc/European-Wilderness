@@ -1,9 +1,10 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class CoarseCorrectionsTest {
     @Test
@@ -40,11 +41,8 @@ class CoarseCorrectionsTest {
         var correction = new CoarseLodCorrections(4096);
         assertThrows(
                 IllegalArgumentException.class,
-                () ->
-                        correction.add(
-                                List.of(
-                                        new CoarseLodCorrections.Anchor(0, 0, 40),
-                                        new CoarseLodCorrections.Anchor(16, 0, Float.NaN))));
+                () -> correction.add(List.of(
+                        new CoarseLodCorrections.Anchor(0, 0, 40), new CoarseLodCorrections.Anchor(16, 0, Float.NaN))));
         assertEquals(0, correction.size());
     }
 
@@ -54,24 +52,11 @@ class CoarseCorrectionsTest {
         long[] output = new long[32768];
         var calls = new AtomicInteger();
         long[] palette = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
-        var result =
-                CoarseSectionComposer.fill(
-                        0,
-                        0,
-                        2,
-                        0,
-                        -64,
-                        1871,
-                        field,
-                        null,
-                        output,
-                        (x, z) -> x < 16,
-                        b -> palette,
-                        v -> v == 0,
-                        (x, z) -> {
-                            calls.incrementAndGet();
-                            return 16;
-                        });
+        var result = CoarseSectionComposer.fill(
+                0, 0, 2, 0, -64, 1871, field, null, output, (x, z) -> x < 16, b -> palette, v -> v == 0, (x, z) -> {
+                    calls.incrementAndGet();
+                    return 16;
+                });
         assertEquals(512, calls.get());
         assertTrue(result.changed());
         assertEquals(64, field[0].firstAir());

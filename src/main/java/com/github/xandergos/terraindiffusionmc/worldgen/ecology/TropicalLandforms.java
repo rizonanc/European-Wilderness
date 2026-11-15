@@ -51,10 +51,9 @@ public final class TropicalLandforms {
             distance /= 1 + 0.12 * coast;
             double shelf = 1 - EuropeanEcology.smoothstep(1.02, 1.39, distance);
             double hills = EuropeanEcology.valueNoise(seed, blockX, blockZ, 28, form == Form.ROCKY ? 115 : 225);
-            double crest =
-                    form == Form.ROCKY
-                            ? (1 - EuropeanEcology.smoothstep(0.38, 0.89, distance)) * (0.42 + 1.03 * hills)
-                            : (1 - EuropeanEcology.smoothstep(0.05, 0.88, distance)) * (0.64 + 0.61 * hills);
+            double crest = form == Form.ROCKY
+                    ? (1 - EuropeanEcology.smoothstep(0.38, 0.89, distance)) * (0.42 + 1.03 * hills)
+                    : (1 - EuropeanEcology.smoothstep(0.05, 0.88, distance)) * (0.64 + 0.61 * hills);
             double profile = peak * crest - 48 * Math.min(1, distance);
             double isolation = EuropeanEcology.smoothstep(70, 270, -seabed);
             return (float) (seabed + shelf * isolation * Math.max(0, profile - seabed));
@@ -113,19 +112,18 @@ public final class TropicalLandforms {
         var form = random.nextBoolean() ? Form.SANDY : Form.ROCKY;
         int peak = form == Form.SANDY ? random.nextInt(300, 560) : random.nextInt(920, 1520);
         double rotation = random.nextDouble() * Math.TAU;
-        var main =
-                new Island(
-                        x,
-                        z,
-                        radius,
-                        peak,
-                        seed,
-                        form,
-                        Math.cos(rotation),
-                        Math.sin(rotation),
-                        random.nextDouble(1.12, 1.35),
-                        random.nextDouble() * Math.TAU,
-                        random.nextDouble() * Math.TAU);
+        var main = new Island(
+                x,
+                z,
+                radius,
+                peak,
+                seed,
+                form,
+                Math.cos(rotation),
+                Math.sin(rotation),
+                random.nextDouble(1.12, 1.35),
+                random.nextDouble() * Math.TAU,
+                random.nextDouble() * Math.TAU);
         int count = random.nextInt(3);
         if (count == 0) return List.of(main);
         var group = new java.util.ArrayList<Island>(count + 1);
@@ -133,13 +131,12 @@ public final class TropicalLandforms {
         for (int i = 0; i < count; i++) {
             double angle = rotation + i * Math.PI + random.nextDouble(-0.42, 0.42);
             int offset = random.nextInt(1200, 1510);
-            group.add(
-                    new Island(
-                            x + (int) (offset * Math.cos(angle)),
-                            z + (int) (offset * Math.sin(angle)),
-                            random.nextInt(80, 141),
-                            random.nextInt(120, 275),
-                            seed));
+            group.add(new Island(
+                    x + (int) (offset * Math.cos(angle)),
+                    z + (int) (offset * Math.sin(angle)),
+                    random.nextInt(80, 141),
+                    random.nextInt(120, 275),
+                    seed));
         }
         return List.copyOf(group);
     }

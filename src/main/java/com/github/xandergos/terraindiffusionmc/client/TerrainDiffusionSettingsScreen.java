@@ -1,6 +1,8 @@
 package com.github.xandergos.terraindiffusionmc.client;
 
 import com.github.xandergos.terraindiffusionmc.compat.roadweaver.RoadWeaverTerrain;
+import com.github.xandergos.terraindiffusionmc.config.SettingsDraft;
+import com.github.xandergos.terraindiffusionmc.config.SettingsPreferences;
 import com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfig;
 import com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfigEditor;
 import com.github.xandergos.terraindiffusionmc.config.TerrainSettingsCatalog;
@@ -8,38 +10,36 @@ import com.github.xandergos.terraindiffusionmc.world.TerrainDiffusionBiomeSource
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Arrays;
-import com.github.xandergos.terraindiffusionmc.config.SettingsDraft;
-import com.github.xandergos.terraindiffusionmc.config.SettingsPreferences;
-import java.util.LinkedHashSet;
-import java.util.Locale;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.screen.narration.NarrationPart;
-import net.minecraft.client.gui.cursor.StandardCursors;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.Click;
-import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.Selectable;
+import net.minecraft.client.gui.cursor.StandardCursors;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
+import net.minecraft.client.gui.screen.narration.NarrationPart;
+import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.widget.ElementListWidget;
 import net.minecraft.client.gui.widget.SliderWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.TextWidget;
-import net.minecraft.client.gui.tooltip.Tooltip;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
-import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.util.math.ColorHelper;
 
 @Environment(EnvType.CLIENT)
@@ -96,9 +96,8 @@ public final class TerrainDiffusionSettingsScreen extends Screen {
         SettingsDraft loaded = null;
         SettingsPreferences stored = null;
         try {
-            loaded =
-                    new SettingsDraft(
-                            TerrainDiffusionConfigEditor.load(configPath), TerrainDiffusionConfigEditor.loadDefaults());
+            loaded = new SettingsDraft(
+                    TerrainDiffusionConfigEditor.load(configPath), TerrainDiffusionConfigEditor.loadDefaults());
         } catch (IOException failure) {
             message = label("load_error", failure.getMessage()).formatted(Formatting.RED);
         }
@@ -155,34 +154,31 @@ public final class TerrainDiffusionSettingsScreen extends Screen {
                 false);
         addSearch(left, frameTop + 65, searchWidth);
         addFilters(filterX, filterY, filterWidth);
-        settingsList =
-                addDrawableChild(
-                        new SettingsList(paneX, paneWidth, contentTop, Math.max(18, frameBottom - contentTop - 48)));
+        settingsList = addDrawableChild(
+                new SettingsList(paneX, paneWidth, contentTop, Math.max(18, frameBottom - contentTop - 48)));
 
         int footerY = frameBottom - 26;
         int resetWidth = Math.min(122, toolbarWidth / 2);
-        undoButton =
-                menuButton(
-                        label("undo"),
-                        left,
-                        footerY,
-                        Math.min(82, toolbarWidth - resetWidth - 4),
-                        () -> {
-                            draft.undo();
-                            refreshRows();
-                        },
-                        false);
-        resetButton =
-                menuButton(
-                        label("reset_section"),
-                        sideLeft,
-                        frameTop + 36,
-                        sideButtonWidth,
-                        () -> {
-                            draft.reset(section().keys());
-                            refreshRows();
-                        },
-                        false);
+        undoButton = menuButton(
+                label("undo"),
+                left,
+                footerY,
+                Math.min(82, toolbarWidth - resetWidth - 4),
+                () -> {
+                    draft.undo();
+                    refreshRows();
+                },
+                false);
+        resetButton = menuButton(
+                label("reset_section"),
+                sideLeft,
+                frameTop + 36,
+                sideButtonWidth,
+                () -> {
+                    draft.reset(section().keys());
+                    refreshRows();
+                },
+                false);
         errorWidget = addDrawableChild(new TextWidget(left, frameBottom - 41, toolbarWidth, 10, message, textRenderer));
         refreshRows();
     }
@@ -266,7 +262,8 @@ public final class TerrainDiffusionSettingsScreen extends Screen {
                 false);
         context.drawText(
                 textRenderer,
-                textRenderer.trimToWidth(label("description." + section().name()).getString(), frameRight - paneX - 44),
+                textRenderer.trimToWidth(
+                        label("description." + section().name()).getString(), frameRight - paneX - 44),
                 paneX + 34,
                 frameTop + 49,
                 MUTED,
@@ -320,23 +317,17 @@ public final class TerrainDiffusionSettingsScreen extends Screen {
     }
 
     private void openProfiles() {
-        client.setScreen(
-                new SettingsProfileScreen(
-                        this,
-                        preferences,
-                        draft::values,
-                        (name, values) -> {
-                            draft.apply(values);
-                            message = label("profile_selected", name);
-                        }));
+        client.setScreen(new SettingsProfileScreen(this, preferences, draft::values, (name, values) -> {
+            draft.apply(values);
+            message = label("profile_selected", name);
+        }));
     }
 
     private void setMessage(Text text) {
         message = text;
         if (errorWidget != null) {
-            errorWidget.setMessage(
-                    Text.literal(textRenderer.trimToWidth(text.getString(), frameRight - paneX - 16))
-                            .setStyle(text.getStyle()));
+            errorWidget.setMessage(Text.literal(textRenderer.trimToWidth(text.getString(), frameRight - paneX - 16))
+                    .setStyle(text.getStyle()));
             errorWidget.setTooltip(text.getString().isEmpty() ? null : Tooltip.of(text));
         }
     }
@@ -356,7 +347,10 @@ public final class TerrainDiffusionSettingsScreen extends Screen {
                     switch (view) {
                         case SECTION -> query.isBlank() ? section().keys() : TerrainSettingsCatalog.KEYS;
                         case CHANGED -> draft.changedKeys();
-                        case FAVORITES -> TerrainSettingsCatalog.KEYS.stream().filter(preferences::favorite).toList();
+                        case FAVORITES ->
+                            TerrainSettingsCatalog.KEYS.stream()
+                                    .filter(preferences::favorite)
+                                    .toList();
                         case RECENT -> recentKeys();
                     };
             for (String key : keys) if (matches(key)) rows.add(setting(key));
@@ -376,16 +370,17 @@ public final class TerrainDiffusionSettingsScreen extends Screen {
 
     private boolean matches(String key) {
         if (query.isBlank()) return true;
-        String text =
-                (key + " " + label("field." + key).getString() + " " + label("tooltip." + key).getString())
-                        .toLowerCase(Locale.ROOT);
+        String text = (key + " " + label("field." + key).getString() + " "
+                        + label("tooltip." + key).getString())
+                .toLowerCase(Locale.ROOT);
         for (String term : query.strip().toLowerCase(Locale.ROOT).split("\\s+")) if (!text.contains(term)) return false;
         return true;
     }
 
     private void updateButtons() {
         undoButton.active = draft != null && draft.canUndo();
-        resetButton.active = draft != null && view == View.SECTION && !section().keys().isEmpty();
+        resetButton.active =
+                draft != null && view == View.SECTION && !section().keys().isEmpty();
         changedButton.active = draft != null;
         Text changed = label("changed", draft == null ? 0 : draft.changedKeys().size());
         changedButton.setMessage(changed);
@@ -432,19 +427,16 @@ public final class TerrainDiffusionSettingsScreen extends Screen {
         var percent = TerrainSettingsCatalog.PERCENTAGES.get(key);
         ClickableWidget control;
         if (choices != null) {
-            control =
-                    ButtonWidget.builder(
-                                    valueLabel(this.draft.get(key)),
-                                    pressed -> {
-                                        String current = this.draft.get(key);
-                                        int index = Arrays.asList(choices).indexOf(current);
-                                        String next = choices[(index + 1) % choices.length];
-                                        edit(key, next, false);
-                                        pressed.setMessage(valueLabel(next));
-                                    })
-                            .dimensions(0, 0, 145, 20)
-                            .tooltip(help)
-                            .build();
+            control = ButtonWidget.builder(valueLabel(this.draft.get(key)), pressed -> {
+                        String current = this.draft.get(key);
+                        int index = Arrays.asList(choices).indexOf(current);
+                        String next = choices[(index + 1) % choices.length];
+                        edit(key, next, false);
+                        pressed.setMessage(valueLabel(next));
+                    })
+                    .dimensions(0, 0, 145, 20)
+                    .tooltip(help)
+                    .build();
         } else if (percent != null) {
             int initial;
             try {
@@ -472,9 +464,8 @@ public final class TerrainDiffusionSettingsScreen extends Screen {
                         @Override
                         public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
                             long now = System.nanoTime();
-                            displayedValue +=
-                                    (value - displayedValue)
-                                            * (1 - Math.exp(-Math.min(0.1, (now - lastFrame) / 1.0e9) * 22));
+                            displayedValue += (value - displayedValue)
+                                    * (1 - Math.exp(-Math.min(0.1, (now - lastFrame) / 1.0e9) * 22));
                             lastFrame = now;
                             int x = getX(), y = getY();
                             int right = getRight() - 5;
@@ -517,7 +508,9 @@ public final class TerrainDiffusionSettingsScreen extends Screen {
         star.setTooltip(Tooltip.of(label("favorite_tip")));
         star.active = preferences != null;
         var row = new SettingRow(caption, detail, note, control, star);
-        row.icon = TerrainSettingsCatalog.PAGES.get(TerrainSettingsCatalog.pageFor(key)).name();
+        row.icon = TerrainSettingsCatalog.PAGES
+                .get(TerrainSettingsCatalog.pageFor(key))
+                .name();
         return row;
     }
 
@@ -554,11 +547,10 @@ public final class TerrainDiffusionSettingsScreen extends Screen {
             var pages = TerrainSettingsCatalog.PAGES;
             java.util.stream.IntStream.range(0, pages.size())
                     .boxed()
-                    .sorted(
-                            java.util.Comparator.comparingInt(index -> {
-                                int order = WORLD_SECTIONS.indexOf(pages.get(index).name());
-                                return order < 0 ? WORLD_SECTIONS.size() : order;
-                            }))
+                    .sorted(java.util.Comparator.comparingInt(index -> {
+                        int order = WORLD_SECTIONS.indexOf(pages.get(index).name());
+                        return order < 0 ? WORLD_SECTIONS.size() : order;
+                    }))
                     .forEach(index -> addEntry(new SectionRow(index)));
         }
 
@@ -618,10 +610,9 @@ public final class TerrainDiffusionSettingsScreen extends Screen {
         @Override
         protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
             hover += ((isSelected() && active ? 1 : 0) - hover) * hoverStep;
-            int fill =
-                    !active
-                            ? 0x58222B33
-                            : accent ? (sidebar ? 0x9A68502C : 0xD09D742F) : sidebar ? 0x08141C24 : 0xA02A333D;
+            int fill = !active
+                    ? 0x58222B33
+                    : accent ? (sidebar ? 0x9A68502C : 0xD09D742F) : sidebar ? 0x08141C24 : 0xA02A333D;
             int color = !active ? 0xFF7F8993 : LIGHT;
             int x = getX(), y = getY();
             if (accent) panel(context, x - 1, y - 1, getWidth() + 2, getHeight() + 2, 0x186D5128, 0x407D6238);
@@ -728,13 +719,12 @@ public final class TerrainDiffusionSettingsScreen extends Screen {
                 detail.setPosition(left, y + 23);
                 note.setMaxWidth(captionWidth - 8);
                 note.setPosition(left + 4, y + 38);
-                int badgeWidth =
-                        Math.min(
-                                captionWidth,
-                                net.minecraft.client.MinecraftClient.getInstance()
-                                                .textRenderer
-                                                .getWidth(note.getMessage())
-                                        + 8);
+                int badgeWidth = Math.min(
+                        captionWidth,
+                        net.minecraft.client.MinecraftClient.getInstance()
+                                        .textRenderer
+                                        .getWidth(note.getMessage())
+                                + 8);
                 panel(context, left, y + 35, badgeWidth, 15, 0x80574326, 0x886F562C);
             }
             if (control != null) {
@@ -758,22 +748,18 @@ public final class TerrainDiffusionSettingsScreen extends Screen {
     }
 
     private SettingRow visualRow(String name, boolean enabled, VisualAction action) {
-        var button =
-                ButtonWidget.builder(
-                                label(name),
-                                pressed -> {
-                                    try {
-                                        action.run();
-                                        setMessage(label("visual_applied").formatted(Formatting.GREEN));
-                                    } catch (Exception | LinkageError failure) {
-                                        org.slf4j.LoggerFactory.getLogger(getClass())
-                                                .warn("Visual settings action failed", failure);
-                                        setMessage(label("visual_error").formatted(Formatting.RED));
-                                    }
-                                })
-                        .dimensions(0, 0, 150, 20)
-                        .tooltip(Tooltip.of(label(name + ".tip").append("\n").append(label("apply.now"))))
-                        .build();
+        var button = ButtonWidget.builder(label(name), pressed -> {
+                    try {
+                        action.run();
+                        setMessage(label("visual_applied").formatted(Formatting.GREEN));
+                    } catch (Exception | LinkageError failure) {
+                        org.slf4j.LoggerFactory.getLogger(getClass()).warn("Visual settings action failed", failure);
+                        setMessage(label("visual_error").formatted(Formatting.RED));
+                    }
+                })
+                .dimensions(0, 0, 150, 20)
+                .tooltip(Tooltip.of(label(name + ".tip").append("\n").append(label("apply.now"))))
+                .build();
         button.active = enabled;
         return new SettingRow(null, null, null, button, null);
     }
@@ -784,33 +770,28 @@ public final class TerrainDiffusionSettingsScreen extends Screen {
                 int viewDistance = client.options.getViewDistance().getValue();
                 var voxy = ExternalVisualSettings.voxyState();
                 rows.add(info(label("view.minecraft", viewDistance, viewDistance * 16)));
-                rows.add(
-                        info(
-                                voxy.present()
-                                        ? label(
-                                                voxy.enabled() && voxy.rendering() ? "view.voxy_on" : "view.voxy_off",
-                                                voxy.chunks())
-                                        : label("view.no_voxy")));
+                rows.add(info(
+                        voxy.present()
+                                ? label(
+                                        voxy.enabled() && voxy.rendering() ? "view.voxy_on" : "view.voxy_off",
+                                        voxy.chunks())
+                                : label("view.no_voxy")));
                 String shader = ExternalVisualSettings.shaderName();
                 rows.add(info(label("view.shader", shader.isBlank() ? "—" : shader)));
-                rows.add(
-                        visualRow(
-                                "open_voxy",
-                                voxy.present(),
-                                () -> client.setScreen(ExternalVisualSettings.voxy(this))));
+                rows.add(visualRow(
+                        "open_voxy", voxy.present(), () -> client.setScreen(ExternalVisualSettings.voxy(this))));
             }
             case "compatibility" -> {
                 String version = RoadWeaverTerrain.installedVersion();
-                rows.add(
-                        info(
-                                version == null
-                                        ? label("roadweaver.missing")
-                                        : RoadWeaverTerrain.supports(version)
-                                                ? label("roadweaver.supported", version)
-                                                : label(
-                                                        "roadweaver.unsupported",
-                                                        version,
-                                                        RoadWeaverTerrain.SUPPORTED_VERSION)));
+                rows.add(info(
+                        version == null
+                                ? label("roadweaver.missing")
+                                : RoadWeaverTerrain.supports(version)
+                                        ? label("roadweaver.supported", version)
+                                        : label(
+                                                "roadweaver.unsupported",
+                                                version,
+                                                RoadWeaverTerrain.SUPPORTED_VERSION)));
                 rows.add(info(installedVersion("Chunky", "chunky")));
                 rows.add(info(installedVersion("C2ME", "c2me")));
                 rows.add(info(installedVersion("Alex's Mobs", "alexsmobs")));
@@ -823,10 +804,9 @@ public final class TerrainDiffusionSettingsScreen extends Screen {
     }
 
     private static Text installedVersion(String name, String id) {
-        var version =
-                FabricLoader.getInstance()
-                        .getModContainer(id)
-                        .map(mod -> mod.getMetadata().getVersion().getFriendlyString());
+        var version = FabricLoader.getInstance()
+                .getModContainer(id)
+                .map(mod -> mod.getMetadata().getVersion().getFriendlyString());
         return label("mod_version", name, version.<Text>map(Text::literal).orElseGet(() -> label("mod_missing")));
     }
 
@@ -885,13 +865,13 @@ public final class TerrainDiffusionSettingsScreen extends Screen {
     private void save() {
         String invalid = TerrainDiffusionConfigEditor.validate(draft.values());
         if (invalid != null) {
-            boolean incompatible =
-                    "performance.prefetch".equals(invalid)
-                            && "adaptive".equals(draft.get(invalid))
-                            && "prepared_only".equals(draft.get("preparation.mode"));
-            message =
-                    (incompatible ? label("adaptive_requires_on_demand") : label("invalid", label("field." + invalid)))
-                            .formatted(Formatting.RED);
+            boolean incompatible = "performance.prefetch".equals(invalid)
+                    && "adaptive".equals(draft.get(invalid))
+                    && "prepared_only".equals(draft.get("preparation.mode"));
+            message = (incompatible
+                            ? label("adaptive_requires_on_demand")
+                            : label("invalid", label("field." + invalid)))
+                    .formatted(Formatting.RED);
             selectPage(TerrainSettingsCatalog.pageFor(invalid));
             return;
         }

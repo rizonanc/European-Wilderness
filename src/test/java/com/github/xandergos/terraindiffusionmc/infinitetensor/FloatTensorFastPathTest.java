@@ -1,9 +1,10 @@
 package com.github.xandergos.terraindiffusionmc.infinitetensor;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.*;
 import java.util.concurrent.*;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class FloatTensorFastPathTest {
     static void same(float[] a, float[] b) {
@@ -104,15 +105,14 @@ class FloatTensorFastPathTest {
         try (var workers = Executors.newFixedThreadPool(8)) {
             var tasks = new ArrayList<Future<FloatTensor>>();
             for (int i = 0; i < 32; i++)
-                tasks.add(
-                        workers.submit(() -> {
-                            var dst = new FloatTensor(new int[] {4, 8, 16});
-                            var src = new FloatTensor(dst.shape);
-                            Arrays.fill(src.data, 0.25f);
-                            int[][] region = {{0, 4}, {0, 8}, {0, 16}};
-                            for (int j = 0; j < 100; j++) dst.addFrom(src, region, region);
-                            return dst;
-                        }));
+                tasks.add(workers.submit(() -> {
+                    var dst = new FloatTensor(new int[] {4, 8, 16});
+                    var src = new FloatTensor(dst.shape);
+                    Arrays.fill(src.data, 0.25f);
+                    int[][] region = {{0, 4}, {0, 8}, {0, 16}};
+                    for (int j = 0; j < 100; j++) dst.addFrom(src, region, region);
+                    return dst;
+                }));
             for (var task : tasks) for (float value : task.get(10, TimeUnit.SECONDS).data) assertEquals(25.0f, value);
         }
     }

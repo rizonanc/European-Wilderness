@@ -1,24 +1,26 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
-import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.PerformanceDiagnostics;
 import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.WorkTimeline.Stage.*;
 
 import com.github.xandergos.terraindiffusionmc.world.TerrainDiffusionBiomeSource;
+import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.PerformanceDiagnostics;
+import java.lang.invoke.*;
+import java.lang.reflect.*;
+import java.util.*;
 import net.minecraft.block.*;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.WorldChunk;
-import java.lang.reflect.*;
-import java.lang.invoke.*;
-import java.util.*;
 
 /** Calls the public 0.2.16 interfaces documented in the author's published 12111 source.
  * Reflection isolates an optional, version-pinned dependency; no Voxy classes are bundled. */
 public final class Voxy016Api {
     /** GPU capabilities and the instance factory must exist before VoxyConfig is initialized. */
     public static boolean runtimeReady() throws ReflectiveOperationException {
-        return (boolean) Class.forName("me.cortex.voxy.commonImpl.VoxyCommon").getMethod("isAvailable").invoke(null);
+        return (boolean) Class.forName("me.cortex.voxy.commonImpl.VoxyCommon")
+                .getMethod("isAvailable")
+                .invoke(null);
     }
 
     private final Method instance, worldId, nullable, enabled, live, acquire, release, mapper, exists, sectionRelease;
@@ -99,38 +101,36 @@ public final class Voxy016Api {
         release = engine.getMethod("releaseRef");
         mapper = engine.getMethod("getMapper");
         exists = engine.getMethod("acquireIfExists", int.class, int.class, int.class, int.class);
-        sectionRelease = Class.forName("me.cortex.voxy.common.world.WorldSection").getMethod("release");
+        sectionRelease =
+                Class.forName("me.cortex.voxy.common.world.WorldSection").getMethod("release");
         var worldSection = Class.forName("me.cortex.voxy.common.world.WorldSection");
         children = worldSection.getMethod("getNonEmptyChildren");
         copySection = worldSection.getMethod("copyData");
         rawSection = worldSection.getMethod("_unsafeGetRawDataArray");
-        stockMip =
-                MethodHandles.publicLookup()
-                        .unreflect(
-                                Class.forName("me.cortex.voxy.common.world.other.Mipper")
-                                        .getMethod(
-                                                "mip",
-                                                long.class,
-                                                long.class,
-                                                long.class,
-                                                long.class,
-                                                long.class,
-                                                long.class,
-                                                long.class,
-                                                long.class,
-                                                map))
-                        .asType(
-                                MethodType.methodType(
-                                        long.class,
-                                        long.class,
-                                        long.class,
-                                        long.class,
-                                        long.class,
-                                        long.class,
-                                        long.class,
-                                        long.class,
-                                        long.class,
-                                        Object.class));
+        stockMip = MethodHandles.publicLookup()
+                .unreflect(Class.forName("me.cortex.voxy.common.world.other.Mipper")
+                        .getMethod(
+                                "mip",
+                                long.class,
+                                long.class,
+                                long.class,
+                                long.class,
+                                long.class,
+                                long.class,
+                                long.class,
+                                long.class,
+                                map))
+                .asType(MethodType.methodType(
+                        long.class,
+                        long.class,
+                        long.class,
+                        long.class,
+                        long.class,
+                        long.class,
+                        long.class,
+                        long.class,
+                        long.class,
+                        Object.class));
         markDirty = engine.getMethod("markDirty", worldSection, int.class, int.class);
         blockUpdateBit = engine.getField("UPDATE_TYPE_BLOCK_BIT").getInt(null);
         nonEmptyBlocks = worldSection.getMethod("getNonEmptyBlockCount");
@@ -139,16 +139,14 @@ public final class Voxy016Api {
         position = section.getMethod("setPosition", int.class, int.class, int.class);
         data = section.getField("section");
         nonAir = section.getField("lvl0NonAirCount");
-        mip =
-                Class.forName("me.cortex.voxy.common.voxelization.WorldVoxilizedSectionMipper")
-                        .getMethod("mipSection", section, map);
+        mip = Class.forName("me.cortex.voxy.common.voxelization.WorldVoxilizedSectionMipper")
+                .getMethod("mipSection", section, map);
         insert = Class.forName("me.cortex.voxy.common.world.WorldUpdater").getMethod("insertUpdate", engine, section);
         blockId = map.getMethod("getIdForBlockState", BlockState.class);
         biomeId = map.getMethod("getIdForBiome", RegistryEntry.class);
         compose = map.getMethod("composeMappingId", byte.class, int.class, int.class);
-        reingest =
-                Class.forName("me.cortex.voxy.common.world.service.VoxelIngestService")
-                        .getMethod("tryAutoIngestChunk", WorldChunk.class);
+        reingest = Class.forName("me.cortex.voxy.common.world.service.VoxelIngestService")
+                .getMethod("tryAutoIngestChunk", WorldChunk.class);
     }
 
     /** Must run on the client thread before handing the pinned engine to a worker. */
@@ -262,9 +260,8 @@ public final class Voxy016Api {
                             WaterMipRepairData.stock(state.stockMips, stockReducer);
                             mip.invoke(null, section, state.map);
                             for (int level = 1; level <= 4; level++) {
-                                Object parent =
-                                        exists.invoke(
-                                                engine, level, cx >> (level + 1), cy >> (level + 1), cz >> (level + 1));
+                                Object parent = exists.invoke(
+                                        engine, level, cx >> (level + 1), cy >> (level + 1), cz >> (level + 1));
                                 if (parent == null) continue;
                                 try {
                                     long[] parentData = (long[]) rawSection.invoke(parent);
@@ -321,9 +318,8 @@ public final class Voxy016Api {
                             WaterMipRepairData.stock(state.stockMips, stockReducer);
                             mip.invoke(null, section, state.map);
                             for (int level = 1; level <= 2; level++) {
-                                Object parent =
-                                        exists.invoke(
-                                                engine, level, cx >> (level + 1), cy >> (level + 1), cz >> (level + 1));
+                                Object parent = exists.invoke(
+                                        engine, level, cx >> (level + 1), cy >> (level + 1), cz >> (level + 1));
                                 if (parent == null) continue;
                                 try {
                                     // Caps remain within their source 16-cube. Its fine terrain is
@@ -408,28 +404,23 @@ public final class Voxy016Api {
         public int highestKnownCube(int worldX, int worldZ, int bottom, int top) throws Exception {
             long start = System.nanoTime();
             try {
-                return LodSkyIndex.highest(
-                        worldX,
-                        worldZ,
-                        bottom,
-                        top,
-                        new LodSkyIndex.Reader() {
-                            public int mask(int level, int x, int y, int z) throws Exception {
-                                Object section = exists.invoke(engine, level, x, y, z);
-                                if (section == null) return -1;
-                                try {
-                                    return level == 0
-                                            ? ((int) nonEmptyBlocks.invoke(section) > 0 ? 1 : 0)
-                                            : Byte.toUnsignedInt((byte) children.invoke(section));
-                                } finally {
-                                    sectionRelease.invoke(section);
-                                }
-                            }
+                return LodSkyIndex.highest(worldX, worldZ, bottom, top, new LodSkyIndex.Reader() {
+                    public int mask(int level, int x, int y, int z) throws Exception {
+                        Object section = exists.invoke(engine, level, x, y, z);
+                        if (section == null) return -1;
+                        try {
+                            return level == 0
+                                    ? ((int) nonEmptyBlocks.invoke(section) > 0 ? 1 : 0)
+                                    : Byte.toUnsignedInt((byte) children.invoke(section));
+                        } finally {
+                            sectionRelease.invoke(section);
+                        }
+                    }
 
-                            public boolean childPresent(int mask, int x, int y, int z) throws Exception {
-                                return (mask & (1 << (int) childIndex.invoke(null, x, y, z))) != 0;
-                            }
-                        });
+                    public boolean childPresent(int mask, int x, int y, int z) throws Exception {
+                        return (mask & (1 << (int) childIndex.invoke(null, x, y, z))) != 0;
+                    }
+                });
             } finally {
                 timings.record("skyIndex", System.nanoTime() - start);
             }
@@ -448,28 +439,20 @@ public final class Voxy016Api {
                     Object section = state.section;
                     long[] target = (long[]) data.get(section);
                     if (state.column != column) {
-                        state.voxels =
-                                new LodVoxelEncoder(
-                                        column,
-                                        biome -> {
-                                            var values = state.palette.get(biome);
-                                            if (values != null) return values;
-                                            values = new long[states.length][2];
-                                            int bid = (int) biomeId.invoke(state.map, biomes.recordedBiome(biome));
-                                            for (int k = 0; k < states.length; k++) {
-                                                int block = (int) blockId.invoke(state.map, states[k]);
-                                                for (int light = 0; light < 2; light++)
-                                                    values[k][light] =
-                                                            (long)
-                                                                    compose.invoke(
-                                                                            null,
-                                                                            (byte) (light == 0 ? 0 : 15),
-                                                                            block,
-                                                                            bid);
-                                            }
-                                            state.palette.put(biome, values);
-                                            return values;
-                                        });
+                        state.voxels = new LodVoxelEncoder(column, biome -> {
+                            var values = state.palette.get(biome);
+                            if (values != null) return values;
+                            values = new long[states.length][2];
+                            int bid = (int) biomeId.invoke(state.map, biomes.recordedBiome(biome));
+                            for (int k = 0; k < states.length; k++) {
+                                int block = (int) blockId.invoke(state.map, states[k]);
+                                for (int light = 0; light < 2; light++)
+                                    values[k][light] =
+                                            (long) compose.invoke(null, (byte) (light == 0 ? 0 : 15), block, bid);
+                            }
+                            state.palette.put(biome, values);
+                            return values;
+                        });
                         state.column = column;
                     }
                     for (int by = 0; by < 2; by++)

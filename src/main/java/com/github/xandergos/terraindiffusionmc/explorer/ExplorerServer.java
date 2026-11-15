@@ -4,8 +4,8 @@ import com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfig;
 import com.github.xandergos.terraindiffusionmc.infinitetensor.FloatTensor;
 import com.github.xandergos.terraindiffusionmc.pipeline.LocalTerrainProvider;
 import com.github.xandergos.terraindiffusionmc.pipeline.WorldPipelineModelConfig;
-import com.github.xandergos.terraindiffusionmc.world.WorldScaleManager;
 import com.github.xandergos.terraindiffusionmc.world.SpawnChoice;
+import com.github.xandergos.terraindiffusionmc.world.WorldScaleManager;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
@@ -92,12 +92,11 @@ public final class ExplorerServer {
         server.createContext("/api/coarse_stats", ExplorerServer::handleCoarseStats);
         server.createContext("/api/detail.png", ExplorerServer::handleDetailPng);
         server.createContext("/api/detail_raw", ExplorerServer::handleDetailRaw);
-        server.setExecutor(
-                Executors.newSingleThreadExecutor(r -> {
-                    Thread t = new Thread(r, "terrain-explorer-http");
-                    t.setDaemon(true);
-                    return t;
-                }));
+        server.setExecutor(Executors.newSingleThreadExecutor(r -> {
+            Thread t = new Thread(r, "terrain-explorer-http");
+            t.setDaemon(true);
+            return t;
+        }));
         server.start();
         SERVER = server;
         SERVER_PORT = port;
@@ -178,13 +177,15 @@ public final class ExplorerServer {
             return;
         }
         try {
-            var body = com.google.gson.JsonParser.parseString(readBody(ex, 1024)).getAsJsonObject();
+            var body =
+                    com.google.gson.JsonParser.parseString(readBody(ex, 1024)).getAsJsonObject();
             if (!Long.toUnsignedString(selection.seed).equals(body.get("seed").getAsString())
                     || !java.util.Objects.equals(selection.seed, LocalTerrainProvider.getPreviewSeedOrNull())) {
                 sendError(ex, 409, "The map seed changed. Reopen the spawn picker.");
                 return;
             }
-            int x = Integer.parseInt(body.get("x").getAsString()), z = Integer.parseInt(body.get("z").getAsString());
+            int x = Integer.parseInt(body.get("x").getAsString()),
+                    z = Integer.parseInt(body.get("z").getAsString());
             var choice = new SpawnChoice(x, z, body.get("habitat").getAsString(), selection.seed);
             int nx = Math.floorDiv(x, selection.scale), nz = Math.floorDiv(z, selection.scale);
             var raw = LocalTerrainProvider.getPipelineData(nz - 2, nx - 2, nz + 3, nx + 3, false)[0];
@@ -447,13 +448,8 @@ public final class ExplorerServer {
                 int centerI = ci * 256 + panI;
                 int centerJ = cj * 256 + panJ;
                 int half = detailSize / 2;
-                float[][] out =
-                        LocalTerrainProvider.getPipelineData(
-                                centerI - half,
-                                centerJ - half,
-                                centerI + half,
-                                centerJ + half,
-                                mode.equals("temperature"));
+                float[][] out = LocalTerrainProvider.getPipelineData(
+                        centerI - half, centerJ - half, centerI + half, centerJ + half, mode.equals("temperature"));
                 float[] elevFlat = out[0];
                 float[] climate = out[1];
                 int H = detailSize;
@@ -517,9 +513,8 @@ public final class ExplorerServer {
                 int half = detailSize / 2;
                 int H = detailSize;
                 int W = detailSize;
-                float[][] out =
-                        LocalTerrainProvider.getPipelineData(
-                                centerI - half, centerJ - half, centerI + half, centerJ + half, true);
+                float[][] out = LocalTerrainProvider.getPipelineData(
+                        centerI - half, centerJ - half, centerI + half, centerJ + half, true);
                 float[] elevFlat = out[0];
                 float[] climate = out[1];
                 ByteBuffer elevBuf = ByteBuffer.allocate(H * W * 2).order(ByteOrder.LITTLE_ENDIAN);

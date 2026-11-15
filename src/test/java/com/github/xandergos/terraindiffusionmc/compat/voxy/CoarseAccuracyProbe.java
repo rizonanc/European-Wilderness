@@ -2,8 +2,8 @@ package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
 import com.github.xandergos.terraindiffusionmc.infinitetensor.FloatTensor;
 import com.github.xandergos.terraindiffusionmc.worldgen.cache.DiskTerrainStore;
-import com.github.xandergos.terraindiffusionmc.worldgen.terrain.TerrainTileKey;
 import com.github.xandergos.terraindiffusionmc.worldgen.mountain.MountainHeightField;
+import com.github.xandergos.terraindiffusionmc.worldgen.terrain.TerrainTileKey;
 import java.nio.*;
 import java.nio.file.*;
 import java.util.*;
@@ -24,12 +24,14 @@ public final class CoarseAccuracyProbe {
         var tiles = new com.github.xandergos.terraindiffusionmc.worldgen.terrain.TerrainTile[4][4];
         for (int tz = 14; tz < 18; tz++)
             for (int tx = 14; tx < 18; tx++) {
-                var tile = store.load(TerrainTileKey.ofTile(12345, tx, tz, 256, fp)).orElseThrow();
+                var tile = store.load(TerrainTileKey.ofTile(12345, tx, tz, 256, fp))
+                        .orElseThrow();
                 tiles[tz - 14][tx - 14] = tile;
                 for (int z = 0; z < 256; z += 8)
                     for (int x = 0; x < 256; x += 8) {
                         int wx = tx * 256 + x, wz = tz * 256 + z;
-                        int exact = MountainHeightField.sample(12345, wx, wz, tile.heightAt(x, z), 2, 1871).surfaceY();
+                        int exact = MountainHeightField.sample(12345, wx, wz, tile.heightAt(x, z), 2, 1871)
+                                .surfaceY();
                         int coarse = patch.surface(wx, wz).firstAir(), error = Math.abs(exact - coarse);
                         errors.add(error);
                         total += error;
@@ -51,30 +53,29 @@ public final class CoarseAccuracyProbe {
         report.put("maxHeightError", errors.getLast());
         report.put("exactHeightRange", List.of(exactMin, exactMax));
         report.put("coarseHeightRange", List.of(coarseMin, coarseMax));
-        java.util.function.IntBinaryOperator exact =
-                (wx, wz) ->
-                        MountainHeightField.sample(
-                                        12345,
-                                        wx,
-                                        wz,
-                                        tiles[Math.floorDiv(wz, 256) - 14][Math.floorDiv(wx, 256) - 14].heightAt(
-                                                Math.floorMod(wx, 256), Math.floorMod(wz, 256)),
-                                        2,
-                                        1871)
-                                .surfaceY();
+        java.util.function.IntBinaryOperator exact = (wx, wz) -> MountainHeightField.sample(
+                        12345,
+                        wx,
+                        wz,
+                        tiles[Math.floorDiv(wz, 256) - 14][Math.floorDiv(wx, 256) - 14].heightAt(
+                                Math.floorMod(wx, 256), Math.floorMod(wz, 256)),
+                        2,
+                        1871)
+                .surfaceY();
         var corrections = new CoarseLodCorrections(262144);
         var anchors = new ArrayList<CoarseLodCorrections.Anchor>();
         int boundary = 3584 + 512;
         for (int z = 3584; z < 3584 + 1024; z += 16)
             for (int x : new int[] {boundary - 32, boundary - 16, boundary - 1})
-                anchors.add(
-                        new CoarseLodCorrections.Anchor(x, z, exact.applyAsInt(x, z) - patch.surface(x, z).firstAir()));
+                anchors.add(new CoarseLodCorrections.Anchor(
+                        x, z, exact.applyAsInt(x, z) - patch.surface(x, z).firstAir()));
         corrections.add(anchors);
         double oldError = 0, newError = 0;
         int boundarySamples = 0;
         for (int z = 3584; z < 3584 + 1024; z += 8)
             for (int x = boundary; x < boundary + 32; x += 4) {
-                int actual = exact.applyAsInt(x, z), coarse = patch.surface(x, z).firstAir();
+                int actual = exact.applyAsInt(x, z),
+                        coarse = patch.surface(x, z).firstAir();
                 oldError += Math.abs(actual - coarse);
                 newError += Math.abs(actual - (coarse + corrections.adjustment(x, z)));
                 boundarySamples++;
@@ -90,7 +91,8 @@ public final class CoarseAccuracyProbe {
                         newError / boundarySamples,
                         "transitionRadius",
                         CoarseLodCorrections.RADIUS));
-        String json = new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(report);
+        String json =
+                new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(report);
         Files.writeString(Path.of(args[2]), json + "\n");
         System.out.println(json);
     }

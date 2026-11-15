@@ -65,9 +65,8 @@ public final class MountainPassPlanner {
                     return Optional.empty();
                 }
 
-                MountainPassPlanner.Grid grid =
-                        new MountainPassPlanner.Grid(
-                                seed, startX, startZ, tileSize, worldScale, surfaceCapY, tile, gridSide);
+                MountainPassPlanner.Grid grid = new MountainPassPlanner.Grid(
+                        seed, startX, startZ, tileSize, worldScale, surfaceCapY, tile, gridSide);
                 MountainPassPlanner.Candidate eastWest = search(grid, true);
                 MountainPassPlanner.Candidate northSouth = search(grid, false);
                 MountainPassPlanner.Candidate best = null;
@@ -90,9 +89,8 @@ public final class MountainPassPlanner {
                     } else {
                         return walkableRouteFor(route).isEmpty()
                                 ? Optional.empty()
-                                : Optional.of(
-                                        new MountainPassPlanner.PassPlan(
-                                                passId(seed, tileX, tileZ), tileX, tileZ, route));
+                                : Optional.of(new MountainPassPlanner.PassPlan(
+                                        passId(seed, tileX, tileZ), tileX, tileZ, route));
                     }
                 }
             } else {
@@ -153,9 +151,8 @@ public final class MountainPassPlanner {
         Arrays.fill(cost, Long.MAX_VALUE);
         Arrays.fill(previous, -1);
         PriorityQueue<MountainPassPlanner.Node> frontier =
-                new PriorityQueue<>(
-                        Comparator.comparingLong(MountainPassPlanner.Node::cost)
-                                .thenComparingInt(MountainPassPlanner.Node::index));
+                new PriorityQueue<>(Comparator.comparingLong(MountainPassPlanner.Node::cost)
+                        .thenComparingInt(MountainPassPlanner.Node::index));
         int lower = n / 4;
         int upper = n - 1 - lower;
 
@@ -173,10 +170,9 @@ public final class MountainPassPlanner {
             if (current.cost == cost[current.index]) {
                 int gx = current.index % n;
                 int gz = current.index / n;
-                boolean atGoal =
-                        eastWest
-                                ? gx == n - 1 && gz >= lower && gz <= upper
-                                : gz == n - 1 && gx >= lower && gx <= upper;
+                boolean atGoal = eastWest
+                        ? gx == n - 1 && gz >= lower && gz <= upper
+                        : gz == n - 1 && gx >= lower && gx <= upper;
                 if (atGoal) {
                     List<Integer> reverse = new ArrayList<>();
 
@@ -268,9 +264,8 @@ public final class MountainPassPlanner {
                 for (int step = 1; step <= 8; step++) {
                     int px = priorX + step * dx;
                     int pz = priorZ + step * dz;
-                    route.add(
-                            new MountainPassPlanner.RoutePoint(
-                                    grid.startX + px, grid.startZ + pz, grid.heightAt(px, pz)));
+                    route.add(new MountainPassPlanner.RoutePoint(
+                            grid.startX + px, grid.startZ + pz, grid.heightAt(px, pz)));
                 }
             }
 

@@ -1,15 +1,18 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.hydrology;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import static org.junit.jupiter.api.Assertions.*;
 
 class WaterWriteBehindFailureTest {
-    @TempDir Path temp;
+    @TempDir
+    Path temp;
+
     private static final WorldWaterGrid GRID = WorldWaterGrid.DEFAULT;
 
     private static WorldWaterStore store(Path root) {

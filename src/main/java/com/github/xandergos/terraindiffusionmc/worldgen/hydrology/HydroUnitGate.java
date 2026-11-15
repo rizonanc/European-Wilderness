@@ -10,10 +10,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -91,21 +91,19 @@ public final class HydroUnitGate {
         Objects.requireNonNull(regionDirectory, "regionDirectory");
         Objects.requireNonNull(probe, "probe");
         Objects.requireNonNull(rawReady, "rawReady");
-        FutureTask<WatershedPlan> task =
-                new FutureTask<>(() ->
-                        this.publishLocked(
-                                seed,
-                                unitOriginX,
-                                unitOriginZ,
-                                parentCoarseW,
-                                parentCoarseH,
-                                parentBases,
-                                key,
-                                daughterTiles,
-                                contractedOutletIds,
-                                regionDirectory,
-                                probe,
-                                rawReady));
+        FutureTask<WatershedPlan> task = new FutureTask<>(() -> this.publishLocked(
+                seed,
+                unitOriginX,
+                unitOriginZ,
+                parentCoarseW,
+                parentCoarseH,
+                parentBases,
+                key,
+                daughterTiles,
+                contractedOutletIds,
+                regionDirectory,
+                probe,
+                rawReady));
         Future<WatershedPlan> flight = this.pending.putIfAbsent(key, task);
         boolean ownsFlight = flight == null;
         if (ownsFlight) {
@@ -203,28 +201,26 @@ public final class HydroUnitGate {
                 GeneratedChunkGuard.Result barrier =
                         GeneratedChunkGuard.check(regionDirectory, (int) extent[0], (int) extent[1], probe);
                 if (!barrier.safeToPublish()) {
-                    throw new IllegalStateException(
-                            "Watershed frontier has generated chunks at extent ("
-                                    + extent[0]
-                                    + ","
-                                    + extent[1]
-                                    + "): "
-                                    + barrier.reason());
+                    throw new IllegalStateException("Watershed frontier has generated chunks at extent ("
+                            + extent[0]
+                            + ","
+                            + extent[1]
+                            + "): "
+                            + barrier.reason());
                 }
             }
 
             WorldSession.requireActive(this.ticket);
-            WatershedPlan plan =
-                    this.store.publishUnit(
-                            seed,
-                            unitOriginX,
-                            unitOriginZ,
-                            parentCoarseW,
-                            parentCoarseH,
-                            parentBases,
-                            key,
-                            daughterTiles,
-                            contractedOutletIds);
+            WatershedPlan plan = this.store.publishUnit(
+                    seed,
+                    unitOriginX,
+                    unitOriginZ,
+                    parentCoarseW,
+                    parentCoarseH,
+                    parentBases,
+                    key,
+                    daughterTiles,
+                    contractedOutletIds);
             this.store.requireUnitDecisions(key, daughterTiles);
             SeamContract seam = SeamContract.of(plan, key.tileSizeBlocks());
             this.register(key, plan, seam, daughterTiles, contractedOutletIds);
@@ -246,13 +242,11 @@ public final class HydroUnitGate {
         }
 
         int tileSize = key.tileSizeBlocks();
-        HydroPrepareService service =
-                new HydroPrepareService(
-                        plan,
-                        seam,
-                        (tileX, tileZ) ->
-                                tileCodes.contains((long) tileZ.intValue() << 32 | tileX.intValue() & 4294967295L)
-                                        && tileSize == key.tileSizeBlocks());
+        HydroPrepareService service = new HydroPrepareService(
+                plan,
+                seam,
+                (tileX, tileZ) -> tileCodes.contains((long) tileZ.intValue() << 32 | tileX.intValue() & 4294967295L)
+                        && tileSize == key.tileSizeBlocks());
         WorldSession.RiverOverlay overlay = service.asOverlay();
         synchronized (this.activeLock) {
             Map<WatershedStore.UnitKey, HydroUnitGate.Published> next = new HashMap<>(this.active);

@@ -1,8 +1,8 @@
 package com.github.xandergos.terraindiffusionmc.mixin.compat;
 
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
-import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.registry.tag.FluidTags;
+import net.minecraft.world.chunk.ChunkSection;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;

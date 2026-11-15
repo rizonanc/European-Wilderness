@@ -23,8 +23,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Environment(EnvType.CLIENT)
 @Mixin(targets = "net/minecraft/client/gui/screen/world/CreateWorldScreen$WorldTab")
 public abstract class CreateWorldScreenWorldTabMixin {
-    @Shadow @Final CreateWorldScreen field_42182;
-    @Shadow private ButtonWidget customizeButton;
+    @Shadow
+    @Final
+    CreateWorldScreen field_42182;
+
+    @Shadow
+    private ButtonWidget customizeButton;
+
     private static final RegistryKey<WorldPreset> TERRAIN_DIFFUSION_PRESET_KEY =
             RegistryKey.of(RegistryKeys.WORLD_PRESET, Identifier.of("terrain-diffusion-mc", "terrain_diffusion"));
 
@@ -72,7 +77,8 @@ public abstract class CreateWorldScreenWorldTabMixin {
             } else {
                 return TERRAIN_DIFFUSION_PRESET_KEY.equals(worldType.preset())
                         ? true
-                        : "terrain diffusion".equalsIgnoreCase(worldType.getName().getString());
+                        : "terrain diffusion"
+                                .equalsIgnoreCase(worldType.getName().getString());
             }
         }
     }

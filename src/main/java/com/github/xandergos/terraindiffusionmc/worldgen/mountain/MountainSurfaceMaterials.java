@@ -14,10 +14,9 @@ public final class MountainSurfaceMaterials {
         long southDelta = (long) southY - surfaceY;
         long westDelta = (long) westY - surfaceY;
         long eastDelta = (long) eastY - surfaceY;
-        long slope =
-                Math.max(
-                        Math.max(Math.abs(northDelta), Math.abs(southDelta)),
-                        Math.max(Math.abs(westDelta), Math.abs(eastDelta)));
+        long slope = Math.max(
+                Math.max(Math.abs(northDelta), Math.abs(southDelta)),
+                Math.max(Math.abs(westDelta), Math.abs(eastDelta)));
         if (surfaceY < 300 && slope <= 1L) {
             return MountainSurfaceMaterials.Material.NONE;
         }
@@ -30,16 +29,14 @@ public final class MountainSurfaceMaterials {
         double shelter = Math.min(6.0, Math.max(0.0, -convexity));
         double exposure = Math.min(6.0, Math.max(0.0, convexity));
         double rockPatch = valueNoise01(seed ^ 8892408665399891877L, x, z, 40);
-        double rockScore =
-                0.3 * Math.min(9L, slope)
-                        + 0.0015 * Math.min(1200, Math.max(0, surfaceY - 280))
-                        + 0.15 * Math.max(-5.0, Math.min(5.0, convexity))
-                        + 1.8 * (rockPatch - 0.5);
-        double windScore =
-                rockPatch
-                        + 5.0E-4 * Math.min(400, Math.max(0, surfaceY - 360))
-                        + 0.02 * (Math.min(4L, slope) - 1L)
-                        + 0.02 * Math.max(-2.0, Math.min(2.0, convexity));
+        double rockScore = 0.3 * Math.min(9L, slope)
+                + 0.0015 * Math.min(1200, Math.max(0, surfaceY - 280))
+                + 0.15 * Math.max(-5.0, Math.min(5.0, convexity))
+                + 1.8 * (rockPatch - 0.5);
+        double windScore = rockPatch
+                + 5.0E-4 * Math.min(400, Math.max(0, surfaceY - 360))
+                + 0.02 * (Math.min(4L, slope) - 1L)
+                + 0.02 * Math.max(-2.0, Math.min(2.0, convexity));
         double severeCold = Math.min(1.0, Math.max(0.0, (-modelTempC - 12.0) / 20.0));
         windScore -= 0.18 * severeCold;
         if (slope == 1L) {

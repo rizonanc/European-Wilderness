@@ -14,9 +14,8 @@ public final class ForestComposition {
     }
 
     private static double gain(long seed, int x, int z, int channel) {
-        double field =
-                .75 * VegetationDistribution.valueNoise(seed, x, z, channel, 256)
-                        + .25 * VegetationDistribution.valueNoise(seed, x, z, channel + 7, 96);
+        double field = .75 * VegetationDistribution.valueNoise(seed, x, z, channel, 256)
+                + .25 * VegetationDistribution.valueNoise(seed, x, z, channel + 7, 96);
         return .35 + 2.2 * field * field;
     }
 

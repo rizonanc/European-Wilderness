@@ -113,9 +113,8 @@ public final class DiagnosticErrors {
         GLOBAL.health = Objects.requireNonNull(check);
     }
 
-    private static final Pattern SECRETS =
-            Pattern.compile(
-                    "(?i)(bearer\\s+|(?:token|password|passwd|secret|authorization|api[_-]?key)\\s*[=:]\\s*)[^\\s,;]+|(?<=://)[^/\\s:@]+:[^/\\s@]+@");
+    private static final Pattern SECRETS = Pattern.compile(
+            "(?i)(bearer\\s+|(?:token|password|passwd|secret|authorization|api[_-]?key)\\s*[=:]\\s*)[^\\s,;]+|(?<=://)[^/\\s:@]+:[^/\\s@]+@");
     private static final Pattern PATHS =
             Pattern.compile("(?i)[a-z]:[\\\\/][^\\r\\n\"<>]*|/(?:home|Users|tmp|var|mnt)/[^\\r\\n\"<>]*");
 
@@ -244,25 +243,21 @@ public final class DiagnosticErrors {
         Objects.requireNonNull(outcome);
         int at = code.ordinal() * Outcome.values().length + outcome.ordinal();
         long now = clock.getAsLong(), skipped;
-        var clean =
-                new Context(
-                        safe(context.requestId, 80),
-                        safe(context.stage, 120),
-                        safe(context.dimension, 120),
-                        safe(context.session, 80),
-                        safe(context.coordinates, 120));
+        var clean = new Context(
+                safe(context.requestId, 80),
+                safe(context.stage, 120),
+                safe(context.dimension, 120),
+                safe(context.session, 80),
+                safe(context.coordinates, 120));
         var cause = root(failure);
-        var notice =
-                new Notice(
-                        Instant.now().toString(),
-                        code,
-                        clean,
-                        outcome,
-                        safe(recovery, 320),
-                        safe(Thread.currentThread().getName(), 120),
-                        cause == null
-                                ? "none"
-                                : safe(cause.getClass().getSimpleName() + ": " + cause.getMessage(), 512));
+        var notice = new Notice(
+                Instant.now().toString(),
+                code,
+                clean,
+                outcome,
+                safe(recovery, 320),
+                safe(Thread.currentThread().getName(), 120),
+                cause == null ? "none" : safe(cause.getClass().getSimpleName() + ": " + cause.getMessage(), 512));
         synchronized (this) {
             seen[at]++;
             if (events.size() == 64) events.removeFirst();
@@ -368,10 +363,9 @@ public final class DiagnosticErrors {
             if (bytes.length > 128 * 1024) throw new IOException("Diagnostic report exceeds 128 KiB limit");
             Files.createDirectories(directory);
             try (var files = Files.list(directory)) {
-                var owned =
-                        files.filter(p -> p.getFileName().toString().matches("td-critical-[0-9]+-[0-9]+\\.json"))
-                                .sorted(Comparator.comparing(p -> p.getFileName().toString()))
-                                .toList();
+                var owned = files.filter(p -> p.getFileName().toString().matches("td-critical-[0-9]+-[0-9]+\\.json"))
+                        .sorted(Comparator.comparing(p -> p.getFileName().toString()))
+                        .toList();
                 for (int i = 0; i <= owned.size() - 10; i++) Files.deleteIfExists(owned.get(i));
             }
             Files.write(

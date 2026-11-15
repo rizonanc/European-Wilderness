@@ -74,11 +74,10 @@ public final class LaplacianUtils {
                 float wc = srcC - c0;
                 c0 = Math.max(0, Math.min(srcW - 1, c0));
                 c1 = Math.max(0, Math.min(srcW - 1, c1));
-                dst[r][c] =
-                        (1.0F - wr) * (1.0F - wc) * src[r0][c0]
-                                + (1.0F - wr) * wc * src[r0][c1]
-                                + wr * (1.0F - wc) * src[r1][c0]
-                                + wr * wc * src[r1][c1];
+                dst[r][c] = (1.0F - wr) * (1.0F - wc) * src[r0][c0]
+                        + (1.0F - wr) * wc * src[r0][c1]
+                        + wr * (1.0F - wc) * src[r1][c0]
+                        + wr * wc * src[r1][c1];
             }
         }
 
@@ -130,11 +129,10 @@ public final class LaplacianUtils {
             for (int c = 0; c < width; c++) {
                 float wc = weights[c];
                 int c0 = left[c], c1 = right[c];
-                out[offset + r * width + c] =
-                        (1.0F - wr) * (1.0F - wc) * src[r0][c0]
-                                + (1.0F - wr) * wc * src[r0][c1]
-                                + wr * (1.0F - wc) * src[r1][c0]
-                                + wr * wc * src[r1][c1];
+                out[offset + r * width + c] = (1.0F - wr) * (1.0F - wc) * src[r0][c0]
+                        + (1.0F - wr) * wc * src[r0][c1]
+                        + wr * (1.0F - wc) * src[r1][c0]
+                        + wr * wc * src[r1][c1];
             }
         }
     }

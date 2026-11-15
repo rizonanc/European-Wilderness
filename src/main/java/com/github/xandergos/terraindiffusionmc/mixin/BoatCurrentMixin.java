@@ -15,9 +15,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(AbstractBoatEntity.class)
 abstract class BoatCurrentMixin implements BoatCurrentPayload.Receiver {
-    @Unique private short terrainDiffusion$flow;
-    @Unique private short terrainDiffusion$sentFlow;
-    @Unique private int terrainDiffusion$lastReceived;
+    @Unique
+    private short terrainDiffusion$flow;
+
+    @Unique
+    private short terrainDiffusion$sentFlow;
+
+    @Unique
+    private int terrainDiffusion$lastReceived;
 
     @Inject(
             method = "tick",

@@ -1,9 +1,10 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.ecology;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.BiomeBalance;
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class BiomeLandscapeTest {
     @Test

@@ -1,8 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.world;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class BiomeColumnCacheTest {
     @Test

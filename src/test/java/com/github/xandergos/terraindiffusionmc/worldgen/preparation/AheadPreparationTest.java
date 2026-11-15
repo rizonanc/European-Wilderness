@@ -1,12 +1,13 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.preparation;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.github.xandergos.terraindiffusionmc.worldgen.terrain.TerrainTileKey;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 import java.util.function.BooleanSupplier;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class AheadPreparationTest {
     private static TerrainTileKey key(int x) {
@@ -33,16 +34,14 @@ class AheadPreparationTest {
         assertEquals(
                 List.of(new TilePrefetchPolicy.TileCoord(0, 0)),
                 WaterPrefetchPolicy.candidates(500, 250, 1000, 0, 512));
-        int slow =
-                WaterPrefetchPolicy.candidates(10, 250, 3, 0, 512).stream()
-                        .mapToInt(TilePrefetchPolicy.TileCoord::x)
-                        .max()
-                        .orElseThrow();
-        int fast =
-                WaterPrefetchPolicy.candidates(10, 250, 180, 0, 512).stream()
-                        .mapToInt(TilePrefetchPolicy.TileCoord::x)
-                        .max()
-                        .orElseThrow();
+        int slow = WaterPrefetchPolicy.candidates(10, 250, 3, 0, 512).stream()
+                .mapToInt(TilePrefetchPolicy.TileCoord::x)
+                .max()
+                .orElseThrow();
+        int fast = WaterPrefetchPolicy.candidates(10, 250, 180, 0, 512).stream()
+                .mapToInt(TilePrefetchPolicy.TileCoord::x)
+                .max()
+                .orElseThrow();
         assertTrue(fast >= slow);
     }
 
@@ -50,16 +49,15 @@ class AheadPreparationTest {
     void testSamplerIncludesCurrentWhileStationary() {
         var desired = new AtomicReference<List<TerrainTileKey>>(List.of());
         var healthy = new AtomicBoolean();
-        var sampler =
-                new TilePrefetchSampler(
-                        7,
-                        "fp",
-                        512,
-                        (keys, ok) -> {
-                            desired.set(keys);
-                            healthy.set(ok);
-                        },
-                        true);
+        var sampler = new TilePrefetchSampler(
+                7,
+                "fp",
+                512,
+                (keys, ok) -> {
+                    desired.set(keys);
+                    healthy.set(ok);
+                },
+                true);
         for (int i = 0; i < 20; i++) sampler.tick(10, 10, 10, true);
         assertFalse(desired.get().isEmpty());
         assertTrue(healthy.get());
@@ -80,27 +78,26 @@ class AheadPreparationTest {
         var second = new CountDownLatch(1);
         var busy = new AtomicBoolean();
         var stages = new AtomicInteger();
-        var work =
-                new TilePrefetchService.TileWork() {
-                    public boolean ready(TerrainTileKey k) {
-                        return false;
-                    }
+        var work = new TilePrefetchService.TileWork() {
+            public boolean ready(TerrainTileKey k) {
+                return false;
+            }
 
-                    public void prepare(TerrainTileKey k) {
-                        fail("must use incremental entry point");
-                    }
+            public void prepare(TerrainTileKey k) {
+                fail("must use incremental entry point");
+            }
 
-                    public boolean prepareNext(TerrainTileKey k, BooleanSupplier allowed) throws Exception {
-                        assertTrue(allowed.getAsBoolean());
-                        if (stages.incrementAndGet() == 1) {
-                            first.countDown();
-                            release.await(5, TimeUnit.SECONDS);
-                            return false;
-                        }
-                        second.countDown();
-                        return true;
-                    }
-                };
+            public boolean prepareNext(TerrainTileKey k, BooleanSupplier allowed) throws Exception {
+                assertTrue(allowed.getAsBoolean());
+                if (stages.incrementAndGet() == 1) {
+                    first.countDown();
+                    release.await(5, TimeUnit.SECONDS);
+                    return false;
+                }
+                second.countDown();
+                return true;
+            }
+        };
         var service = new TilePrefetchService(work, () -> true, busy::get, () -> false);
         try {
             service.updateCandidates(List.of(key(0)), true);
@@ -128,28 +125,27 @@ class AheadPreparationTest {
         var next = new CountDownLatch(1);
         var calls = new CopyOnWriteArrayList<TerrainTileKey>();
         var revoked = new AtomicBoolean();
-        var work =
-                new TilePrefetchService.TileWork() {
-                    public boolean ready(TerrainTileKey k) {
-                        return false;
-                    }
+        var work = new TilePrefetchService.TileWork() {
+            public boolean ready(TerrainTileKey k) {
+                return false;
+            }
 
-                    public void prepare(TerrainTileKey k) {
-                        fail("must use incremental entry point");
-                    }
+            public void prepare(TerrainTileKey k) {
+                fail("must use incremental entry point");
+            }
 
-                    public boolean prepareNext(TerrainTileKey k, BooleanSupplier allowed) throws Exception {
-                        calls.add(k);
-                        if (k.equals(key(0))) {
-                            first.countDown();
-                            release.await(5, TimeUnit.SECONDS);
-                            revoked.set(!allowed.getAsBoolean());
-                            return false;
-                        }
-                        next.countDown();
-                        return true;
-                    }
-                };
+            public boolean prepareNext(TerrainTileKey k, BooleanSupplier allowed) throws Exception {
+                calls.add(k);
+                if (k.equals(key(0))) {
+                    first.countDown();
+                    release.await(5, TimeUnit.SECONDS);
+                    revoked.set(!allowed.getAsBoolean());
+                    return false;
+                }
+                next.countDown();
+                return true;
+            }
+        };
         var service = new TilePrefetchService(work, () -> true, () -> false, () -> false);
         try {
             service.updateCandidates(List.of(key(0)), true);
@@ -170,20 +166,19 @@ class AheadPreparationTest {
     void testManualPreparationAndUnhealthyTicksPreventAdmission() throws Exception {
         var manual = new AtomicBoolean(true);
         var started = new CountDownLatch(1);
-        var service =
-                new TilePrefetchService(
-                        new TilePrefetchService.TileWork() {
-                            public boolean ready(TerrainTileKey k) {
-                                return false;
-                            }
+        var service = new TilePrefetchService(
+                new TilePrefetchService.TileWork() {
+                    public boolean ready(TerrainTileKey k) {
+                        return false;
+                    }
 
-                            public void prepare(TerrainTileKey k) {
-                                started.countDown();
-                            }
-                        },
-                        () -> true,
-                        () -> false,
-                        manual::get);
+                    public void prepare(TerrainTileKey k) {
+                        started.countDown();
+                    }
+                },
+                () -> true,
+                () -> false,
+                manual::get);
         try {
             service.updateCandidates(List.of(key(0)), true);
             assertFalse(started.await(150, TimeUnit.MILLISECONDS));

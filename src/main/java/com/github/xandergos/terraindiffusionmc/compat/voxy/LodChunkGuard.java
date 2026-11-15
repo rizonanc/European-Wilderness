@@ -1,16 +1,16 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
+import it.unimi.dsi.fastutil.longs.*;
 import java.io.IOException;
 import java.nio.*;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.*;
 import java.util.function.LongSupplier;
-import it.unimi.dsi.fastutil.longs.*;
 
 /** Read-only protection of real 16x16 chunks. Disk headers are read only by the LOD worker. */
 public final class LodChunkGuard {
@@ -117,7 +117,8 @@ public final class LodChunkGuard {
             if (header == null || now - header.readAt() >= 2_000_000_000L) {
                 header = read(region, now);
                 headers.put(region, header);
-                while (headers.size() > 128) headers.remove(headers.keySet().iterator().next());
+                while (headers.size() > 128)
+                    headers.remove(headers.keySet().iterator().next());
             }
             return header;
         }

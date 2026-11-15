@@ -1,12 +1,12 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.hydrology;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
 import com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfig;
 import com.github.xandergos.terraindiffusionmc.world.TerrainDiffusionBiomeSource;
 import com.github.xandergos.terraindiffusionmc.world.WorldSessionBinding;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.vehicle.AbstractBoatEntity;
 import net.minecraft.registry.tag.FluidTags;

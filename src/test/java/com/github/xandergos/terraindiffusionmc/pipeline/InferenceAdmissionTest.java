@@ -1,12 +1,13 @@
 package com.github.xandergos.terraindiffusionmc.pipeline;
 
+import static com.github.xandergos.terraindiffusionmc.pipeline.InferenceDemand.Priority.*;
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 import java.util.function.BooleanSupplier;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-import static com.github.xandergos.terraindiffusionmc.pipeline.InferenceDemand.Priority.*;
 
 class InferenceAdmissionTest {
     private static void until(BooleanSupplier condition) throws Exception {
@@ -17,16 +18,11 @@ class InferenceAdmissionTest {
 
     private static Future<Integer> block(InferenceThread worker, CountDownLatch release) throws Exception {
         var entered = new CountDownLatch(1);
-        var result =
-                worker.submit(
-                        new InferenceDemand(FOREGROUND),
-                        () -> true,
-                        1,
-                        () -> {
-                            entered.countDown();
-                            release.await();
-                            return 1;
-                        });
+        var result = worker.submit(new InferenceDemand(FOREGROUND), () -> true, 1, () -> {
+            entered.countDown();
+            release.await();
+            return 1;
+        });
         assertTrue(entered.await(5, TimeUnit.SECONDS));
         return result;
     }
@@ -40,9 +36,9 @@ class InferenceAdmissionTest {
             block(worker, release);
             var a = worker.submit(new InferenceDemand(NEAR), () -> true, 10, () -> order.add("a"));
             var b = worker.submit(new InferenceDemand(NEAR), () -> true, 10, () -> order.add("b"));
-            var waiting =
-                    submitters.submit(() ->
-                            worker.submit(new InferenceDemand(NEAR), () -> true, 10, () -> order.add("waiting")).get());
+            var waiting = submitters.submit(
+                    () -> worker.submit(new InferenceDemand(NEAR), () -> true, 10, () -> order.add("waiting"))
+                            .get());
             until(() -> worker.snapshot().admissionWaiters() == 1);
             var fg = worker.submit(new InferenceDemand(FOREGROUND), () -> true, 10, () -> order.add("foreground"));
             assertEquals(4, worker.snapshot().pendingJobs());
@@ -67,28 +63,17 @@ class InferenceAdmissionTest {
         var callers = Executors.newSingleThreadExecutor();
         try (var worker = new InferenceThread("bytes", 4, 100, 1)) {
             block(worker, release);
-            var optional =
-                    worker.submitOptional(
-                            new InferenceDemand(DISTANT),
-                            () -> true,
-                            80,
-                            () -> {
-                                fail("optional exceeded byte budget");
-                                return 0;
-                            });
+            var optional = worker.submitOptional(new InferenceDemand(DISTANT), () -> true, 80, () -> {
+                fail("optional exceeded byte budget");
+                return 0;
+            });
             assertThrows(CancellationException.class, optional::get);
             assertEquals(1, worker.snapshot().optionalDeferred());
-            var large =
-                    callers.submit(() ->
-                            worker.submit(
-                                            new InferenceDemand(FOREGROUND),
-                                            () -> true,
-                                            150,
-                                            () -> {
-                                                assertEquals(1, worker.snapshot().pendingJobs());
-                                                return 42;
-                                            })
-                                    .get());
+            var large = callers.submit(() -> worker.submit(new InferenceDemand(FOREGROUND), () -> true, 150, () -> {
+                        assertEquals(1, worker.snapshot().pendingJobs());
+                        return 42;
+                    })
+                    .get());
             until(() -> worker.snapshot().admissionWaiters() == 1);
             assertEquals(1, worker.snapshot().pendingBytes());
             release.countDown();
@@ -107,20 +92,16 @@ class InferenceAdmissionTest {
         var valid = new AtomicBoolean(true);
         try (var worker = new InferenceThread("retired", 4, 100, 1)) {
             block(worker, release);
-            var queued =
-                    worker.submit(
-                            new InferenceDemand(FOREGROUND),
-                            valid::get,
-                            50,
-                            () -> {
-                                fail("retired work executed");
-                                return 0;
-                            });
+            var queued = worker.submit(new InferenceDemand(FOREGROUND), valid::get, 50, () -> {
+                fail("retired work executed");
+                return 0;
+            });
             assertEquals(51, worker.snapshot().pendingBytes());
             valid.set(false);
             worker.discardStale();
             assertInstanceOf(
-                    CancellationException.class, assertThrows(ExecutionException.class, queued::get).getCause());
+                    CancellationException.class,
+                    assertThrows(ExecutionException.class, queued::get).getCause());
             assertEquals(1, worker.snapshot().pendingBytes());
             assertEquals(0, worker.snapshot().queuedJobs());
         } finally {
@@ -134,21 +115,16 @@ class InferenceAdmissionTest {
         var finished = new CountDownLatch(1);
         try (var worker = new InferenceThread("native-cancel", 4, 100, 1)) {
             var entered = new CountDownLatch(1);
-            var running =
-                    worker.submit(
-                            new InferenceDemand(FOREGROUND),
-                            () -> true,
-                            70,
-                            () -> {
-                                entered.countDown();
-                                try {
-                                    release.await();
-                                    assertFalse(Thread.currentThread().isInterrupted());
-                                    return 1;
-                                } finally {
-                                    finished.countDown();
-                                }
-                            });
+            var running = worker.submit(new InferenceDemand(FOREGROUND), () -> true, 70, () -> {
+                entered.countDown();
+                try {
+                    release.await();
+                    assertFalse(Thread.currentThread().isInterrupted());
+                    return 1;
+                } finally {
+                    finished.countDown();
+                }
+            });
             assertTrue(entered.await(5, TimeUnit.SECONDS));
             assertTrue(running.cancel(true));
             assertEquals(70, worker.snapshot().pendingBytes());
@@ -188,15 +164,10 @@ class InferenceAdmissionTest {
             block(worker, release);
             var requiredDemand = new InferenceDemand(NEAR);
             var required = worker.submit(requiredDemand, () -> true, 10, () -> order.add("aged"));
-            var optional =
-                    worker.submitOptional(
-                            new InferenceDemand(DISTANT),
-                            () -> true,
-                            10,
-                            () -> {
-                                fail("expired preview ran");
-                                return 0;
-                            });
+            var optional = worker.submitOptional(new InferenceDemand(DISTANT), () -> true, 10, () -> {
+                fail("expired preview ran");
+                return 0;
+            });
             var foreground =
                     worker.submit(new InferenceDemand(FOREGROUND), () -> true, 10, () -> order.add("foreground"));
             clock.addAndGet(TimeUnit.SECONDS.toNanos(11));
@@ -243,7 +214,8 @@ class InferenceAdmissionTest {
         var callers = Executors.newSingleThreadExecutor();
         try (var worker = new InferenceThread("retired-waiter", 2, 100, 1)) {
             block(worker, release);
-            var waiting = callers.submit(() -> worker.submit(new InferenceDemand(NEAR), valid::get, 10, () -> 0).get());
+            var waiting = callers.submit(() -> worker.submit(new InferenceDemand(NEAR), valid::get, 10, () -> 0)
+                    .get());
             until(() -> worker.snapshot().admissionWaiters() == 1);
             valid.set(false);
             assertThrows(ExecutionException.class, () -> waiting.get(5, TimeUnit.SECONDS));
@@ -261,7 +233,8 @@ class InferenceAdmissionTest {
             var failed = worker.submit(() -> worker.submit(() -> 1).get());
             assertInstanceOf(
                     RejectedExecutionException.class,
-                    assertThrows(ExecutionException.class, () -> failed.get(5, TimeUnit.SECONDS)).getCause());
+                    assertThrows(ExecutionException.class, () -> failed.get(5, TimeUnit.SECONDS))
+                            .getCause());
             assertEquals(42, worker.submit(() -> 42).get(5, TimeUnit.SECONDS));
         }
     }
@@ -278,7 +251,8 @@ class InferenceAdmissionTest {
             worker.close();
             assertInstanceOf(
                     RejectedExecutionException.class,
-                    assertThrows(ExecutionException.class, () -> waiting.get(5, TimeUnit.SECONDS)).getCause());
+                    assertThrows(ExecutionException.class, () -> waiting.get(5, TimeUnit.SECONDS))
+                            .getCause());
             release.countDown();
             assertEquals(1, running.get(5, TimeUnit.SECONDS));
             until(() -> worker.snapshot().pendingJobs() == 0);
@@ -295,9 +269,8 @@ class InferenceAdmissionTest {
         assertThrows(IllegalArgumentException.class, () -> LocalTerrainProvider.estimateRegionBytes(1, 0, 0, 1, 24));
         assertThrows(
                 ArithmeticException.class,
-                () ->
-                        LocalTerrainProvider.estimateRegionBytes(
-                                Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, 24));
+                () -> LocalTerrainProvider.estimateRegionBytes(
+                        Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE, 24));
     }
 
     @Test
@@ -307,22 +280,21 @@ class InferenceAdmissionTest {
         try (var worker = new InferenceThread("stress", 6, 600, 1)) {
             var jobs = new ArrayList<Future<?>>();
             for (int i = 0; i < 20; i++)
-                jobs.add(
-                        workers.submit(() -> {
-                            for (int n = 0; n < 20; n++)
-                                assertEquals(
-                                        1,
-                                        worker.submit(
-                                                        new InferenceDemand(n % 2 == 0 ? FOREGROUND : NEAR),
-                                                        () -> true,
-                                                        100,
-                                                        () -> {
-                                                            completed.incrementAndGet();
-                                                            return 1;
-                                                        })
-                                                .get(10, TimeUnit.SECONDS));
-                            return null;
-                        }));
+                jobs.add(workers.submit(() -> {
+                    for (int n = 0; n < 20; n++)
+                        assertEquals(
+                                1,
+                                worker.submit(
+                                                new InferenceDemand(n % 2 == 0 ? FOREGROUND : NEAR),
+                                                () -> true,
+                                                100,
+                                                () -> {
+                                                    completed.incrementAndGet();
+                                                    return 1;
+                                                })
+                                        .get(10, TimeUnit.SECONDS));
+                    return null;
+                }));
             for (var job : jobs) job.get(20, TimeUnit.SECONDS);
             assertEquals(400, completed.get());
             until(() -> worker.snapshot().pendingJobs() == 0);
@@ -340,11 +312,10 @@ class InferenceAdmissionTest {
         var restored = new AtomicBoolean();
         try (var worker = new InferenceThread("interrupt", 2, 100, 1)) {
             block(worker, release);
-            var caller =
-                    new Thread(() -> {
-                        result.set(worker.submit(new InferenceDemand(NEAR), () -> true, 10, () -> 42));
-                        restored.set(Thread.currentThread().isInterrupted());
-                    });
+            var caller = new Thread(() -> {
+                result.set(worker.submit(new InferenceDemand(NEAR), () -> true, 10, () -> 42));
+                restored.set(Thread.currentThread().isInterrupted());
+            });
             caller.start();
             until(() -> worker.snapshot().admissionWaiters() == 1);
             caller.interrupt();

@@ -1,14 +1,14 @@
 package com.github.xandergos.terraindiffusionmc.pipeline;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.lang.reflect.*;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class HeightmapValidationTest {
     private static Object assemble(float[] height, short[] biome, float[] climate) throws Exception {
-        var method =
-                LocalTerrainProvider.class.getDeclaredMethod(
-                        "buildHeightmapData", float[].class, short[].class, int.class, int.class, float[].class);
+        var method = LocalTerrainProvider.class.getDeclaredMethod(
+                "buildHeightmapData", float[].class, short[].class, int.class, int.class, float[].class);
         method.setAccessible(true);
         try {
             return method.invoke(null, height, biome, 1, 2, climate);
@@ -30,9 +30,8 @@ class HeightmapValidationTest {
     void testValidHeightQuantization() throws Exception {
         float[] climate = new float[8];
         climate[0] = 0.5f;
-        var result =
-                (LocalTerrainProvider.HeightmapData)
-                        assemble(new float[] {-0.25f, 32768.5f}, new short[] {2, 3}, climate);
+        var result = (LocalTerrainProvider.HeightmapData)
+                assemble(new float[] {-0.25f, 32768.5f}, new short[] {2, 3}, climate);
         assertArrayEquals(new short[] {-1, 32767}, result.heightmap[0]);
         assertArrayEquals(new short[] {2, 3}, result.biomeIds[0]);
         climate[0] = 1;

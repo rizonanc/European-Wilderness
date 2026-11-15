@@ -8,14 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 
 final class EuropeanTreePlanner {
-    private static final Comparator<EuropeanTreePlanner.PlannedVoxel> VOXEL_ORDER =
-            Comparator.comparingInt(EuropeanTreePlanner.PlannedVoxel::y)
-                    .thenComparingInt(EuropeanTreePlanner.PlannedVoxel::x)
-                    .thenComparingInt(EuropeanTreePlanner.PlannedVoxel::z);
+    private static final Comparator<EuropeanTreePlanner.PlannedVoxel> VOXEL_ORDER = Comparator.comparingInt(
+                    EuropeanTreePlanner.PlannedVoxel::y)
+            .thenComparingInt(EuropeanTreePlanner.PlannedVoxel::x)
+            .thenComparingInt(EuropeanTreePlanner.PlannedVoxel::z);
 
     private EuropeanTreePlanner() {}
 
@@ -64,16 +64,15 @@ final class EuropeanTreePlanner {
                 // A collision in the trunk's chunk must also reject its canopy in
                 // the neighbour. Validate the whole tree before taking a chunk part.
                 for (var voxel : tree.shape().voxels()) {
-                    var whole =
-                            new PlannedVoxel(
-                                    Math.addExact(tree.candidate().x(), voxel.x()),
-                                    Math.addExact(tree.baseY(), voxel.y()),
-                                    Math.addExact(tree.candidate().z(), voxel.z()),
-                                    voxel.log(),
-                                    voxel.leafDistance(),
-                                    tree.species(),
-                                    tree.candidate().priority(),
-                                    tree.candidate().identity());
+                    var whole = new PlannedVoxel(
+                            Math.addExact(tree.candidate().x(), voxel.x()),
+                            Math.addExact(tree.baseY(), voxel.y()),
+                            Math.addExact(tree.candidate().z(), voxel.z()),
+                            voxel.log(),
+                            voxel.leafDistance(),
+                            tree.species(),
+                            tree.candidate().priority(),
+                            tree.candidate().identity());
                     if (!replaceable.test(tree, whole)) {
                         clear = false;
                         break;
@@ -111,16 +110,15 @@ final class EuropeanTreePlanner {
     private static List<PlannedVoxel> whole(PreparedTree tree) {
         List<PlannedVoxel> result = new ArrayList<>(tree.shape().voxels().size());
         for (var v : tree.shape().voxels())
-            result.add(
-                    new PlannedVoxel(
-                            Math.addExact(tree.candidate().x(), v.x()),
-                            Math.addExact(tree.baseY(), v.y()),
-                            Math.addExact(tree.candidate().z(), v.z()),
-                            v.log(),
-                            v.leafDistance(),
-                            tree.species(),
-                            tree.candidate().priority(),
-                            tree.candidate().identity()));
+            result.add(new PlannedVoxel(
+                    Math.addExact(tree.candidate().x(), v.x()),
+                    Math.addExact(tree.baseY(), v.y()),
+                    Math.addExact(tree.candidate().z(), v.z()),
+                    v.log(),
+                    v.leafDistance(),
+                    tree.species(),
+                    tree.candidate().priority(),
+                    tree.candidate().identity()));
         return result;
     }
 
@@ -150,16 +148,15 @@ final class EuropeanTreePlanner {
                 throw new IllegalArgumentException("tree part escaped target chunk");
             }
 
-            result.add(
-                    new EuropeanTreePlanner.PlannedVoxel(
-                            voxel.x(),
-                            voxel.y(),
-                            voxel.z(),
-                            voxel.log(),
-                            voxel.leafDistance(),
-                            tree.species(),
-                            candidate.priority(),
-                            candidate.identity()));
+            result.add(new EuropeanTreePlanner.PlannedVoxel(
+                    voxel.x(),
+                    voxel.y(),
+                    voxel.z(),
+                    voxel.log(),
+                    voxel.leafDistance(),
+                    tree.species(),
+                    candidate.priority(),
+                    candidate.identity()));
         }
 
         return List.copyOf(result);
@@ -178,7 +175,8 @@ final class EuropeanTreePlanner {
                 if (identity != 0) {
                     return identity > 0 ? first : second;
                 } else {
-                    int species = Integer.compare(first.species().ordinal(), second.species().ordinal());
+                    int species = Integer.compare(
+                            first.species().ordinal(), second.species().ordinal());
                     if (species != 0) {
                         return species > 0 ? first : second;
                     } else {

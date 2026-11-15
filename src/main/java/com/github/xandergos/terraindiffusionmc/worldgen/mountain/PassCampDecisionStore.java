@@ -27,7 +27,8 @@ public final class PassCampDecisionStore {
     private final Object[] locks = new Object[64];
 
     public PassCampDecisionStore(Path directory) {
-        this.directory = Objects.requireNonNull(directory, "directory").toAbsolutePath().normalize();
+        this.directory =
+                Objects.requireNonNull(directory, "directory").toAbsolutePath().normalize();
 
         for (int i = 0; i < this.locks.length; i++) {
             this.locks[i] = new Object();
@@ -56,10 +57,9 @@ public final class PassCampDecisionStore {
                     return existing;
                 } else {
                     TerrainTile tile = lookup.load(key);
-                    PassCampDecisionStore.Decision decision =
-                            tile == null
-                                    ? PassCampDecisionStore.Decision.DISABLED
-                                    : PassCampDecisionStore.Decision.ACTIVE;
+                    PassCampDecisionStore.Decision decision = tile == null
+                            ? PassCampDecisionStore.Decision.DISABLED
+                            : PassCampDecisionStore.Decision.ACTIVE;
                     if (tile != null) {
                         requireMatchingTile(tile, key);
                     }

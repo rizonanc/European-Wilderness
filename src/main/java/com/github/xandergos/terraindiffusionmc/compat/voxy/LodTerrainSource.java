@@ -1,9 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
-import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
-import com.github.xandergos.terraindiffusionmc.worldgen.settings.BiomeBalance;
-import com.github.xandergos.terraindiffusionmc.worldgen.terrain.*;
 import com.github.xandergos.terraindiffusionmc.worldgen.hydrology.*;
+import com.github.xandergos.terraindiffusionmc.worldgen.settings.BiomeBalance;
+import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
+import com.github.xandergos.terraindiffusionmc.worldgen.terrain.*;
 import com.github.xandergos.terraindiffusionmc.worldgen.tree.*;
 import java.util.*;
 
@@ -135,7 +135,9 @@ public final class LodTerrainSource {
         }
 
         public int firstAir(int x, int z) throws Exception {
-            return inside(x, z) ? column.firstAir(x - column.x, z - column.z) : view(x, z).carvedHeight(x, z, 0);
+            return inside(x, z)
+                    ? column.firstAir(x - column.x, z - column.z)
+                    : view(x, z).carvedHeight(x, z, 0);
         }
 
         public int waterY(int x, int z) throws Exception {

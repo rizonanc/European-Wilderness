@@ -99,11 +99,8 @@ public final class BiomeClassifier {
                         } else if (x >= 1.0F) {
                             growingSeason = 0.0F;
                         } else {
-                            growingSeason =
-                                    365.0F
-                                            * (0.5F
-                                                    - (float) Math.asin(Math.max(-1.0F, Math.min(1.0F, x)))
-                                                            / (float) Math.PI);
+                            growingSeason = 365.0F
+                                    * (0.5F - (float) Math.asin(Math.max(-1.0F, Math.min(1.0F, x))) / (float) Math.PI);
                         }
                     }
 

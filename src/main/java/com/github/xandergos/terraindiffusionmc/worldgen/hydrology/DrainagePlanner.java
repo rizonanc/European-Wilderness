@@ -1,8 +1,8 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.hydrology;
 
-import java.util.Arrays;
 import it.unimi.dsi.fastutil.ints.IntArrayFIFOQueue;
 import it.unimi.dsi.fastutil.longs.LongHeapPriorityQueue;
+import java.util.Arrays;
 
 public final class DrainagePlanner {
     public static final int COARSE_STEP_BLOCKS = 2;
@@ -69,10 +69,9 @@ public final class DrainagePlanner {
         Math.addExact(coarseOriginZ, height - 1);
         int[][] filled = priorityFlood(base, width, height);
         DrainagePlanner.CellKind[][] kinds = classifyDepressions(base, filled, width, height, lakeThreshold);
-        int[][] dirs =
-                naturalRouting
-                        ? preparedDirections(seed, coarseOriginX, coarseOriginZ, filled, width, height)
-                        : flowDirections(filled, width, height);
+        int[][] dirs = naturalRouting
+                ? preparedDirections(seed, coarseOriginX, coarseOriginZ, filled, width, height)
+                : flowDirections(filled, width, height);
         long[][] accumulation = accumulate(dirs, width, height);
         return new DrainagePlanner.DrainagePlan(seed, coarseOriginX, coarseOriginZ, filled, kinds, dirs, accumulation);
     }
@@ -108,10 +107,9 @@ public final class DrainagePlanner {
             }
         // Seed ALL exits first. A newly resolved cell cannot become another
         // zero-distance exit during a row scan: that caused long directional stripes.
-        exits.sort((a, b) ->
-                Long.compareUnsigned(
-                        routingTie(seed, originX + a % width * 2, originZ + a / width * 2),
-                        routingTie(seed, originX + b % width * 2, originZ + b / width * 2)));
+        exits.sort((a, b) -> Long.compareUnsigned(
+                routingTie(seed, originX + a % width * 2, originZ + a / width * 2),
+                routingTie(seed, originX + b % width * 2, originZ + b / width * 2)));
         IntArrayFIFOQueue wave = new IntArrayFIFOQueue(exits.size());
         for (int exit : exits) wave.enqueue(exit);
         while (!wave.isEmpty()) {
@@ -250,10 +248,9 @@ public final class DrainagePlanner {
                         }
                     }
 
-                    DrainagePlanner.CellKind kind =
-                            cells < minCells && maxDepth < minDepth
-                                    ? DrainagePlanner.CellKind.FILLED
-                                    : DrainagePlanner.CellKind.LAKE;
+                    DrainagePlanner.CellKind kind = cells < minCells && maxDepth < minDepth
+                            ? DrainagePlanner.CellKind.FILLED
+                            : DrainagePlanner.CellKind.LAKE;
 
                     while (!component.isEmpty()) {
                         int code = component.dequeueInt();
@@ -415,13 +412,12 @@ public final class DrainagePlanner {
                 }
 
                 if (heights[z].length != width) {
-                    throw new IllegalArgumentException(
-                            "heights must be rectangular: row "
-                                    + z
-                                    + " has width "
-                                    + heights[z].length
-                                    + " instead of "
-                                    + width);
+                    throw new IllegalArgumentException("heights must be rectangular: row "
+                            + z
+                            + " has width "
+                            + heights[z].length
+                            + " instead of "
+                            + width);
                 }
             }
 
@@ -452,13 +448,12 @@ public final class DrainagePlanner {
                 }
 
                 if (base[z].length != width) {
-                    throw new IllegalArgumentException(
-                            "base must be rectangular: row "
-                                    + z
-                                    + " has width "
-                                    + base[z].length
-                                    + " instead of "
-                                    + width);
+                    throw new IllegalArgumentException("base must be rectangular: row "
+                            + z
+                            + " has width "
+                            + base[z].length
+                            + " instead of "
+                            + width);
                 }
             }
 

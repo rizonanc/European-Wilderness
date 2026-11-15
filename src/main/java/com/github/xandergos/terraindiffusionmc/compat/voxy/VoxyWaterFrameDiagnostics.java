@@ -1,17 +1,18 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
+import static org.lwjgl.opengl.GL11C.*;
+import static org.lwjgl.opengl.GL12C.GL_PACK_SKIP_IMAGES;
+import static org.lwjgl.opengl.GL21C.GL_PIXEL_PACK_BUFFER_BINDING;
+import static org.lwjgl.opengl.GL30C.*;
+import static org.lwjgl.opengl.GL42C.GL_BUFFER_UPDATE_BARRIER_BIT;
+import static org.lwjgl.opengl.GL42C.glMemoryBarrier;
+import static org.lwjgl.opengl.GL45C.*;
+
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 import net.minecraft.client.MinecraftClient;
-import static org.lwjgl.opengl.GL11C.*;
-import static org.lwjgl.opengl.GL12C.GL_PACK_SKIP_IMAGES;
-import static org.lwjgl.opengl.GL42C.GL_BUFFER_UPDATE_BARRIER_BIT;
-import static org.lwjgl.opengl.GL21C.GL_PIXEL_PACK_BUFFER_BINDING;
-import static org.lwjgl.opengl.GL30C.*;
-import static org.lwjgl.opengl.GL42C.glMemoryBarrier;
-import static org.lwjgl.opengl.GL45C.*;
 
 /** Explicit, bounded, one-frame inspection. Never writes GL textures, config or world data. */
 public final class VoxyWaterFrameDiagnostics {
@@ -110,28 +111,25 @@ public final class VoxyWaterFrameDiagnostics {
             int w = (int) field(viewport, "width"), h = (int) field(viewport, "height");
             if (w < 4 || h < 4) throw new IllegalStateException("Empty viewport");
             int bound = (int) field(call(field(viewport, "depthBoundingBuffer"), "getDepthTex"), "id");
-            int depth =
-                    glGetNamedFramebufferAttachmentParameteri(
-                            framebuffer, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME);
+            int depth = glGetNamedFramebufferAttachmentParameteri(
+                    framebuffer, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME);
             int[] targets = new int[2];
             for (int i = 0; i < targets.length; i++)
-                targets[i] =
-                        glGetNamedFramebufferAttachmentParameteri(
-                                framebuffer, GL_COLOR_ATTACHMENT0 + i, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME);
+                targets[i] = glGetNamedFramebufferAttachmentParameteri(
+                        framebuffer, GL_COLOR_ATTACHMENT0 + i, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME);
             int countBuffer = (int) field(field(viewport, "drawCountCallBuffer"), "id");
             int[] counts = new int[8];
             glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT);
             glGetNamedBufferSubData(countBuffer, 0, counts);
-            StringBuilder line =
-                    new StringBuilder("water-frame: viewport=")
-                            .append(w)
-                            .append('x')
-                            .append(h)
-                            .append(" counters=")
-                            .append(Arrays.toString(counts))
-                            .append(" depthFunc=")
-                            .append(glGetInteger(GL_DEPTH_FUNC))
-                            .append(" formats=");
+            StringBuilder line = new StringBuilder("water-frame: viewport=")
+                    .append(w)
+                    .append('x')
+                    .append(h)
+                    .append(" counters=")
+                    .append(Arrays.toString(counts))
+                    .append(" depthFunc=")
+                    .append(glGetInteger(GL_DEPTH_FUNC))
+                    .append(" formats=");
             for (int target : targets)
                 line.append(
                                 target == 0
@@ -139,10 +137,9 @@ public final class VoxyWaterFrameDiagnostics {
                                         : Integer.toHexString(
                                                 glGetTextureLevelParameteri(target, 0, GL_TEXTURE_INTERNAL_FORMAT)))
                         .append(',');
-            var inverse =
-                    new org.joml.Matrix4f((org.joml.Matrix4f) field(viewport, "projection"))
-                            .mul((org.joml.Matrix4f) field(viewport, "modelView"))
-                            .invert();
+            var inverse = new org.joml.Matrix4f((org.joml.Matrix4f) field(viewport, "projection"))
+                    .mul((org.joml.Matrix4f) field(viewport, "modelView"))
+                    .invert();
             double cx = (double) field(viewport, "cameraX"),
                     cy = (double) field(viewport, "cameraY"),
                     cz = (double) field(viewport, "cameraZ");
@@ -183,9 +180,8 @@ public final class VoxyWaterFrameDiagnostics {
             double cy,
             double cz) {
         if (!Float.isFinite(depth) || depth >= 1 || depth < 0) return "SKY/UNKNOWN";
-        var p =
-                inverse.transform(
-                        new org.joml.Vector4f((x + .5f) / width * 2 - 1, (y + .5f) / height * 2 - 1, depth * 2 - 1, 1));
+        var p = inverse.transform(
+                new org.joml.Vector4f((x + .5f) / width * 2 - 1, (y + .5f) / height * 2 - 1, depth * 2 - 1, 1));
         if (!Float.isFinite(p.w) || Math.abs(p.w) < 1e-9) return "UNKNOWN";
         return String.format(java.util.Locale.ROOT, "%.2f,%.2f,%.2f", cx + p.x / p.w, cy + p.y / p.w, cz + p.z / p.w);
     }

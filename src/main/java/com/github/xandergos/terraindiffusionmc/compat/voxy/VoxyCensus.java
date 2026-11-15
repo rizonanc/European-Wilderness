@@ -1,11 +1,11 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
+import java.util.*;
+import me.cortex.voxy.common.world.other.Mapper;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.WorldChunk;
-import java.util.*;
-import me.cortex.voxy.common.world.other.Mapper;
 
 /** Bounded, read-only engine census. Resident sections are not proof of disk contents;
  * a concurrent ingest or a virtual render overlay can differ from this snapshot. */
@@ -167,9 +167,8 @@ public final class VoxyCensus {
                     var heights = chunk.getHeightmap(Heightmap.Type.WORLD_SURFACE);
                     for (int z : new int[] {2, 10})
                         for (int x : new int[] {2, 10})
-                            result.add(
-                                    new Sample(
-                                            (centerX + dx) * 16 + x, (centerZ + dz) * 16 + z, heights.get(x, z) - 1));
+                            result.add(new Sample(
+                                    (centerX + dx) * 16 + x, (centerZ + dz) * 16 + z, heights.get(x, z) - 1));
                 }
         return List.copyOf(result);
     }
@@ -263,11 +262,10 @@ public final class VoxyCensus {
             columns.computeIfAbsent(
                             new Key(0, Math.floorDiv(p.x, 32), 0, Math.floorDiv(p.z, 32)), k -> new ArrayList<>())
                     .add(p);
-        agg.realChunksAvailable =
-                samples.stream()
-                        .map(p -> new Key(0, Math.floorDiv(p.x, 16), 0, Math.floorDiv(p.z, 16)))
-                        .distinct()
-                        .count();
+        agg.realChunksAvailable = samples.stream()
+                .map(p -> new Key(0, Math.floorDiv(p.x, 16), 0, Math.floorDiv(p.z, 16)))
+                .distinct()
+                .count();
         for (var entry : columns.entrySet()) {
             var column = entry.getKey();
             var pending = new ArrayList<>(entry.getValue());

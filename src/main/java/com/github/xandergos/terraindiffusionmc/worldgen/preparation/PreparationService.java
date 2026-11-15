@@ -36,12 +36,11 @@ public final class PreparationService {
         if (repository != null && ticket != null) {
             this.repository = repository;
             this.ticket = ticket;
-            this.worker =
-                    Executors.newSingleThreadExecutor(task -> {
-                        Thread thread = new Thread(task, "terrain-preparation");
-                        thread.setDaemon(true);
-                        return thread;
-                    });
+            this.worker = Executors.newSingleThreadExecutor(task -> {
+                Thread thread = new Thread(task, "terrain-preparation");
+                thread.setDaemon(true);
+                return thread;
+            });
         } else {
             throw new IllegalArgumentException("repository and ticket must not be null");
         }

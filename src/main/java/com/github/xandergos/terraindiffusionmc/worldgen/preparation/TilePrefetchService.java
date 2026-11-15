@@ -129,7 +129,9 @@ public final class TilePrefetchService {
 
     public int queued() {
         synchronized (this.lock) {
-            return (int) this.desired.stream().filter(k -> !this.attempted.contains(k)).count();
+            return (int) this.desired.stream()
+                    .filter(k -> !this.attempted.contains(k))
+                    .count();
         }
     }
 
@@ -206,11 +208,10 @@ public final class TilePrefetchService {
                                 }
                                 continue;
                             }
-                            key =
-                                    this.desired.stream()
-                                            .filter(k -> !this.attempted.contains(k))
-                                            .findFirst()
-                                            .orElseThrow();
+                            key = this.desired.stream()
+                                    .filter(k -> !this.attempted.contains(k))
+                                    .findFirst()
+                                    .orElseThrow();
                             this.attempted.add(key);
                             this.activeKey = key;
                             break;
@@ -242,10 +243,8 @@ public final class TilePrefetchService {
                             && !this.manualBusy.getAsBoolean()) {
                         this.metrics.start();
                         ran = true;
-                        try (var ignored =
-                                com.github.xandergos.terraindiffusionmc.pipeline.InferenceDemand.scope(
-                                        com.github.xandergos.terraindiffusionmc.pipeline.InferenceDemand.Priority
-                                                .NEAR)) {
+                        try (var ignored = com.github.xandergos.terraindiffusionmc.pipeline.InferenceDemand.scope(
+                                com.github.xandergos.terraindiffusionmc.pipeline.InferenceDemand.Priority.NEAR)) {
                             if (this.work.prepareNext(key, () -> mayContinueWork(key))) this.metrics.complete();
                             else deferred = true;
                         }
@@ -273,13 +272,10 @@ public final class TilePrefetchService {
                 synchronized (this.lock) {
                     // Leave GPU/CPU idle between stages as well as checking server load.
                     if (ran)
-                        nextStageNanos =
-                                System.nanoTime()
-                                        + Math.min(
-                                                TimeUnit.SECONDS.toNanos(2),
-                                                Math.max(
-                                                        TimeUnit.MILLISECONDS.toNanos(100),
-                                                        System.nanoTime() - stageStart));
+                        nextStageNanos = System.nanoTime()
+                                + Math.min(
+                                        TimeUnit.SECONDS.toNanos(2),
+                                        Math.max(TimeUnit.MILLISECONDS.toNanos(100), System.nanoTime() - stageStart));
                     if (deferred && !this.closed) {
                         this.attempted.remove(key);
                     }

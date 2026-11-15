@@ -1,5 +1,8 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.diagnostics;
 
+import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors.*;
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.google.gson.JsonParser;
 import java.io.IOException;
 import java.nio.file.*;
@@ -8,11 +11,11 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import static org.junit.jupiter.api.Assertions.*;
-import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors.*;
 
 class DiagnosticErrorsTest {
-    @TempDir Path temp;
+    @TempDir
+    Path temp;
+
     private final Context context =
             new Context("td-test", "TEST_FAILURE", "minecraft:overworld", "opaque-session", "tile=(-1,2)");
 
@@ -21,13 +24,10 @@ class DiagnosticErrorsTest {
         var clock = new AtomicLong();
         var lines = new ArrayList<String>();
         var failures = new ArrayList<Throwable>();
-        var d =
-                new DiagnosticErrors(
-                        clock::get,
-                        (line, failure) -> {
-                            lines.add(line);
-                            failures.add(failure);
-                        });
+        var d = new DiagnosticErrors(clock::get, (line, failure) -> {
+            lines.add(line);
+            failures.add(failure);
+        });
         var root = new IOException("simulated native failure");
         var wrapped = new CompletionException(root);
         for (int i = 0; i < 1000; i++) d.record(Code.INF_RUN, context, wrapped, Outcome.FAILED, "propagated", true);
@@ -42,7 +42,9 @@ class DiagnosticErrorsTest {
         clock.set(TimeUnit.SECONDS.toNanos(16));
         d.record(Code.INF_RUN, context, wrapped, Outcome.FAILED, "propagated", true);
         assertTrue(lines.getLast().contains("SuppressedSincePrevious=999"));
-        assertEquals(Code.values().length, Arrays.stream(Code.values()).map(c -> c.id).distinct().count());
+        assertEquals(
+                Code.values().length,
+                Arrays.stream(Code.values()).map(c -> c.id).distinct().count());
     }
 
     @Test
@@ -103,15 +105,8 @@ class DiagnosticErrorsTest {
         try (var pool = Executors.newFixedThreadPool(8)) {
             var jobs = new ArrayList<Future<?>>();
             for (int i = 0; i < 1000; i++)
-                jobs.add(
-                        pool.submit(() ->
-                                d.record(
-                                        Code.CAC_CRC,
-                                        context,
-                                        new IOException("CRC"),
-                                        Outcome.DEGRADED,
-                                        "recompute",
-                                        false)));
+                jobs.add(pool.submit(() ->
+                        d.record(Code.CAC_CRC, context, new IOException("CRC"), Outcome.DEGRADED, "recompute", false)));
             for (var job : jobs) job.get(10, TimeUnit.SECONDS);
         }
         assertEquals(1, lines.size());

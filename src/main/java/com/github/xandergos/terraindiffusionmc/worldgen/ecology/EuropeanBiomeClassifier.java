@@ -50,13 +50,12 @@ public final class EuropeanBiomeClassifier {
                     short old = upstream[i];
                     int blockX = x0 + x, blockZ = z0 + z;
                     boolean temperate = temp >= -5.0 && temp <= 20.0 && precip >= 250.0;
-                    boolean dryLowland =
-                            largerLandscapes
-                                    && elev >= 0
-                                    && elev < 1400
-                                    && temp >= 11
-                                    && ((balance.deserts() != 100 && old == 5)
-                                            || EuropeanEcology.aridity(temp, precip) < balance.desertAridityLimit());
+                    boolean dryLowland = largerLandscapes
+                            && elev >= 0
+                            && elev < 1400
+                            && temp >= 11
+                            && ((balance.deserts() != 100 && old == 5)
+                                    || EuropeanEcology.aridity(temp, precip) < balance.desertAridityLimit());
                     if (old != 41 && old != 44 && old != 46 && old != 48 && (temperate || dryLowland)) {
                         int center = (z + 1) * (width + 2) + x + 1;
                         double dx = (halo[center + 1] - halo[center - 1]) / (2.0 * pixelSizeM);
@@ -65,36 +64,33 @@ public final class EuropeanBiomeClassifier {
                             throw new IllegalArgumentException("Non-finite ecology halo");
                         }
 
-                        EuropeanEcology.ForestCondition condition =
-                                EuropeanEcology.evaluate(
-                                        seed,
-                                        temp,
-                                        precip,
-                                        elev,
-                                        Math.hypot(dx, dz),
-                                        Double.POSITIVE_INFINITY,
-                                        blockX,
-                                        blockZ,
-                                        largerLandscapes,
-                                        balance);
+                        EuropeanEcology.ForestCondition condition = EuropeanEcology.evaluate(
+                                seed,
+                                temp,
+                                precip,
+                                elev,
+                                Math.hypot(dx, dz),
+                                Double.POSITIVE_INFINITY,
+                                blockX,
+                                blockZ,
+                                largerLandscapes,
+                                balance);
 
                         if (!temperate && condition.zone() != EuropeanEcology.Zone.DESERT) {
                             if (old == 5) result[i] = 17;
                             continue;
                         }
-                        result[i] =
-                                (short)
-                                        (switch (condition.zone()) {
-                                            case DECIDUOUS_FOREST -> condition.forestDensity() < 0.18 ? 229 : 208;
-                                            case MIXED_FOREST -> condition.forestDensity() < 0.18 ? 229 : 209;
-                                            case CONIFEROUS_FOREST ->
-                                                    (short) (condition.forestDensity() < 0.18 ? 216 : 215);
-                                            case MEADOW, FLOODPLAIN -> 229;
-                                            case MOUNTAIN_MEADOW -> 29;
-                                            case ROCKY_SLOPE -> 35;
-                                            case ALPINE_SNOW -> 32;
-                                            case DESERT -> 5;
-                                        });
+                        result[i] = (short)
+                                (switch (condition.zone()) {
+                                    case DECIDUOUS_FOREST -> condition.forestDensity() < 0.18 ? 229 : 208;
+                                    case MIXED_FOREST -> condition.forestDensity() < 0.18 ? 229 : 209;
+                                    case CONIFEROUS_FOREST -> (short) (condition.forestDensity() < 0.18 ? 216 : 215);
+                                    case MEADOW, FLOODPLAIN -> 229;
+                                    case MOUNTAIN_MEADOW -> 29;
+                                    case ROCKY_SLOPE -> 35;
+                                    case ALPINE_SNOW -> 32;
+                                    case DESERT -> 5;
+                                });
                     }
                     if (largerLandscapes) result[i] = withOpenFields(seed, blockX, blockZ, result[i], balance);
                 }

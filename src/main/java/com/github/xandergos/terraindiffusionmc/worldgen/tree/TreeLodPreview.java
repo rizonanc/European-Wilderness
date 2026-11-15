@@ -95,18 +95,17 @@ public final class TreeLodPreview {
             return null;
         double dx = (field.firstAir(x + 1, z) - field.firstAir(x - 1, z)) / 2.0,
                 dz = (field.firstAir(x, z + 1) - field.firstAir(x, z - 1)) / 2.0;
-        var ecology =
-                EuropeanEcology.evaluate(
-                        seed,
-                        sample.temperatureC(),
-                        sample.precipitationMm(),
-                        sample.heightMeters(),
-                        Math.hypot(dx, dz),
-                        Double.POSITIVE_INFINITY,
-                        x,
-                        z,
-                        largerLandscapes,
-                        field.biomeBalance());
+        var ecology = EuropeanEcology.evaluate(
+                seed,
+                sample.temperatureC(),
+                sample.precipitationMm(),
+                sample.heightMeters(),
+                Math.hypot(dx, dz),
+                Double.POSITIVE_INFINITY,
+                x,
+                z,
+                largerLandscapes,
+                field.biomeBalance());
         if (!(candidate.age() == TreeAge.YOUNG
                 ? VegetationDistribution.acceptsYoung(candidate, seed, ecology)
                 : VegetationDistribution.acceptsAdult(candidate, seed, ecology))) return null;

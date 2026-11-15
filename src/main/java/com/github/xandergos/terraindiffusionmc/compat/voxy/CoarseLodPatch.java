@@ -1,13 +1,13 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
-import com.github.xandergos.terraindiffusionmc.infinitetensor.FloatTensor;
 import com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfig;
-import com.github.xandergos.terraindiffusionmc.worldgen.ecology.EuropeanEcology;
-import com.github.xandergos.terraindiffusionmc.worldgen.ecology.TropicalLandforms;
+import com.github.xandergos.terraindiffusionmc.infinitetensor.FloatTensor;
 import com.github.xandergos.terraindiffusionmc.worldgen.ecology.CoastalTerrain;
 import com.github.xandergos.terraindiffusionmc.worldgen.ecology.EuropeanBiomeClassifier;
-import com.github.xandergos.terraindiffusionmc.worldgen.settings.BiomeBalance;
+import com.github.xandergos.terraindiffusionmc.worldgen.ecology.EuropeanEcology;
+import com.github.xandergos.terraindiffusionmc.worldgen.ecology.TropicalLandforms;
 import com.github.xandergos.terraindiffusionmc.worldgen.mountain.MountainHeightField;
+import com.github.xandergos.terraindiffusionmc.worldgen.settings.BiomeBalance;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
 
 /** Immutable neural conditioning map. Never enters the exact terrain/water stores. */
@@ -64,74 +64,63 @@ public final class CoarseLodPatch {
         double tx = gx - ix, tz = gz - iz;
         float[] values = channels[channel];
         int p = iz * GRID + ix;
-        return (float)
-                ((1 - tz) * ((1 - tx) * values[p] + tx * values[p + 1])
-                        + tz * ((1 - tx) * values[p + GRID] + tx * values[p + GRID + 1]));
+        return (float) ((1 - tz) * ((1 - tx) * values[p] + tx * values[p + 1])
+                + tz * ((1 - tx) * values[p + GRID] + tx * values[p + GRID + 1]));
     }
 
     public Surface surface(int x, int z) {
         var session = WorldSession.current();
-        boolean active =
-                session != null
-                        && session.isActive()
-                        && session.worldSeed() == seed
-                        && session.profile().worldScale() == scale;
+        boolean active = session != null
+                && session.isActive()
+                && session.worldSeed() == seed
+                && session.profile().worldScale() == scale;
         boolean largerLandscapes = active && session.profile().largerLandscapes();
         var balance = active ? session.profile().biomeBalance() : BiomeBalance.DEFAULT;
         float root = channel(0, x, z);
         float metres = balance.adjustElevation(Math.copySign(root * root, root));
         boolean regional = active && session.profile().climateShift().isPresent();
         if (regional) metres = CoastalTerrain.height(seed, x, z, metres);
-        double temperature = channel(2, x, z) + (regional ? session.profile().climateShift().orElse(0) : 0),
+        double
+                temperature =
+                        channel(2, x, z)
+                                + (regional ? session.profile().climateShift().orElse(0) : 0),
                 precip = Math.max(0, channel(4, x, z));
-        var island =
-                active && session.profile().tropicalLandforms()
-                        ? islandColumn(metres, x, z, (float) temperature, session.profile().largeIslands())
-                        : null;
-        short height =
-                (short)
-                        Math.max(
-                                Short.MIN_VALUE,
-                                Math.min(10000, Math.round(island == null ? metres : island.height())));
-        int air = MountainHeightField.sampleForWorld(seed, x, z, height, scale, cap).surfaceY();
+        var island = active && session.profile().tropicalLandforms()
+                ? islandColumn(
+                        metres, x, z, (float) temperature, session.profile().largeIslands())
+                : null;
+        short height = (short)
+                Math.max(Short.MIN_VALUE, Math.min(10000, Math.round(island == null ? metres : island.height())));
+        int air = MountainHeightField.sampleForWorld(seed, x, z, height, scale, cap)
+                .surfaceY();
         if (island != null) return new Surface(air, island.biome(), 0);
-        var condition =
-                EuropeanEcology.evaluate(
-                        seed,
-                        temperature,
-                        precip,
-                        height,
-                        0,
-                        Double.POSITIVE_INFINITY,
-                        x,
-                        z,
-                        largerLandscapes,
-                        balance);
-        short biome =
-                (short)
-                        (switch (condition.zone()) {
-                            case DECIDUOUS_FOREST -> 208;
-                            case MIXED_FOREST -> 209;
-                            case CONIFEROUS_FOREST -> 215;
-                            case ALPINE_SNOW -> 32;
-                            case ROCKY_SLOPE -> 35;
-                            case DESERT -> 5;
-                            case MOUNTAIN_MEADOW -> 29;
-                            default -> 229;
-                        });
+        var condition = EuropeanEcology.evaluate(
+                seed, temperature, precip, height, 0, Double.POSITIVE_INFINITY, x, z, largerLandscapes, balance);
+        short biome = (short)
+                (switch (condition.zone()) {
+                    case DECIDUOUS_FOREST -> 208;
+                    case MIXED_FOREST -> 209;
+                    case CONIFEROUS_FOREST -> 215;
+                    case ALPINE_SNOW -> 32;
+                    case ROCKY_SLOPE -> 35;
+                    case DESERT -> 5;
+                    case MOUNTAIN_MEADOW -> 29;
+                    default -> 229;
+                });
         if (height < 0) biome = 0;
         if (regional) biome = CoastalTerrain.biome(seed, x, z, metres, scale, biome);
         if (largerLandscapes) biome = EuropeanBiomeClassifier.withOpenFields(seed, x, z, biome, balance);
-        if (active) biome = EuropeanEcology.varyBiome(seed, x, z, biome, session.profile().biomeVariety());
+        if (active)
+            biome = EuropeanEcology.varyBiome(
+                    seed, x, z, biome, session.profile().biomeVariety());
         // A canopy silhouette, not individual trees. Exact crowns come from near LOD/chunks.
         long hash = mix(seed ^ ((long) Math.floorDiv(x, 32) * 73428767) ^ ((long) Math.floorDiv(z, 32) * 912931));
         double density = (biome == 108 || biome == 115) ? condition.forestDensity() * 0.4 : condition.forestDensity();
-        int canopy =
-                air > 63
-                                && (biome == 208 || biome == 209 || biome == 215 || biome == 108 || biome == 115)
-                                && ((hash >>> 11) * 0x1.0p-53) < density * TREE_DENSITY
-                        ? (biome == 215 || biome == 115 ? 20 : 14) + (int) (hash & 7)
-                        : 0;
+        int canopy = air > 63
+                        && (biome == 208 || biome == 209 || biome == 215 || biome == 108 || biome == 115)
+                        && ((hash >>> 11) * 0x1.0p-53) < density * TREE_DENSITY
+                ? (biome == 215 || biome == 115 ? 20 : 14) + (int) (hash & 7)
+                : 0;
         return new Surface(air, biome, canopy);
     }
 

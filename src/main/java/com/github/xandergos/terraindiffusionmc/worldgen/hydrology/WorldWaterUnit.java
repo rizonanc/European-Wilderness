@@ -1,7 +1,6 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.hydrology;
 
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.WaterGenerationOptions;
-
 import java.util.*;
 
 /** Sparse whole watersheds owned by the location of their lake minimum or sea mouth. */
@@ -136,18 +135,17 @@ final class WorldWaterUnit {
             WaterGenerationOptions options,
             int scale) {
         int side = grid.unitSide(), x = grid.x(cell) - grid.unitHalo(), z = grid.z(cell) - grid.unitHalo();
-        var data =
-                PreparedWaterArea.calculate(
-                        seed,
-                        x,
-                        z,
-                        raw,
-                        new PreparedWaterArea.Owner(grid.x(cell), grid.z(cell), grid.core()),
-                        revision,
-                        currentsEnabled,
-                        revision >= 5,
-                        options,
-                        scale);
+        var data = PreparedWaterArea.calculate(
+                seed,
+                x,
+                z,
+                raw,
+                new PreparedWaterArea.Owner(grid.x(cell), grid.z(cell), grid.core()),
+                revision,
+                currentsEnabled,
+                revision >= 5,
+                options,
+                scale);
         int count = 0;
         for (int w : data.water()) if (w != PreparedWaterArea.NONE) count++;
         int[] index = new int[count];

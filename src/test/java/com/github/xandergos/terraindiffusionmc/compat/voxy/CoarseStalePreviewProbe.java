@@ -14,34 +14,33 @@ public final class CoarseStalePreviewProbe {
             Arrays.fill(field, new CoarseLodPatch.Surface(64 + 8 * unit, (short) 229, 0));
             long[] source = new long[32768], target = new long[32768];
             Arrays.fill(source, 24 * 1024, 25 * 1024, 99);
-            var result =
-                    CoarseSectionComposer.fill(
-                            level,
-                            -1,
-                            64 / side,
-                            -1,
-                            -64,
-                            1871,
-                            field,
-                            source,
-                            target,
-                            (x, z) -> false,
-                            b -> palette,
-                            v -> v == 0);
-            results.add(
-                    Map.of(
-                            "level",
-                            level,
-                            "staleSlabValue",
-                            target[24 * 1024],
-                            "groundValue",
-                            target[0],
-                            "originalSlabValue",
-                            source[24 * 1024],
-                            "children",
-                            Byte.toUnsignedInt(result.children())));
+            var result = CoarseSectionComposer.fill(
+                    level,
+                    -1,
+                    64 / side,
+                    -1,
+                    -64,
+                    1871,
+                    field,
+                    source,
+                    target,
+                    (x, z) -> false,
+                    b -> palette,
+                    v -> v == 0);
+            results.add(Map.of(
+                    "level",
+                    level,
+                    "staleSlabValue",
+                    target[24 * 1024],
+                    "groundValue",
+                    target[0],
+                    "originalSlabValue",
+                    source[24 * 1024],
+                    "children",
+                    Byte.toUnsignedInt(result.children())));
         }
-        String json = new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(results);
+        String json =
+                new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(results);
         Files.writeString(Path.of(args[0]), json + "\n");
         System.out.println(json);
     }

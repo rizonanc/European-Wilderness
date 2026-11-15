@@ -15,8 +15,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = ModNioPackResources.class, remap = false)
 abstract class GeophilicResourcePackMixin {
-    @Shadow @Final private ModContainer mod;
-    @Shadow @Final private Map<ResourceType, Set<String>> namespaces;
+    @Shadow
+    @Final
+    private ModContainer mod;
+
+    @Shadow
+    @Final
+    private Map<ResourceType, Set<String>> namespaces;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void terrainDiffusion$keepGeophilicFeatures(CallbackInfo ci) {
@@ -24,9 +29,8 @@ abstract class GeophilicResourcePackMixin {
         // Geophilic puts its vanilla biome replacements in minecraft, including in overlay packs.
         namespaces.computeIfPresent(
                 ResourceType.SERVER_DATA,
-                (type, names) ->
-                        names.stream()
-                                .filter(name -> !name.equals("minecraft"))
-                                .collect(Collectors.toUnmodifiableSet()));
+                (type, names) -> names.stream()
+                        .filter(name -> !name.equals("minecraft"))
+                        .collect(Collectors.toUnmodifiableSet()));
     }
 }

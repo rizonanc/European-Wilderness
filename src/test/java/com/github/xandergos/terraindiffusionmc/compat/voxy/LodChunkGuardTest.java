@@ -1,15 +1,17 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.nio.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import static org.junit.jupiter.api.Assertions.*;
 
 class LodChunkGuardTest {
-    @TempDir Path temp;
+    @TempDir
+    Path temp;
 
     private Path region(int x, int z) {
         return temp.resolve("r." + x + "." + z + ".mca");

@@ -1,6 +1,5 @@
 package com.github.xandergos.terraindiffusionmc.pipeline;
 
-import com.github.xandergos.terraindiffusionmc.infinitetensor.FloatTensor;
 import java.lang.reflect.*;
 import java.nio.*;
 import java.nio.file.*;
@@ -21,17 +20,13 @@ public final class LatentInferenceProbe {
         for (String file : List.of("world_pipeline_config.json", "pipeline_data.json"))
             Files.copy(source.resolve(file), models.resolve(file), StandardCopyOption.REPLACE_EXISTING);
         Files.writeString(config.resolve("european-wilderness.properties"), "inference.device=cpu\n");
-        var provider =
-                (GameProvider)
-                        Proxy.newProxyInstance(
-                                LatentInferenceProbe.class.getClassLoader(),
-                                new Class[] {GameProvider.class},
-                                (p, m, a) -> {
-                                    if (m.getName().equals("getLaunchDirectory")) return out;
-                                    if (m.getName().equals("getGameId")) return "latent-probe";
-                                    if (m.getReturnType() == boolean.class) return false;
-                                    return null;
-                                });
+        var provider = (GameProvider) Proxy.newProxyInstance(
+                LatentInferenceProbe.class.getClassLoader(), new Class[] {GameProvider.class}, (p, m, a) -> {
+                    if (m.getName().equals("getLaunchDirectory")) return out;
+                    if (m.getName().equals("getGameId")) return "latent-probe";
+                    if (m.getReturnType() == boolean.class) return false;
+                    return null;
+                });
         FabricLoaderImpl.INSTANCE.setGameProvider(provider);
         Field ready = ModelAssetManager.class.getDeclaredField("READY");
         ready.setAccessible(true);
@@ -69,7 +64,10 @@ public final class LatentInferenceProbe {
             report.put("windows", pipeline.getTotalComputedWindowCount());
             report.put("native", OnnxModel.statistics());
             report.put("totalMs", (System.nanoTime() - started) / 1e6);
-            String json = new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(report);
+            String json = new com.google.gson.GsonBuilder()
+                    .setPrettyPrinting()
+                    .create()
+                    .toJson(report);
             Files.writeString(out.resolve("latent-probe-report.json"), json + "\n");
             ByteBuffer bytes = ByteBuffer.allocate(first.elev.length * 4).order(ByteOrder.LITTLE_ENDIAN);
             for (float value : first.elev) bytes.putFloat(value);
@@ -90,19 +88,18 @@ public final class LatentInferenceProbe {
         if (climate == null || climate.length != 5 * size * size) throw new AssertionError("Climate element count");
         for (float value : elev) if (!Float.isFinite(value)) throw new AssertionError("Non-finite elevation");
         for (float value : climate) if (!Float.isFinite(value)) throw new AssertionError("Non-finite climate");
-        System.out.println(
-                "region "
-                        + size
-                        + " at "
-                        + ox
-                        + ","
-                        + oy
-                        + " done in "
-                        + ((System.nanoTime() - started) / 1e6)
-                        + " ms; elevMin="
-                        + min(elev)
-                        + " elevMax="
-                        + max(elev));
+        System.out.println("region "
+                + size
+                + " at "
+                + ox
+                + ","
+                + oy
+                + " done in "
+                + ((System.nanoTime() - started) / 1e6)
+                + " ms; elevMin="
+                + min(elev)
+                + " elevMax="
+                + max(elev));
         return new Result(elev, climate);
     }
 

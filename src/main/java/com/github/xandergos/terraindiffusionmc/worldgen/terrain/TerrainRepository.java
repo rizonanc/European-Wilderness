@@ -1,17 +1,17 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.terrain;
 
+import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors.*;
+
 import com.github.xandergos.terraindiffusionmc.worldgen.cache.DiskTerrainStore;
+import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors;
 import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.GenerationMetrics;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors;
-import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors.*;
-import java.util.Optional;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
 public final class TerrainRepository {
@@ -123,22 +123,21 @@ public final class TerrainRepository {
         long estimateBytes = estimateBytes(key);
         // Admission is shared by every repository/store for this cache directory.
         var reservation = new java.util.concurrent.atomic.AtomicReference<DiskTerrainStore.Reservation>();
-        PendingTile task =
-                new PendingTile(() -> {
-                    try (var admitted = reservation.get()) {
-                        var cached = peekRam(key);
-                        if (cached.isPresent()) return cached.get();
-                        GenerationMetrics.countRepoComputed();
-                        TerrainTile computed = this.loader.load(key);
-                        if (computed != null && computed.key().equals(key)) {
-                            this.requireOwnerActive();
-                            this.store.store(key, computed, admitted);
-                            return computed;
-                        } else {
-                            throw new IllegalStateException("Tile loader returned foreign data for " + key);
-                        }
-                    }
-                });
+        PendingTile task = new PendingTile(() -> {
+            try (var admitted = reservation.get()) {
+                var cached = peekRam(key);
+                if (cached.isPresent()) return cached.get();
+                GenerationMetrics.countRepoComputed();
+                TerrainTile computed = this.loader.load(key);
+                if (computed != null && computed.key().equals(key)) {
+                    this.requireOwnerActive();
+                    this.store.store(key, computed, admitted);
+                    return computed;
+                } else {
+                    throw new IllegalStateException("Tile loader returned foreign data for " + key);
+                }
+            }
+        });
         PendingTile flight = this.pending.putIfAbsent(key, task);
         if (flight == null) {
             flight = task;
@@ -146,14 +145,13 @@ public final class TerrainRepository {
             try {
                 var admitted = this.store.tryReserve(estimateBytes, this.diskQuotaBytes);
                 if (admitted == null)
-                    throw new DiskQuotaExceededException(
-                            "Disk quota exceeded: "
-                                    + store.quotaStatistics()
-                                    + ", quota "
-                                    + diskQuotaBytes
-                                    + ", refusing to compute "
-                                    + key
-                                    + ". Stored tiles were left untouched.");
+                    throw new DiskQuotaExceededException("Disk quota exceeded: "
+                            + store.quotaStatistics()
+                            + ", quota "
+                            + diskQuotaBytes
+                            + ", refusing to compute "
+                            + key
+                            + ". Stored tiles were left untouched.");
                 reservation.set(admitted);
             } catch (IOException | RuntimeException admissionFailed) {
                 emit(
@@ -171,9 +169,8 @@ public final class TerrainRepository {
             task.run();
         }
 
-        try (var inherited =
-                flight.demand.inheritPriorityFrom(
-                        com.github.xandergos.terraindiffusionmc.pipeline.InferenceDemand.current())) {
+        try (var inherited = flight.demand.inheritPriorityFrom(
+                com.github.xandergos.terraindiffusionmc.pipeline.InferenceDemand.current())) {
             TerrainTile result = flight.get();
             this.requireOwnerActive();
             this.pending.remove(key, flight);
@@ -258,7 +255,8 @@ public final class TerrainRepository {
             }
 
             this.ramBytes = this.ramBytes + tile.ramBytes();
-            Iterator<Entry<TerrainTileKey, TerrainTile>> eldest = this.ram.entrySet().iterator();
+            Iterator<Entry<TerrainTileKey, TerrainTile>> eldest =
+                    this.ram.entrySet().iterator();
 
             while (this.ramBytes > this.maxRamBytes && this.ram.size() > 1 && eldest.hasNext()) {
                 TerrainTile evicted = eldest.next().getValue();

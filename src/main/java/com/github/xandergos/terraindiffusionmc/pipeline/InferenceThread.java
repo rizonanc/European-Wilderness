@@ -1,15 +1,16 @@
 package com.github.xandergos.terraindiffusionmc.pipeline;
 
-import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors;
 import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors.*;
+import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.WorkTimeline.Stage.*;
+
+import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors;
+import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.PerformanceDiagnostics;
+import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.StageTimings;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BooleanSupplier;
 import java.util.function.LongSupplier;
-import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.PerformanceDiagnostics;
-import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.StageTimings;
-import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.WorkTimeline.Stage.*;
 
 /** One native inference owner. Admission bounds the existing queue, never runs work on callers. */
 public final class InferenceThread implements AutoCloseable {
@@ -48,21 +49,13 @@ public final class InferenceThread implements AutoCloseable {
         this.maxBytes = maxBytes;
         this.reservedForeground = reservedForeground;
         this.clock = Objects.requireNonNull(clock);
-        executor =
-                new ThreadPoolExecutor(
-                        1,
-                        1,
-                        0,
-                        TimeUnit.MILLISECONDS,
-                        new PriorityBlockingQueue<>(),
-                        task -> {
-                            var thread = new Thread(task, threadName);
-                            thread.setDaemon(true);
-                            thread.setUncaughtExceptionHandler(
-                                    (t, failure) -> failed(Code.SCH_WORKER, "INFERENCE_WORKER", failure));
-                            worker = thread;
-                            return thread;
-                        });
+        executor = new ThreadPoolExecutor(1, 1, 0, TimeUnit.MILLISECONDS, new PriorityBlockingQueue<>(), task -> {
+            var thread = new Thread(task, threadName);
+            thread.setDaemon(true);
+            thread.setUncaughtExceptionHandler((t, failure) -> failed(Code.SCH_WORKER, "INFERENCE_WORKER", failure));
+            worker = thread;
+            return thread;
+        });
     }
 
     public <T> Future<T> submit(Callable<T> task) {

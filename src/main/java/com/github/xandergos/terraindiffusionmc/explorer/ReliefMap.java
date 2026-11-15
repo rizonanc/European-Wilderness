@@ -98,9 +98,8 @@ public final class ReliefMap {
         for (int i = 0; i < H * W; i++) {
             double slopeRad = (Math.PI / 2) - Math.atan(Math.hypot(dx[i], dy[i]));
             double aspectRad = Math.atan2(dy[i], -dx[i]);
-            double val =
-                    Math.sin(altRad) * Math.sin(slopeRad)
-                            + Math.cos(altRad) * Math.cos(slopeRad) * Math.cos(azRad - aspectRad);
+            double val = Math.sin(altRad) * Math.sin(slopeRad)
+                    + Math.cos(altRad) * Math.cos(slopeRad) * Math.cos(azRad - aspectRad);
             hs[i] = (float) Math.min(1.0, Math.max(0.0, val));
         }
 

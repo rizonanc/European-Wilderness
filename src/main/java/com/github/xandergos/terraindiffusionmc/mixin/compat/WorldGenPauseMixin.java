@@ -1,9 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.mixin.compat;
 
 import com.github.xandergos.terraindiffusionmc.compat.voxy.WorldGenCompat;
+import java.util.function.BooleanSupplier;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.server.MinecraftServer;
-import java.util.function.BooleanSupplier;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;

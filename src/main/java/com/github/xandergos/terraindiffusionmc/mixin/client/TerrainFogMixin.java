@@ -37,14 +37,10 @@ abstract class TerrainFogMixin {
             for (int dz = -32; dz <= 32; dz += 32) {
                 if (dx == 0 && dz == 0 || !world.isChunkLoaded((pos.getX() + dx) >> 4, (pos.getZ() + dz) >> 4))
                     continue;
-                relief +=
-                        Math.max(
-                                0,
-                                world.getTopY(
-                                                Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
-                                                pos.getX() + dx,
-                                                pos.getZ() + dz)
-                                        - ground);
+                relief += Math.max(
+                        0,
+                        world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, pos.getX() + dx, pos.getZ() + dz)
+                                - ground);
                 samples++;
             }
         if (samples < 4) return;

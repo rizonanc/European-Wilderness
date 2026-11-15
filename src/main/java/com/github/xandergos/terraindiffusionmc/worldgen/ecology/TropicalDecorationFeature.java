@@ -37,14 +37,10 @@ public final class TropicalDecorationFeature extends Feature<DefaultFeatureConfi
         var world = context.getWorld();
         int x = context.getOrigin().getX() & ~15, z = context.getOrigin().getZ() & ~15;
         long seed = session.worldSeed();
-        var oasis =
-                TropicalLandforms.oasis(
-                        seed,
-                        Math.floorDiv(x, TropicalLandforms.OASIS_CELL),
-                        Math.floorDiv(z, TropicalLandforms.OASIS_CELL));
-        boolean nearOasis =
-                Math.abs(oasis.x() - x - 8) <= TropicalLandforms.OASIS_REACH + 8
-                        && Math.abs(oasis.z() - z - 8) <= TropicalLandforms.OASIS_REACH + 8;
+        var oasis = TropicalLandforms.oasis(
+                seed, Math.floorDiv(x, TropicalLandforms.OASIS_CELL), Math.floorDiv(z, TropicalLandforms.OASIS_CELL));
+        boolean nearOasis = Math.abs(oasis.x() - x - 8) <= TropicalLandforms.OASIS_REACH + 8
+                && Math.abs(oasis.z() - z - 8) <= TropicalLandforms.OASIS_REACH + 8;
         var random = TropicalLandforms.random(seed, x >> 4, z >> 4, 23);
         int palmX = x + random.nextInt(4, 12), palmZ = z + random.nextInt(4, 12);
         boolean island =
@@ -56,7 +52,8 @@ public final class TropicalDecorationFeature extends Feature<DefaultFeatureConfi
             int waterY = nearOasis ? oasisLevel(session, terrain, oasis) : Integer.MIN_VALUE;
             boolean changed = waterY != Integer.MIN_VALUE && shapeOasis(world, terrain, oasis, x, z, waterY);
             if (waterY != Integer.MIN_VALUE) {
-                double angle = TropicalLandforms.random(seed, oasis.x(), oasis.z(), 24).nextDouble() * Math.TAU;
+                double angle =
+                        TropicalLandforms.random(seed, oasis.x(), oasis.z(), 24).nextDouble() * Math.TAU;
                 for (int i = 0; i < 4; i++) {
                     double theta = angle + i * Math.TAU / 4;
                     int rootX = oasis.x() + (int) Math.round(Math.cos(theta) * oasis.radius() * 0.72);
@@ -112,14 +109,11 @@ public final class TropicalDecorationFeature extends Feature<DefaultFeatureConfi
                 var ground = distance < 0.58 || distance > 0.82 ? Blocks.SAND : Blocks.GRASS_BLOCK;
                 for (int y = Math.min(oldAir, air) - 2; y <= Math.max(oldAir - 1, Math.max(air - 1, level)); y++) {
                     var pos = new BlockPos(wx, y, wz);
-                    BlockState material =
-                            y < air - 1
-                                    ? Blocks.SANDSTONE.getDefaultState()
-                                    : y == air - 1
-                                            ? ground.getDefaultState()
-                                            : y <= level
-                                                    ? Blocks.WATER.getDefaultState()
-                                                    : Blocks.AIR.getDefaultState();
+                    BlockState material = y < air - 1
+                            ? Blocks.SANDSTONE.getDefaultState()
+                            : y == air - 1
+                                    ? ground.getDefaultState()
+                                    : y <= level ? Blocks.WATER.getDefaultState() : Blocks.AIR.getDefaultState();
                     changed |= world.setBlockState(pos, material, 2);
                 }
                 if (ground == Blocks.GRASS_BLOCK && air > level) {
@@ -129,7 +123,10 @@ public final class TropicalDecorationFeature extends Feature<DefaultFeatureConfi
                         if (air == level + 1
                                 && growth < 0.18
                                 && Blocks.SUGAR_CANE.getDefaultState().canPlaceAt(world, pos)) {
-                            for (int stem = 0; stem < 2 && world.getBlockState(pos.up(stem)).isAir(); stem++) {
+                            for (int stem = 0;
+                                    stem < 2
+                                            && world.getBlockState(pos.up(stem)).isAir();
+                                    stem++) {
                                 changed |= world.setBlockState(pos.up(stem), Blocks.SUGAR_CANE.getDefaultState(), 2);
                             }
                         } else if (growth < 0.4)
@@ -199,7 +196,8 @@ public final class TropicalDecorationFeature extends Feature<DefaultFeatureConfi
             var key = TerrainTileKey.forBlock(x, z, tileSize, session.worldSeed(), session.fingerprint());
             var tile = tiles.get(key);
             if (tile == null) {
-                tile = PreparedFallback.requiredTilesFor(session.repository(), PreparedFallback.mode()).get(key);
+                tile = PreparedFallback.requiredTilesFor(session.repository(), PreparedFallback.mode())
+                        .get(key);
                 tiles.put(key, tile);
             }
             return tile;

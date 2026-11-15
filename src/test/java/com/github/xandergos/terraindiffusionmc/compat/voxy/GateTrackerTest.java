@@ -1,8 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
-import org.junit.jupiter.api.Test;
-import java.util.concurrent.atomic.AtomicLong;
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.concurrent.atomic.AtomicLong;
+import org.junit.jupiter.api.Test;
 
 class GateTrackerTest {
     private static void seconds(AtomicLong clock, int count, boolean open, Runnable between) {
@@ -80,14 +81,13 @@ class GateTrackerTest {
     void readsFromAnotherThreadSeeAConsistentSnapshot() throws Exception {
         var clock = new AtomicLong(0L);
         var tracker = new GateTracker(clock::get);
-        var reader =
-                new Thread(() -> {
-                    for (int i = 0; i < 200; i++) {
-                        tracker.openRatio10();
-                        tracker.openRatio60();
-                        tracker.totalChecks();
-                    }
-                });
+        var reader = new Thread(() -> {
+            for (int i = 0; i < 200; i++) {
+                tracker.openRatio10();
+                tracker.openRatio60();
+                tracker.totalChecks();
+            }
+        });
         reader.start();
         for (int s = 0; s < 20; s++) {
             tracker.sample(s % 2 == 0);

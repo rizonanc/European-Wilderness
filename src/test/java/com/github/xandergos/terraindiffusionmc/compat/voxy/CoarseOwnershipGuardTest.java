@@ -1,13 +1,15 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.nio.*;
 import java.nio.file.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import static org.junit.jupiter.api.Assertions.*;
 
 class CoarseOwnershipGuardTest {
-    @TempDir Path temp;
+    @TempDir
+    Path temp;
 
     private void save(int x, int z, int index) throws Exception {
         byte[] bytes = new byte[8192];
@@ -102,19 +104,16 @@ class CoarseOwnershipGuardTest {
     void testBackgroundDiskCacheLockNeverBlocksLoadedChunkProtection() throws Exception {
         var entered = new java.util.concurrent.CountDownLatch(1);
         var release = new java.util.concurrent.CountDownLatch(1);
-        var guard =
-                new LodChunkGuard(
-                        temp,
-                        () -> {
-                            entered.countDown();
-                            try {
-                                release.await(5, java.util.concurrent.TimeUnit.SECONDS);
-                            } catch (InterruptedException failure) {
-                                Thread.currentThread().interrupt();
-                                throw new IllegalStateException(failure);
-                            }
-                            return 1L;
-                        });
+        var guard = new LodChunkGuard(temp, () -> {
+            entered.countDown();
+            try {
+                release.await(5, java.util.concurrent.TimeUnit.SECONDS);
+            } catch (InterruptedException failure) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException(failure);
+            }
+            return 1L;
+        });
         assertFalse(guard.renderRegionReady(0, 0));
         try (var threads = java.util.concurrent.Executors.newFixedThreadPool(2)) {
             var disk = threads.submit(() -> guard.prepareRenderRegions(1));

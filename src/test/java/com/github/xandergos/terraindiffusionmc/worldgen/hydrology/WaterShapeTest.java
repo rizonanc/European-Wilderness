@@ -1,8 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.hydrology;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class WaterShapeTest {
     private static int[] lake() {

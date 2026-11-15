@@ -1,11 +1,12 @@
 package com.github.xandergos.terraindiffusionmc.pipeline;
 
+import static com.github.xandergos.terraindiffusionmc.pipeline.InferenceDemand.Priority.*;
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-import static com.github.xandergos.terraindiffusionmc.pipeline.InferenceDemand.Priority.*;
 
 class InferencePriorityTest {
     private static void await(CountDownLatch latch) throws Exception {
@@ -18,13 +19,12 @@ class InferencePriorityTest {
             var entered = new CountDownLatch(1);
             var release = new CountDownLatch(1);
             var order = Collections.synchronizedList(new ArrayList<String>());
-            var running =
-                    worker.submit(() -> {
-                        entered.countDown();
-                        release.await();
-                        order.add("running");
-                        return 0;
-                    });
+            var running = worker.submit(() -> {
+                entered.countDown();
+                release.await();
+                order.add("running");
+                return 0;
+            });
             await(entered);
             try {
                 var far = worker.submit(new InferenceDemand(DISTANT), () -> true, () -> order.add("far"));
@@ -88,25 +88,21 @@ class InferencePriorityTest {
             await(entered);
             try {
                 var valid = new AtomicBoolean(true);
-                var stale =
-                        worker.submit(
-                                new InferenceDemand(DISTANT),
-                                valid::get,
-                                () -> {
-                                    fail("retired job ran");
-                                    return 0;
-                                });
-                var cancelled =
-                        worker.submit(() -> {
-                            fail("cancelled job ran");
-                            return 0;
-                        });
+                var stale = worker.submit(new InferenceDemand(DISTANT), valid::get, () -> {
+                    fail("retired job ran");
+                    return 0;
+                });
+                var cancelled = worker.submit(() -> {
+                    fail("cancelled job ran");
+                    return 0;
+                });
                 cancelled.cancel(true);
                 valid.set(false);
                 release.countDown();
                 assertInstanceOf(
                         CancellationException.class,
-                        assertThrows(ExecutionException.class, () -> stale.get(5, TimeUnit.SECONDS)).getCause());
+                        assertThrows(ExecutionException.class, () -> stale.get(5, TimeUnit.SECONDS))
+                                .getCause());
                 assertThrows(CancellationException.class, cancelled::get);
                 assertEquals(42, worker.submit(() -> 42).get(5, TimeUnit.SECONDS));
             } finally {
@@ -120,13 +116,11 @@ class InferencePriorityTest {
         assertEquals(FOREGROUND, InferenceDemand.currentPriority());
         try (var ignored = InferenceDemand.scope(DISTANT)) {
             assertEquals(DISTANT, InferenceDemand.currentPriority());
-            assertThrows(
-                    IllegalStateException.class,
-                    () -> {
-                        try (var nested = InferenceDemand.scope(NEAR)) {
-                            throw new IllegalStateException();
-                        }
-                    });
+            assertThrows(IllegalStateException.class, () -> {
+                try (var nested = InferenceDemand.scope(NEAR)) {
+                    throw new IllegalStateException();
+                }
+            });
             assertEquals(DISTANT, InferenceDemand.currentPriority());
         }
         assertEquals(FOREGROUND, InferenceDemand.currentPriority());

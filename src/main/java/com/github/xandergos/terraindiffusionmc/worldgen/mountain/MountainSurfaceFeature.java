@@ -42,38 +42,34 @@ public final class MountainSurfaceFeature extends Feature<DefaultFeatureConfig> 
         int chunkX = Math.floorDiv(context.getOrigin().getX(), 16);
         int chunkZ = Math.floorDiv(context.getOrigin().getZ(), 16);
         PerformanceProfile.PreparationMode mode = PreparedFallback.mode();
-        MountainTerrainView terrain =
-                new MountainTerrainView(
-                        repository.tileSize(),
-                        seed,
-                        session.fingerprint(),
-                        session.profile().worldScale(),
-                        world.getTopYInclusive(),
-                        MountainTerrainView.adaptChecked(PreparedFallback.requiredTilesFor(repository, mode)::get));
+        MountainTerrainView terrain = new MountainTerrainView(
+                repository.tileSize(),
+                seed,
+                session.fingerprint(),
+                session.profile().worldScale(),
+                world.getTopYInclusive(),
+                MountainTerrainView.adaptChecked(PreparedFallback.requiredTilesFor(repository, mode)::get));
 
         try {
-            boolean surfaceChanged =
-                    MountainSurfacePlanning.planAndWrite(
-                            mode,
-                            () ->
-                                    MountainSurfacePlanning.planChunk(
-                                            terrain, seed, chunkX, chunkZ, MountainSurfaceFeature::classify),
-                            plan -> {
-                                WorldSession.requireActive(session);
-                                boolean changed =
-                                        write(world, plan, seed)
-                                                | MountainLandforms.generate(
-                                                        world,
-                                                        terrain,
-                                                        seed,
-                                                        chunkX,
-                                                        chunkZ,
-                                                        session.riverOverlay(),
-                                                        session.profile().newLandforms());
-                                return session.profile().climateShift().isPresent()
-                                        ? changed | StoneLandmark.generate(world, terrain, seed, chunkX, chunkZ)
-                                        : changed;
-                            });
+            boolean surfaceChanged = MountainSurfacePlanning.planAndWrite(
+                    mode,
+                    () -> MountainSurfacePlanning.planChunk(
+                            terrain, seed, chunkX, chunkZ, MountainSurfaceFeature::classify),
+                    plan -> {
+                        WorldSession.requireActive(session);
+                        boolean changed = write(world, plan, seed)
+                                | MountainLandforms.generate(
+                                        world,
+                                        terrain,
+                                        seed,
+                                        chunkX,
+                                        chunkZ,
+                                        session.riverOverlay(),
+                                        session.profile().newLandforms());
+                        return session.profile().climateShift().isPresent()
+                                ? changed | StoneLandmark.generate(world, terrain, seed, chunkX, chunkZ)
+                                : changed;
+                    });
             return PASS_AND_CAMP.generate(context) | surfaceChanged;
         } catch (MountainTerrainView.LookupException failed) {
             throw new IllegalStateException("Mountain surface terrain lookup failed", failed.getCause());
@@ -82,10 +78,8 @@ public final class MountainSurfaceFeature extends Feature<DefaultFeatureConfig> 
 
     private static MountainSurfaceMaterials.Material classify(
             long seed, int x, int z, int y, float temperature, int north, int south, int west, int east) {
-        int slope =
-                Math.max(
-                        Math.max(Math.abs(north - y), Math.abs(south - y)),
-                        Math.max(Math.abs(west - y), Math.abs(east - y)));
+        int slope = Math.max(
+                Math.max(Math.abs(north - y), Math.abs(south - y)), Math.max(Math.abs(west - y), Math.abs(east - y)));
         var glacial = RegionalGeology.glacialSurface(seed, x, z, y, temperature, slope);
         return glacial == MountainSurfaceMaterials.Material.NONE
                 ? MountainSurfaceMaterials.classify(seed, x, z, y, temperature, north, south, west, east)
@@ -113,12 +107,11 @@ public final class MountainSurfaceFeature extends Feature<DefaultFeatureConfig> 
                     abovePos = groundPos.up();
                     BlockState ground = world.getBlockState(groundPos);
                     BlockState above = world.getBlockState(abovePos);
-                    write =
-                            planWrite(
-                                    ground,
-                                    above,
-                                    placement.material(),
-                                    RegionalGeology.rock(seed, placement.x(), placement.z()));
+                    write = planWrite(
+                            ground,
+                            above,
+                            placement.material(),
+                            RegionalGeology.rock(seed, placement.x(), placement.z()));
                     if (write != null) {
                         if (write.groundReplacement() == null) {
                             break;
@@ -140,17 +133,15 @@ public final class MountainSurfaceFeature extends Feature<DefaultFeatureConfig> 
                 Block backing = RegionalGeology.rock(seed, placement.x(), placement.z());
                 final int surfaceY = groundY;
                 final MountainSurfacePlanning.Placement surfacePlacement = placement;
-                int depth =
-                        MountainSurfacePlanning.rockSubsurfaceDepth(offsetx -> {
-                            int y = surfaceY - offsetx;
-                            if (y < world.getBottomY()) {
-                                return false;
-                            }
+                int depth = MountainSurfacePlanning.rockSubsurfaceDepth(offsetx -> {
+                    int y = surfaceY - offsetx;
+                    if (y < world.getBottomY()) {
+                        return false;
+                    }
 
-                            BlockState below =
-                                    world.getBlockState(new BlockPos(surfacePlacement.x(), y, surfacePlacement.z()));
-                            return naturalRockSubsurface(below) && below.getFluidState().isEmpty();
-                        });
+                    BlockState below = world.getBlockState(new BlockPos(surfacePlacement.x(), y, surfacePlacement.z()));
+                    return naturalRockSubsurface(below) && below.getFluidState().isEmpty();
+                });
 
                 for (int offset = 1; offset <= depth; offset++) {
                     BlockPos belowPos = new BlockPos(placement.x(), groundY - offset, placement.z());
@@ -179,24 +170,22 @@ public final class MountainSurfaceFeature extends Feature<DefaultFeatureConfig> 
                     case SNOW -> Blocks.SNOW_BLOCK;
                     case NONE, THIN_SNOW -> null;
                 };
-        MountainSurfacePlanning.WriteDecision decision =
-                MountainSurfacePlanning.decideWrite(
-                        material,
-                        naturalGround(ground),
-                        ground.getFluidState().isEmpty(),
-                        above.getFluidState().isEmpty(),
-                        above.isAir(),
-                        singleSnowCap,
-                        replacement != null && ground.isOf(replacement));
+        MountainSurfacePlanning.WriteDecision decision = MountainSurfacePlanning.decideWrite(
+                material,
+                naturalGround(ground),
+                ground.getFluidState().isEmpty(),
+                above.getFluidState().isEmpty(),
+                above.isAir(),
+                singleSnowCap,
+                replacement != null && ground.isOf(replacement));
         if (decision == null) {
             return null;
         }
 
         BlockState newGround = decision.replaceGround() ? replacement.getDefaultState() : null;
-        BlockState newAbove =
-                decision.placeThinSnow()
-                        ? Blocks.SNOW.getDefaultState()
-                        : (decision.clearSnowCap() ? Blocks.AIR.getDefaultState() : null);
+        BlockState newAbove = decision.placeThinSnow()
+                ? Blocks.SNOW.getDefaultState()
+                : (decision.clearSnowCap() ? Blocks.AIR.getDefaultState() : null);
         return new MountainSurfaceFeature.SurfaceWrite(newGround, newAbove);
     }
 

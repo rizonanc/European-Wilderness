@@ -9,10 +9,9 @@ import java.util.Random;
 import java.util.Set;
 
 public record TrunkProfile(List<TrunkProfile.Point> wood, TreeAge.Footprint base, int maxRadius) {
-    public static final Comparator<TrunkProfile.Point> POINT_ORDER =
-            Comparator.comparingInt(TrunkProfile.Point::y)
-                    .thenComparingInt(TrunkProfile.Point::x)
-                    .thenComparingInt(TrunkProfile.Point::z);
+    public static final Comparator<TrunkProfile.Point> POINT_ORDER = Comparator.comparingInt(TrunkProfile.Point::y)
+            .thenComparingInt(TrunkProfile.Point::x)
+            .thenComparingInt(TrunkProfile.Point::z);
     private static final long SEED_SALT = 7640891576956012809L;
 
     public TrunkProfile(List<TrunkProfile.Point> wood, TreeAge.Footprint base, int maxRadius) {
@@ -122,11 +121,10 @@ public record TrunkProfile(List<TrunkProfile.Point> wood, TreeAge.Footprint base
 
             List<TrunkProfile.Point> ordered = new ArrayList<>(points);
             ordered.sort(POINT_ORDER);
-            int radius =
-                    ordered.stream()
-                            .mapToInt(point -> Math.max(Math.abs(point.x()), Math.abs(point.z())))
-                            .max()
-                            .orElseThrow();
+            int radius = ordered.stream()
+                    .mapToInt(point -> Math.max(Math.abs(point.x()), Math.abs(point.z())))
+                    .max()
+                    .orElseThrow();
             return new TrunkProfile(ordered, selected, radius);
         } else {
             throw new IllegalArgumentException("trunk height must be between one and 36");

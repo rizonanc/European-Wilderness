@@ -26,13 +26,11 @@ public final class IngestSnapshotMixinProbe {
             ClassNode node = super.getClassNode(name, transform, flags);
             if (!name.equals(TARGET)) return node;
             var mapped = new ClassNode();
-            node.accept(
-                    new ClassRemapper(
-                            mapped,
-                            new SimpleRemapper(
-                                    Map.of(
-                                            "net/minecraft/class_2826", SECTION.replace('.', '/'),
-                                            "net/minecraft/class_2804", LIGHT.replace('.', '/')))));
+            node.accept(new ClassRemapper(
+                    mapped,
+                    new SimpleRemapper(Map.of(
+                            "net/minecraft/class_2826", SECTION.replace('.', '/'),
+                            "net/minecraft/class_2804", LIGHT.replace('.', '/')))));
             return mapped;
         }
     }
@@ -120,9 +118,8 @@ public final class IngestSnapshotMixinProbe {
 
         Object[] enqueue(int value) throws Exception {
             Class<?> record = loadClass(TARGET), section = loadClass(SECTION), light = loadClass(LIGHT);
-            var ctor =
-                    record.getDeclaredConstructor(
-                            int.class, int.class, int.class, loadClass(ENGINE), section, light, light);
+            var ctor = record.getDeclaredConstructor(
+                    int.class, int.class, int.class, loadClass(ENGINE), section, light, light);
             ctor.setAccessible(true);
             Object source = section.getConstructor(int.class).newInstance(value);
             Object task = ctor.newInstance(-33, 13, -420, null, source, null, null);

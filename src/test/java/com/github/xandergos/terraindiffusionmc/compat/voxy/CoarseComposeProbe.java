@@ -1,9 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
+import com.sun.management.ThreadMXBean;
 import java.lang.management.ManagementFactory;
 import java.nio.file.*;
 import java.util.*;
-import com.sun.management.ThreadMXBean;
 
 /** Pure composition cost with the same read-only guard/correction lookups as rendering.
  * Excludes Voxy meshing, GPU uploads and neural inference. */
@@ -24,11 +24,9 @@ public final class CoarseComposeProbe {
         var thread = (ThreadMXBean) ManagementFactory.getThreadMXBean();
         thread.setThreadAllocatedMemoryEnabled(true);
         long id = Thread.currentThread().threadId();
-        CoarseSectionComposer.Protected exact =
-                (x, z) ->
-                        guard.knownRealColumn(x, z)
-                                || guard.savedRealColumn(x, z)
-                                || coverage.contains(Math.floorDiv(x, 16), Math.floorDiv(z, 16));
+        CoarseSectionComposer.Protected exact = (x, z) -> guard.knownRealColumn(x, z)
+                || guard.savedRealColumn(x, z)
+                || coverage.contains(Math.floorDiv(x, 16), Math.floorDiv(z, 16));
         java.util.function.IntFunction<long[]> colors = b -> palette;
         java.util.function.LongPredicate air = v -> (v & (((1L << 20) - 1) << 27)) == 0;
         CoarseSectionComposer.Adjustment correction = corrections::adjustment, zero = (x, z) -> 0;
@@ -44,20 +42,20 @@ public final class CoarseComposeProbe {
                                         .nonAir()
                                 + target[n & 32767];
             long duration = System.nanoTime() - started, bytes = thread.getThreadAllocatedBytes(id) - allocated;
-            modes.add(
-                    Map.of(
-                            "correction",
-                            mode == correction,
-                            "iterations",
-                            iterations,
-                            "msPerSection",
-                            duration / 1e6 / iterations,
-                            "bytesPerSection",
-                            bytes / (double) iterations,
-                            "checksum",
-                            checksum));
+            modes.add(Map.of(
+                    "correction",
+                    mode == correction,
+                    "iterations",
+                    iterations,
+                    "msPerSection",
+                    duration / 1e6 / iterations,
+                    "bytesPerSection",
+                    bytes / (double) iterations,
+                    "checksum",
+                    checksum));
         }
-        String json = new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(modes);
+        String json =
+                new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(modes);
         Files.writeString(Path.of(args[0]), json + "\n");
         System.out.println(json);
     }

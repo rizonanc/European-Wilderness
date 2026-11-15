@@ -10,8 +10,8 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.Mutable;
-import net.minecraft.world.SpawnHelper;
 import net.minecraft.world.Heightmap.Type;
+import net.minecraft.world.SpawnHelper;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.SpawnSettings.SpawnEntry;
 import net.minecraft.world.gen.StructureAccessor;
@@ -41,9 +41,8 @@ public abstract class SpawnHelperMixin {
             int top = world.getTopY(Type.MOTION_BLOCKING_NO_LEAVES, pos.getX(), pos.getZ());
             boolean surface = DaylightHostileSpawnFilter.isSurfaceSpawn(pos.getY(), top);
             if (!surface) {
-                surface =
-                        DaylightHostileSpawnFilter.isSurfaceSpawn(
-                                pos.getY(), resolveGroundTop(world, pos.getX(), top, pos.getZ()));
+                surface = DaylightHostileSpawnFilter.isSurfaceSpawn(
+                        pos.getY(), resolveGroundTop(world, pos.getX(), top, pos.getZ()));
             }
 
             boolean ourForest = surface && isOurForest(world, pos);

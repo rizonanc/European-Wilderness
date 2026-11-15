@@ -1,10 +1,10 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.hydrology;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.Arrays;
 
 /** queue regenerable water plans. Full or closed queues write synchronously. */
 final class WaterWriteBehind implements AutoCloseable {

@@ -1,10 +1,11 @@
 package com.github.xandergos.terraindiffusionmc.pipeline;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class WorldPipelineScratchParityTest {
     private static void assertBitsEqual(float[] expected, float[] actual, String what) {
@@ -128,8 +129,7 @@ class WorldPipelineScratchParityTest {
         float[] reused = new float[6 * 130 * 64];
         java.util.Arrays.fill(reused, Float.NaN);
         long[] seeds = {42L, -777L, Long.MAX_VALUE - 1};
-        int[][] cases = {
-            {64, 64, 6, 64, 64}, {130, 64, 6, 64, 64}, {64, 64, 6, 256, 256}
+        int[][] cases = {{64, 64, 6, 64, 64}, {130, 64, 6, 64, 64}, {64, 64, 6, 256, 256}
         }; // exact, partial-span, multi-tile
         for (int run = 0; run < cases.length; run++) {
             int h = cases[run][0], w = cases[run][1], c = cases[run][2], th = cases[run][3], tw = cases[run][4];

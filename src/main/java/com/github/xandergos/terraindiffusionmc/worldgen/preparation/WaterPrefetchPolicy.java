@@ -19,19 +19,15 @@ public final class WaterPrefetchPolicy {
                 long wx = (long) Math.floor(x + dx / speed * distance),
                         wz = (long) Math.floor(z + dz / speed * distance);
                 if (Math.abs(wx) < 29_990_000 && Math.abs(wz) < 29_990_000)
-                    result.add(
-                            new TilePrefetchPolicy.TileCoord(
-                                    Math.floorDiv((int) wx, side), Math.floorDiv((int) wz, side)));
+                    result.add(new TilePrefetchPolicy.TileCoord(
+                            Math.floorDiv((int) wx, side), Math.floorDiv((int) wz, side)));
             }
         } else if (speed < 2) {
             int lx = Math.floorMod(x, side), lz = Math.floorMod(z, side);
-            List<int[]> edges =
-                    new ArrayList<>(
-                            List.of(
-                                    new int[] {lx, -1, 0},
-                                    new int[] {side - 1 - lx, 1, 0},
-                                    new int[] {lz, 0, -1},
-                                    new int[] {side - 1 - lz, 0, 1}));
+            List<int[]> edges = new ArrayList<>(
+                    List.of(new int[] {lx, -1, 0}, new int[] {side - 1 - lx, 1, 0}, new int[] {lz, 0, -1}, new int[] {
+                        side - 1 - lz, 0, 1
+                    }));
             edges.sort(Comparator.comparingInt(a -> a[0]));
             for (int i = 0; i < 2; i++)
                 result.add(

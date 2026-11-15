@@ -2,15 +2,15 @@ package com.github.xandergos.terraindiffusionmc.world;
 
 import com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfig;
 import com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfigEditor;
-import java.io.IOException;
-import org.slf4j.LoggerFactory;
 import com.github.xandergos.terraindiffusionmc.pipeline.ModelAssetManager;
 import com.github.xandergos.terraindiffusionmc.pipeline.OnnxModel;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.GenerationProfileState;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.ProfileCompatibility;
-import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldGenerationOptions;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.WaterGenerationOptions;
+import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldGenerationOptions;
+import java.io.IOException;
 import net.minecraft.server.world.ServerWorld;
+import org.slf4j.LoggerFactory;
 
 public final class WorldScaleManager {
     public static final int DEFAULT_SCALE = 2;
@@ -33,10 +33,9 @@ public final class WorldScaleManager {
         var states = serverWorld.getPersistentStateManager();
         if (states.get(GenerationProfileState.TYPE) == null) {
             var source = serverWorld.getChunkManager().getChunkGenerator().getBiomeSource();
-            var options =
-                    source instanceof TerrainDiffusionBiomeSource terrain
-                            ? terrain.creationOptions().orElseGet(WorldScaleManager::currentWorldOptions)
-                            : currentWorldOptions();
+            var options = source instanceof TerrainDiffusionBiomeSource terrain
+                    ? terrain.creationOptions().orElseGet(WorldScaleManager::currentWorldOptions)
+                    : currentWorldOptions();
             GenerationProfileState.offerDefaults(
                     currentScale,
                     ModelAssetManager.getModelRevision(),

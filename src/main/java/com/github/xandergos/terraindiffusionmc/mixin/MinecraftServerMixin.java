@@ -30,11 +30,10 @@ public class MinecraftServerMixin {
         if (world.getRegistryKey().equals(World.OVERWORLD)
                 && world.getChunkManager().getChunkGenerator().getBiomeSource()
                         instanceof com.github.xandergos.terraindiffusionmc.world.TerrainDiffusionBiomeSource source) {
-            BlockPos spawnPos =
-                    source.spawnChoice()
-                            .filter(choice -> choice.seed() == world.getSeed())
-                            .map(SpawnSelector::findSelectedSpawn)
-                            .orElseGet(SpawnSelector::findSpawnBlockPos);
+            BlockPos spawnPos = source.spawnChoice()
+                    .filter(choice -> choice.seed() == world.getSeed())
+                    .map(SpawnSelector::findSelectedSpawn)
+                    .orElseGet(SpawnSelector::findSpawnBlockPos);
             worldProperties.setSpawnPoint(SpawnPoint.create(World.OVERWORLD, spawnPos, 0.0F, 0.0F));
             ci.cancel();
         }

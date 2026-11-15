@@ -1,8 +1,8 @@
 package com.github.xandergos.terraindiffusionmc.mixin.compat;
 
 import com.github.xandergos.terraindiffusionmc.compat.voxy.CoarseRenderHooks;
-import me.cortex.voxy.common.world.WorldSection;
 import me.cortex.voxy.client.core.rendering.building.*;
+import me.cortex.voxy.common.world.WorldSection;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 

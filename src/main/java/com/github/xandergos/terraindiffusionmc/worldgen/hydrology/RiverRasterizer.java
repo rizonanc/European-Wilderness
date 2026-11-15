@@ -92,9 +92,8 @@ public final class RiverRasterizer {
                 int[] bed = new int[groundThalweg.length];
 
                 for (int i = 0; i < bed.length; i++) {
-                    bed[i] =
-                            Math.min(
-                                    Math.subtractExact(groundThalweg[i], 1), Math.subtractExact(water[i], depthBlocks));
+                    bed[i] = Math.min(
+                            Math.subtractExact(groundThalweg[i], 1), Math.subtractExact(water[i], depthBlocks));
                 }
 
                 return bed;
@@ -183,13 +182,12 @@ public final class RiverRasterizer {
                 }
 
                 if (Math.subtractExact(water[i - 1], water[i]) > 2) {
-                    throw new IllegalArgumentException(
-                            "water drop exceeds the fixed rapid step at "
-                                    + i
-                                    + ": "
-                                    + water[i - 1]
-                                    + " -> "
-                                    + water[i]);
+                    throw new IllegalArgumentException("water drop exceeds the fixed rapid step at "
+                            + i
+                            + ": "
+                            + water[i - 1]
+                            + " -> "
+                            + water[i]);
                 }
             }
 
@@ -369,13 +367,12 @@ public final class RiverRasterizer {
                 }
 
                 if (ground[z].length != width) {
-                    throw new IllegalArgumentException(
-                            "sourceGround must be rectangular: row "
-                                    + z
-                                    + " has width "
-                                    + ground[z].length
-                                    + " instead of "
-                                    + width);
+                    throw new IllegalArgumentException("sourceGround must be rectangular: row "
+                            + z
+                            + " has width "
+                            + ground[z].length
+                            + " instead of "
+                            + width);
                 }
             }
 

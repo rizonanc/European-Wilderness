@@ -1,14 +1,17 @@
 package com.github.xandergos.terraindiffusionmc.pipeline;
 
+import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors.*;
+
 import com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfig;
 import com.github.xandergos.terraindiffusionmc.infinitetensor.FloatTensor;
 import com.github.xandergos.terraindiffusionmc.world.HeightConverter;
 import com.github.xandergos.terraindiffusionmc.world.WorldScaleManager;
+import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors;
 import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.GenerationMetrics;
-import com.github.xandergos.terraindiffusionmc.worldgen.ecology.EuropeanBiomeClassifier;
-import com.github.xandergos.terraindiffusionmc.worldgen.ecology.TropicalLandforms;
 import com.github.xandergos.terraindiffusionmc.worldgen.ecology.CoastalTerrain;
+import com.github.xandergos.terraindiffusionmc.worldgen.ecology.EuropeanBiomeClassifier;
 import com.github.xandergos.terraindiffusionmc.worldgen.ecology.SlopeClimate;
+import com.github.xandergos.terraindiffusionmc.worldgen.ecology.TropicalLandforms;
 import com.github.xandergos.terraindiffusionmc.worldgen.mountain.MountainRegionCache;
 import com.github.xandergos.terraindiffusionmc.worldgen.mountain.MountainSurfaceRegion;
 import com.github.xandergos.terraindiffusionmc.worldgen.mountain.WorldHeightProfile;
@@ -19,8 +22,6 @@ import com.github.xandergos.terraindiffusionmc.worldgen.terrain.PreparedFallback
 import com.github.xandergos.terraindiffusionmc.worldgen.terrain.TerrainRepository;
 import com.github.xandergos.terraindiffusionmc.worldgen.terrain.TerrainTileKey;
 import com.github.xandergos.terraindiffusionmc.worldgen.terrain.TileAssembler;
-import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors;
-import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors.*;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -136,7 +137,10 @@ public final class LocalTerrainProvider {
     public static synchronized void shutdown() {
         WorldSession retiring = WorldSession.current();
         if (retiring != null) {
-            LOG.info("Retiring terrain session {} on {}", retiring.id(), Thread.currentThread().getName());
+            LOG.info(
+                    "Retiring terrain session {} on {}",
+                    retiring.id(),
+                    Thread.currentThread().getName());
         }
 
         WorldSession.deactivate(retiring);
@@ -167,16 +171,11 @@ public final class LocalTerrainProvider {
 
     static FloatTensor getSpawnCoarse(int i0, int j0, int i1, int j1, WorldSession ticket) throws Exception {
         return INFERENCE
-                .submit(
-                        InferenceDemand.current(),
-                        ticket::isActive,
-                        estimateRegionBytes(i0, j0, i1, j1, 16),
-                        () -> {
-                            WorldSession.requireActive(ticket);
-                            if (instanceSeed != ticket.worldSeed())
-                                throw new IllegalStateException("Spawn seed is not bound");
-                            return getInstance().pipeline.getCoarseSlice(i0, j0, i1, j1);
-                        })
+                .submit(InferenceDemand.current(), ticket::isActive, estimateRegionBytes(i0, j0, i1, j1, 16), () -> {
+                    WorldSession.requireActive(ticket);
+                    if (instanceSeed != ticket.worldSeed()) throw new IllegalStateException("Spawn seed is not bound");
+                    return getInstance().pipeline.getCoarseSlice(i0, j0, i1, j1);
+                })
                 .get();
     }
 
@@ -280,10 +279,9 @@ public final class LocalTerrainProvider {
         return INFERENCE
                 .submit(
                         InferenceDemand.current(),
-                        () ->
-                                WorldSession.current() == ticket
-                                        && (ticket == null || ticket.isActive())
-                                        && java.util.Objects.equals(preview, PREVIEW.previewSeedOrNull()),
+                        () -> WorldSession.current() == ticket
+                                && (ticket == null || ticket.isActive())
+                                && java.util.Objects.equals(preview, PREVIEW.previewSeedOrNull()),
                         bytes,
                         task)
                 .get();
@@ -319,16 +317,14 @@ public final class LocalTerrainProvider {
         try {
             long worldSeed = session.worldSeed();
             String fingerprint = session.fingerprint();
-            TileAssembler.AssembledRegion region =
-                    PreparedFallback.regionFor(
-                            repository, worldSeed, fingerprint, PreparedFallback.mode(), i1, j1, i2, j2);
-            LocalTerrainProvider.HeightmapData data =
-                    withMountainSurface(
-                            region,
-                            session,
-                            j1,
-                            i1,
-                            WorldHeightProfile.surfaceCapYForScale(session.profile().worldScale()));
+            TileAssembler.AssembledRegion region = PreparedFallback.regionFor(
+                    repository, worldSeed, fingerprint, PreparedFallback.mode(), i1, j1, i2, j2);
+            LocalTerrainProvider.HeightmapData data = withMountainSurface(
+                    region,
+                    session,
+                    j1,
+                    i1,
+                    WorldHeightProfile.surfaceCapYForScale(session.profile().worldScale()));
             WorldSession.requireActive(session);
             return data;
         } catch (RuntimeException e) {
@@ -345,19 +341,16 @@ public final class LocalTerrainProvider {
         String fingerprint = session.fingerprint();
         int scale = session.profile().worldScale();
         MountainRegionCache cache = session.mountainRegions();
-        MountainRegionCache.Key key =
-                new MountainRegionCache.Key(
-                        seed, fingerprint, scale, startX, startZ, region.width(), region.height(), surfaceCapY);
-        MountainRegionCache.SurfaceComputer transform =
-                () ->
-                        MountainSurfaceRegion.transform(
-                                seed,
-                                startX,
-                                startZ,
-                                region.heights(),
-                                scale,
-                                surfaceCapY,
-                                session.profile().mountainRelief());
+        MountainRegionCache.Key key = new MountainRegionCache.Key(
+                seed, fingerprint, scale, startX, startZ, region.width(), region.height(), surfaceCapY);
+        MountainRegionCache.SurfaceComputer transform = () -> MountainSurfaceRegion.transform(
+                seed,
+                startX,
+                startZ,
+                region.heights(),
+                scale,
+                surfaceCapY,
+                session.profile().mountainRelief());
         MountainSurfaceRegion surface =
                 region.complete() ? cache.getOrCompute(key, session, transform) : cache.computeUncached(key, transform);
         WorldSession.requireActive(session);
@@ -384,9 +377,8 @@ public final class LocalTerrainProvider {
             throw new IllegalStateException("No tile repository bound to the active world session");
         }
 
-        TerrainTileKey key =
-                TerrainTileKey.forBlock(
-                        blockX, blockZ, repository.tileSize(), session.worldSeed(), session.fingerprint());
+        TerrainTileKey key = TerrainTileKey.forBlock(
+                blockX, blockZ, repository.tileSize(), session.worldSeed(), session.fingerprint());
 
         try {
             short biome = PreparedFallback.biomeFor(repository, key, blockX, blockZ, PreparedFallback.mode());
@@ -416,10 +408,9 @@ public final class LocalTerrainProvider {
                                 int scale = WorldScaleManager.getCurrentScale();
                                 long computedWindowCountBefore = provider.pipeline.getTotalComputedWindowCount();
                                 GenerationProfile profile = ticket.profile();
-                                LocalTerrainProvider.HeightmapData data =
-                                        scale <= 1
-                                                ? provider.handle1x(i1, j1, i2, j2, profile)
-                                                : provider.handleUpsampled(i1, j1, i2, j2, scale, profile);
+                                LocalTerrainProvider.HeightmapData data = scale <= 1
+                                        ? provider.handle1x(i1, j1, i2, j2, profile)
+                                        : provider.handleUpsampled(i1, j1, i2, j2, scale, profile);
                                 long computedWindowCountAfter = provider.pipeline.getTotalComputedWindowCount();
                                 int regionWidth = j2 - j1;
                                 int regionHeight = i2 - i1;
@@ -464,25 +455,23 @@ public final class LocalTerrainProvider {
         if (shift != 0) for (int i = 0; i < H * W; i++) climate[i] += shift;
         if (profile.slopeClimate()) applySlopeClimate(climate, elevPadded, W, H, 30F / profile.worldScale());
         short[] biomeFlat = BiomeClassifier.classify(elevFlat, climate, i1, j1, elevPadded, H, W, 30.0F);
-        biomeFlat =
-                EuropeanBiomeClassifier.classify(
-                        instanceSeed,
-                        elevFlat,
-                        climate,
-                        biomeFlat,
-                        elevPadded,
-                        H,
-                        W,
-                        30.0F,
-                        j1,
-                        i1,
-                        profile.largerLandscapes(),
-                        profile.biomeBalance());
+        biomeFlat = EuropeanBiomeClassifier.classify(
+                instanceSeed,
+                elevFlat,
+                climate,
+                biomeFlat,
+                elevPadded,
+                H,
+                W,
+                30.0F,
+                j1,
+                i1,
+                profile.largerLandscapes(),
+                profile.biomeBalance());
         if (profile.climateShift().isPresent()) {
             for (int i = 0; i < H * W; i++)
-                biomeFlat[i] =
-                        CoastalTerrain.biome(
-                                instanceSeed, j1 + i % W, i1 + i / W, elevFlat[i], profile.worldScale(), biomeFlat[i]);
+                biomeFlat[i] = CoastalTerrain.biome(
+                        instanceSeed, j1 + i % W, i1 + i / W, elevFlat[i], profile.worldScale(), biomeFlat[i]);
         }
         applyIslands(profile, j1, i1, W, H, elevFlat, climate, biomeFlat);
         return buildHeightmapData(elevFlat, biomeFlat, H, W, climate);
@@ -516,9 +505,8 @@ public final class LocalTerrainProvider {
         boolean roi = !Boolean.getBoolean("terrain.diffusion.roi.disable");
         float[] elevSmooth, elevPadded;
         if (roi) {
-            elevPadded =
-                    LaplacianUtils.bilinearResizeRoi(
-                            elevNative2D, nH * scale, nW * scale, cropI1 - 1, cropJ1 - 1, H + 2, W + 2);
+            elevPadded = LaplacianUtils.bilinearResizeRoi(
+                    elevNative2D, nH * scale, nW * scale, cropI1 - 1, cropJ1 - 1, H + 2, W + 2);
             elevSmooth = new float[H * W];
             for (int r = 0; r < H; r++) System.arraycopy(elevPadded, (r + 1) * (W + 2) + 1, elevSmooth, r * W, W);
         } else {
@@ -536,25 +524,23 @@ public final class LocalTerrainProvider {
         if (profile.slopeClimate()) applySlopeClimate(climate, elevPadded, W, H, 30F / profile.worldScale());
         float[] elevOut = this.addElevationNoise(elevSmooth, elevPadded, i1, j1, H, W, pixelSizeM);
         short[] biomeFlat = BiomeClassifier.classify(elevSmooth, climate, i1, j1, elevPadded, H, W, pixelSizeM);
-        biomeFlat =
-                EuropeanBiomeClassifier.classify(
-                        instanceSeed,
-                        elevSmooth,
-                        climate,
-                        biomeFlat,
-                        elevPadded,
-                        H,
-                        W,
-                        pixelSizeM,
-                        j1,
-                        i1,
-                        profile.largerLandscapes(),
-                        profile.biomeBalance());
+        biomeFlat = EuropeanBiomeClassifier.classify(
+                instanceSeed,
+                elevSmooth,
+                climate,
+                biomeFlat,
+                elevPadded,
+                H,
+                W,
+                pixelSizeM,
+                j1,
+                i1,
+                profile.largerLandscapes(),
+                profile.biomeBalance());
         if (profile.climateShift().isPresent()) {
             for (int i = 0; i < H * W; i++)
-                biomeFlat[i] =
-                        CoastalTerrain.biome(
-                                instanceSeed, j1 + i % W, i1 + i / W, elevOut[i], profile.worldScale(), biomeFlat[i]);
+                biomeFlat[i] = CoastalTerrain.biome(
+                        instanceSeed, j1 + i % W, i1 + i / W, elevOut[i], profile.worldScale(), biomeFlat[i]);
         }
         applyIslands(profile, j1, i1, W, H, elevOut, climate, biomeFlat);
         return buildHeightmapData(elevOut, biomeFlat, H, W, climate);
@@ -579,9 +565,8 @@ public final class LocalTerrainProvider {
                     for (int wx = Math.max(x, cx * cell); wx < Math.min(x + width, (cx + 1) * cell); wx++) {
                         int index = (wz - z) * width + wx - x;
                         if (elevations[index] >= 0) continue;
-                        var island =
-                                TropicalLandforms.islandColumn(
-                                        group, elevations[index], wx, wz, climate[index], profile.worldScale());
+                        var island = TropicalLandforms.islandColumn(
+                                group, elevations[index], wx, wz, climate[index], profile.worldScale());
                         if (island == null) continue;
                         elevations[index] = island.height();
                         biomes[index] = island.biome();
@@ -598,13 +583,12 @@ public final class LocalTerrainProvider {
             for (int x = 0; x < width; x++) {
                 int here = (z + 1) * stride + x + 1;
                 if (elevation[here] < 200) continue;
-                float exposure =
-                        SlopeClimate.exposure(
-                                elevation[here - stride],
-                                elevation[here + stride],
-                                elevation[here + 1],
-                                elevation[here - 1],
-                                step);
+                float exposure = SlopeClimate.exposure(
+                        elevation[here - stride],
+                        elevation[here + stride],
+                        elevation[here + 1],
+                        elevation[here - 1],
+                        step);
                 int cell = z * width + x;
                 climate[cell] += SlopeClimate.temperature(exposure);
                 climate[rain + cell] *= SlopeClimate.precipitation(exposure);
@@ -626,10 +610,9 @@ public final class LocalTerrainProvider {
             float height = balance.adjustElevation(heights[i]);
             int wx = x + i % width, wz = z + i / width;
             if (regional) height = CoastalTerrain.height(instanceSeed, wx, wz, height);
-            heights[i] =
-                    profile.newLandforms()
-                            ? CoastalTerrain.fjordsAndSkerries(instanceSeed, wx, wz, height, profile.worldScale())
-                            : height;
+            heights[i] = profile.newLandforms()
+                    ? CoastalTerrain.fjordsAndSkerries(instanceSeed, wx, wz, height, profile.worldScale())
+                    : height;
         }
     }
 
@@ -651,10 +634,9 @@ public final class LocalTerrainProvider {
                     sf = sf * sf * (float) Math.sqrt(sf);
                     float nx = j1 + c;
                     float ny = i1 + r;
-                    elevOut[idx] =
-                            e
-                                    + ELEV_NOISE_COARSE.GetNoise(nx, ny) * ampC * sf
-                                    + ELEV_NOISE_FINE.GetNoise(nx, ny) * ampF * sf;
+                    elevOut[idx] = e
+                            + ELEV_NOISE_COARSE.GetNoise(nx, ny) * ampC * sf
+                            + ELEV_NOISE_FINE.GetNoise(nx, ny) * ampF * sf;
                 }
             }
         }

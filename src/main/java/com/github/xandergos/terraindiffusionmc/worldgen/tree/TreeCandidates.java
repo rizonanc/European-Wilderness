@@ -13,8 +13,13 @@ public final class TreeCandidates {
     public static final int ADULT_CELL_SIZE = 5;
     public static final int REGENERATION_CELL_SIZE = 11;
     public static final int MAX_TREE_RADIUS = 8;
-    @Deprecated public static final int SPACING = 5;
-    @Deprecated public static final int MAX_RADIUS = 8;
+
+    @Deprecated
+    public static final int SPACING = 5;
+
+    @Deprecated
+    public static final int MAX_RADIUS = 8;
+
     private static final int MAX_ADULT_ROOT_RADIUS = 4;
     private static final int MAX_YOUNG_ROOT_RADIUS = 1;
     private static final int AGE_STAND_CELLS = 11;
@@ -217,21 +222,19 @@ public final class TreeCandidates {
 
     private static TreeCandidates.RootEnvelope rootEnvelope(
             TreeCandidates.Candidate candidate, Map<Long, TreeCandidates.RootEnvelope> cache) {
-        return cache.computeIfAbsent(
-                candidate.identity(),
-                ignored -> {
-                    Set<Long> offsets = new HashSet<>();
+        return cache.computeIfAbsent(candidate.identity(), ignored -> {
+            Set<Long> offsets = new HashSet<>();
 
-                    for (TreeSpecies species : TreeSpecies.values()) {
-                        TrunkProfile profile = TrunkProfile.generate(species, candidate.age(), candidate.seed(), 4);
+            for (TreeSpecies species : TreeSpecies.values()) {
+                TrunkProfile profile = TrunkProfile.generate(species, candidate.age(), candidate.seed(), 4);
 
-                        for (TrunkProfile.Point point : profile.wood()) {
-                            offsets.add(pack(point.x(), point.z()));
-                        }
-                    }
+                for (TrunkProfile.Point point : profile.wood()) {
+                    offsets.add(pack(point.x(), point.z()));
+                }
+            }
 
-                    return new TreeCandidates.RootEnvelope(Set.copyOf(offsets));
-                });
+            return new TreeCandidates.RootEnvelope(Set.copyOf(offsets));
+        });
     }
 
     private static long pack(int x, int z) {
@@ -276,14 +279,11 @@ public final class TreeCandidates {
         long identity = mix(seed ^ mix(cellX * -7046029254386353131L) ^ mix(cellZ * -3335678366873096957L) ^ layerSalt);
         long x = cellX * cellSize + Long.remainderUnsigned(mix(identity ^ -8161530843051276573L), cellSize);
         long z = cellZ * cellSize + Long.remainderUnsigned(mix(identity ^ 6384245875588680899L), cellSize);
-        double ageRoll =
-                wrapUnit(
-                        unit(mix(identity ^ 2129725606500045391L))
-                                + .15 * (VegetationDistribution.valueNoise(seed, (int) x, (int) z, 61, 192) - .5));
-        TreeAge age =
-                young
-                        ? TreeAge.YOUNG
-                        : (ageRoll < 0.68 ? TreeAge.ADULT : (ageRoll < 0.95 ? TreeAge.OLD : TreeAge.RARE_LARGE));
+        double ageRoll = wrapUnit(unit(mix(identity ^ 2129725606500045391L))
+                + .15 * (VegetationDistribution.valueNoise(seed, (int) x, (int) z, 61, 192) - .5));
+        TreeAge age = young
+                ? TreeAge.YOUNG
+                : (ageRoll < 0.68 ? TreeAge.ADULT : (ageRoll < 0.95 ? TreeAge.OLD : TreeAge.RARE_LARGE));
 
         int radius =
                 switch (age) {

@@ -76,13 +76,12 @@ public final class GrassSurfaceMip {
                             != GrassMipMapping.GROUND) continue;
                     int index = base + cap * plane, kind = mapping.ewh$grassKind(WaterMipPolicy.blockId(data[index]));
                     if (kind != GrassMipMapping.AIR && kind < GrassMipMapping.SHORT) continue;
-                    boolean keep =
-                            sample(
-                                            Math.floorDiv(sectionX * 16 + x, size),
-                                            Math.floorDiv(sectionZ * 16 + z, size),
-                                            level,
-                                            size * size)
-                                    < count;
+                    boolean keep = sample(
+                                    Math.floorDiv(sectionX * 16 + x, size),
+                                    Math.floorDiv(sectionZ * 16 + z, size),
+                                    level,
+                                    size * size)
+                            < count;
                     long value = keep ? representative : data[index] & ~BLOCK_MASK;
                     if (data[index] != value) {
                         data[index] = value;

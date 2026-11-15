@@ -1,18 +1,20 @@
 package com.github.xandergos.terraindiffusionmc.pipeline;
 
-import com.github.xandergos.terraindiffusionmc.worldgen.terrain.*;
+import static com.github.xandergos.terraindiffusionmc.pipeline.InferenceDemand.Priority.*;
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.github.xandergos.terraindiffusionmc.worldgen.cache.DiskTerrainStore;
+import com.github.xandergos.terraindiffusionmc.worldgen.terrain.*;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import static org.junit.jupiter.api.Assertions.*;
-import static com.github.xandergos.terraindiffusionmc.pipeline.InferenceDemand.Priority.*;
 
 class SharedTilePriorityTest {
-    @TempDir Path temp;
+    @TempDir
+    Path temp;
 
     @Test
     void foregroundReaderPromotesTheExistingBackgroundTileWithoutDuplicateInference() throws Exception {
@@ -31,29 +33,26 @@ class SharedTilePriorityTest {
             var count = new AtomicInteger();
             List<String> order = Collections.synchronizedList(new ArrayList<>());
             var key = TerrainTileKey.ofTile(7, 0, 0, 16, "shared-priority");
-            var repo =
-                    new TerrainRepository(
-                            new DiskTerrainStore(temp),
-                            k -> {
-                                count.incrementAndGet();
-                                demand.set(InferenceDemand.current());
-                                var result =
-                                        worker.submit(() -> {
-                                            order.add("tile");
-                                            return new TerrainTile(k, new short[256], new short[256]);
-                                        });
-                                queued.countDown();
-                                return result.get();
-                            },
-                            16,
-                            1024 * 1024,
-                            16L * 1024 * 1024);
-            var background =
-                    readers.submit(() -> {
-                        try (var ignored = InferenceDemand.scope(DISTANT)) {
-                            return repo.get(key);
-                        }
-                    });
+            var repo = new TerrainRepository(
+                    new DiskTerrainStore(temp),
+                    k -> {
+                        count.incrementAndGet();
+                        demand.set(InferenceDemand.current());
+                        var result = worker.submit(() -> {
+                            order.add("tile");
+                            return new TerrainTile(k, new short[256], new short[256]);
+                        });
+                        queued.countDown();
+                        return result.get();
+                    },
+                    16,
+                    1024 * 1024,
+                    16L * 1024 * 1024);
+            var background = readers.submit(() -> {
+                try (var ignored = InferenceDemand.scope(DISTANT)) {
+                    return repo.get(key);
+                }
+            });
             assertTrue(queued.await(5, TimeUnit.SECONDS));
             var near = worker.submit(new InferenceDemand(NEAR), () -> true, () -> order.add("near"));
             var foreground = readers.submit(() -> repo.get(key));
@@ -79,31 +78,29 @@ class SharedTilePriorityTest {
         var readerEntered = new CountDownLatch(1);
         var count = new AtomicInteger();
         var key = TerrainTileKey.ofTile(7, 0, 0, 16, "interrupted-flight");
-        var repo =
-                new TerrainRepository(
-                        new DiskTerrainStore(temp),
-                        k -> {
-                            count.incrementAndGet();
-                            entered.countDown();
-                            release.await();
-                            return new TerrainTile(k, new short[256], new short[256]);
-                        },
-                        16,
-                        1024 * 1024,
-                        16L * 1024 * 1024);
+        var repo = new TerrainRepository(
+                new DiskTerrainStore(temp),
+                k -> {
+                    count.incrementAndGet();
+                    entered.countDown();
+                    release.await();
+                    return new TerrainTile(k, new short[256], new short[256]);
+                },
+                16,
+                1024 * 1024,
+                16L * 1024 * 1024);
         try {
             var owner = threads.submit(() -> repo.get(key));
             assertTrue(entered.await(5, TimeUnit.SECONDS));
             var failure = new AtomicReference<Throwable>();
-            var waiter =
-                    new Thread(() -> {
-                        readerEntered.countDown();
-                        try {
-                            assertThrows(InterruptedException.class, () -> repo.get(key));
-                        } catch (Throwable error) {
-                            failure.set(error);
-                        }
-                    });
+            var waiter = new Thread(() -> {
+                readerEntered.countDown();
+                try {
+                    assertThrows(InterruptedException.class, () -> repo.get(key));
+                } catch (Throwable error) {
+                    failure.set(error);
+                }
+            });
             waiter.start();
             assertTrue(readerEntered.await(5, TimeUnit.SECONDS));
             long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
@@ -115,12 +112,11 @@ class SharedTilePriorityTest {
             assertNull(failure.get());
             var secondThread = new AtomicReference<Thread>();
             var secondStarted = new CountDownLatch(1);
-            var second =
-                    threads.submit(() -> {
-                        secondThread.set(Thread.currentThread());
-                        secondStarted.countDown();
-                        return repo.get(key);
-                    });
+            var second = threads.submit(() -> {
+                secondThread.set(Thread.currentThread());
+                secondStarted.countDown();
+                return repo.get(key);
+            });
             assertTrue(secondStarted.await(5, TimeUnit.SECONDS));
             deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
             while (secondThread.get().getState() != Thread.State.WAITING

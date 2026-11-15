@@ -1,11 +1,12 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
-import org.objectweb.asm.*;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import org.objectweb.asm.*;
 
 class CoarseRawAbiTest {
     /** Only the environment flag provider is stubbed. WorldSection itself is
@@ -29,13 +30,12 @@ class CoarseRawAbiTest {
             if (name.endsWith("VoxyCommon")) {
                 var writer = new ClassWriter(0);
                 writer.visit(Opcodes.V21, Opcodes.ACC_PUBLIC, name.replace('.', '/'), null, "java/lang/Object", null);
-                var method =
-                        writer.visitMethod(
-                                Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC,
-                                "isVerificationFlagOn",
-                                "(Ljava/lang/String;)Z",
-                                null,
-                                null);
+                var method = writer.visitMethod(
+                        Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC,
+                        "isVerificationFlagOn",
+                        "(Ljava/lang/String;)Z",
+                        null,
+                        null);
                 method.visitCode();
                 method.visitInsn(Opcodes.ICONST_0);
                 method.visitInsn(Opcodes.IRETURN);
@@ -70,20 +70,19 @@ class CoarseRawAbiTest {
         var field = new CoarseLodPatch.Surface[1024];
         Arrays.fill(field, new CoarseLodPatch.Surface(64, (short) 229, 0));
         long[] palette = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
-        var result =
-                CoarseSectionComposer.fill(
-                        4,
-                        -2,
-                        0,
-                        1,
-                        -64,
-                        1871,
-                        field,
-                        target,
-                        target,
-                        (x, z) -> x < -1008 && z < 528,
-                        b -> palette,
-                        v -> v == 0);
+        var result = CoarseSectionComposer.fill(
+                4,
+                -2,
+                0,
+                1,
+                -64,
+                1871,
+                field,
+                target,
+                target,
+                (x, z) -> x < -1008 && z < 528,
+                b -> palette,
+                v -> v == 0);
         type.getMethod("_unsafeSetNonEmptyChildren", byte.class).invoke(preview, result.children());
         assertEquals(result.children(), type.getMethod("getNonEmptyChildren").invoke(preview));
         assertArrayEquals(unchanged, original);

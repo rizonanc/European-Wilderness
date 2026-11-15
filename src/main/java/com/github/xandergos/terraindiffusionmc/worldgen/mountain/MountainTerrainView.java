@@ -41,28 +41,26 @@ final class MountainTerrainView {
             throw new IllegalStateException("Mountain surface requires climate for " + tile.key());
         } else {
             return new MountainTerrainView.Sample(
-                    this.firstAir(x, z), tile.climateAt(0, tile.key().localX(x), tile.key().localZ(z)));
+                    this.firstAir(x, z),
+                    tile.climateAt(0, tile.key().localX(x), tile.key().localZ(z)));
         }
     }
 
     int firstAir(int x, int z) {
         long packed = (long) x << 32 ^ z & 4294967295L;
-        return this.firstAir.computeIfAbsent(
-                packed,
-                ignored -> {
-                    TerrainTile tile = this.tile(x, z);
-                    short metres = tile.heightAt(tile.key().localX(x), tile.key().localZ(z));
-                    int raw =
-                            MountainHeightField.sampleForWorld(this.seed, x, z, metres, this.scale, this.surfaceCapY)
-                                    .surfaceY();
-                    var session = com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession.current();
-                    return session != null
-                                    && session.worldSeed() == seed
-                                    && session.fingerprint().equals(fingerprint)
-                                    && session.riverOverlay() != null
-                            ? session.riverOverlay().carvedHeight(x, z, raw)
-                            : raw;
-                });
+        return this.firstAir.computeIfAbsent(packed, ignored -> {
+            TerrainTile tile = this.tile(x, z);
+            short metres = tile.heightAt(tile.key().localX(x), tile.key().localZ(z));
+            int raw = MountainHeightField.sampleForWorld(this.seed, x, z, metres, this.scale, this.surfaceCapY)
+                    .surfaceY();
+            var session = com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession.current();
+            return session != null
+                            && session.worldSeed() == seed
+                            && session.fingerprint().equals(fingerprint)
+                            && session.riverOverlay() != null
+                    ? session.riverOverlay().carvedHeight(x, z, raw)
+                    : raw;
+        });
     }
 
     int firstAirNeighbour(int x, int z, int dx, int dz) {
@@ -102,19 +100,15 @@ final class MountainTerrainView {
 
     private TerrainTile tile(int x, int z) {
         TerrainTileKey key = TerrainTileKey.forBlock(x, z, this.tileSize, this.seed, this.fingerprint);
-        return this.tiles.computeIfAbsent(
-                key,
-                requested -> {
-                    TerrainTile loaded =
-                            Objects.requireNonNull(
-                                    this.loader.apply(requested),
-                                    () -> "Terrain loader returned null for " + requested);
-                    if (!requested.equals(loaded.key())) {
-                        throw new IllegalStateException("Terrain loader returned foreign tile for " + requested);
-                    } else {
-                        return loaded;
-                    }
-                });
+        return this.tiles.computeIfAbsent(key, requested -> {
+            TerrainTile loaded = Objects.requireNonNull(
+                    this.loader.apply(requested), () -> "Terrain loader returned null for " + requested);
+            if (!requested.equals(loaded.key())) {
+                throw new IllegalStateException("Terrain loader returned foreign tile for " + requested);
+            } else {
+                return loaded;
+            }
+        });
     }
 
     @FunctionalInterface

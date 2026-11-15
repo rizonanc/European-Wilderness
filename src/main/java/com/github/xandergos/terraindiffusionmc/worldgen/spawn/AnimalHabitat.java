@@ -48,10 +48,9 @@ public final class AnimalHabitat {
     }
 
     static float chance(EntityType<?> type, String biome, int altitude, boolean cold, boolean water) {
-        boolean forest =
-                biome.contains("forest")
-                        || biome.contains("taiga")
-                        || biome.startsWith("european_") && !biome.endsWith("meadow");
+        boolean forest = biome.contains("forest")
+                || biome.contains("taiga")
+                || biome.startsWith("european_") && !biome.endsWith("meadow");
         if (type == EntityType.GOAT) return altitude >= 55 ? 1 : 0.05F;
         if (type == EntityType.FROG || type == EntityType.TURTLE) return water && !cold && altitude < 20 ? 1 : 0;
         if (type == EntityType.WOLF) return forest ? 1 : 0.14F;

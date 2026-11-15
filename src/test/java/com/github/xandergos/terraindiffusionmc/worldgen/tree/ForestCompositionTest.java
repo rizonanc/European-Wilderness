@@ -1,8 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.tree;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.github.xandergos.terraindiffusionmc.worldgen.ecology.EuropeanEcology;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class ForestCompositionTest {
     private static EuropeanEcology.ForestCondition climate() {
@@ -32,9 +33,8 @@ class ForestCompositionTest {
                 for (int cz = sz * 6; cz < (sz + 1) * 6; cz++)
                     for (int cx = sx * 6; cx < (sx + 1) * 6; cx++)
                         for (var candidate : TreeCandidates.rawAdultRootsForChunk(42, cx, cz)) {
-                            species.add(
-                                    ForestComposition.at(42, candidate.x(), candidate.z(), climate())
-                                            .choose(candidate.speciesRoll()));
+                            species.add(ForestComposition.at(42, candidate.x(), candidate.z(), climate())
+                                    .choose(candidate.speciesRoll()));
                             count++;
                         }
                 assertTrue(count > 100);

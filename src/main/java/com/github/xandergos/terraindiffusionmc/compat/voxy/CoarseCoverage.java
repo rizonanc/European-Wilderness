@@ -1,8 +1,8 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
+import it.unimi.dsi.fastutil.longs.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
-import it.unimi.dsi.fastutil.longs.*;
 
 /** Exact-preview ownership by 16x16 column. Overflow fails closed. */
 public final class CoarseCoverage {

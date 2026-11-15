@@ -4,9 +4,9 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.BooleanSupplier;
+import me.cortex.voxy.client.core.rendering.building.RenderGenerationService;
 import me.cortex.voxy.common.world.*;
 import me.cortex.voxy.common.world.other.Mapper;
-import me.cortex.voxy.client.core.rendering.building.RenderGenerationService;
 
 /** Renderer-only sections. Nothing here is inserted into WorldEngine or saved.
  * Voxy owns/releases returned untracked sections exactly like its normal reads. */
@@ -179,26 +179,25 @@ public final class CoarseVoxyRenderer implements CoarseRenderHooks.Provider {
         int sampleX = sx * side + x * unit + unit / 2, sampleZ = sz * side + z * unit + unit / 2;
         var field = field(l, sx, sz);
         var point = cache.surface(sampleX, sampleZ);
-        String suffix =
-                "; requestedXYZ="
-                        + wx
-                        + ","
-                        + wy
-                        + ","
-                        + wz
-                        + " sampledXZ="
-                        + sampleX
-                        + ","
-                        + sampleZ
-                        + " pointFirstAir="
-                        + (point == null ? "UNKNOWN" : point.firstAir())
-                        + " pointCorrection="
-                        + corrections.adjustment(sampleX, sampleZ)
-                        + " pointOwned="
-                        + exact(sampleX, sampleZ)
-                        + " ownership="
-                        + exactReason(sampleX, sampleZ)
-                        + " exactTerrainHeight=UNKNOWN";
+        String suffix = "; requestedXYZ="
+                + wx
+                + ","
+                + wy
+                + ","
+                + wz
+                + " sampledXZ="
+                + sampleX
+                + ","
+                + sampleZ
+                + " pointFirstAir="
+                + (point == null ? "UNKNOWN" : point.firstAir())
+                + " pointCorrection="
+                + corrections.adjustment(sampleX, sampleZ)
+                + " pointOwned="
+                + exact(sampleX, sampleZ)
+                + " ownership="
+                + exactReason(sampleX, sampleZ)
+                + " exactTerrainHeight=UNKNOWN";
         if (field == null || !ownershipReady(sampleX, sampleZ))
             return description + suffix + " virtualExpected=UNKNOWN";
         var world = (WorldEngine) engine;
@@ -257,17 +256,16 @@ public final class CoarseVoxyRenderer implements CoarseRenderHooks.Provider {
     private Object render(Object engine, long position, Object original, boolean neighbor) {
         var DBG = System.getProperty("td.coarse.trace") != null;
         if (DBG)
-            System.err.println(
-                    "coarse render L"
-                            + WorldEngine.getLevel(position)
-                            + " at "
-                            + WorldEngine.getX(position)
-                            + ","
-                            + WorldEngine.getZ(position)
-                            + " failed="
-                            + failed
-                            + " retired="
-                            + retired);
+            System.err.println("coarse render L"
+                    + WorldEngine.getLevel(position)
+                    + " at "
+                    + WorldEngine.getX(position)
+                    + ","
+                    + WorldEngine.getZ(position)
+                    + " failed="
+                    + failed
+                    + " retired="
+                    + retired);
         if (!matches(engine)) return original;
         long started = System.nanoTime();
         try {
@@ -415,13 +413,12 @@ public final class CoarseVoxyRenderer implements CoarseRenderHooks.Provider {
     private WorldSection compose(long position, WorldSection original, boolean neighbor) {
         var DBG = System.getProperty("td.coarse.trace") != null;
         if (DBG)
-            System.err.println(
-                    "compose L"
-                            + WorldEngine.getLevel(position)
-                            + " enter original="
-                            + (original != null)
-                            + " children="
-                            + (original == null ? "-" : original.getNonEmptyChildren()));
+            System.err.println("compose L"
+                    + WorldEngine.getLevel(position)
+                    + " enter original="
+                    + (original != null)
+                    + " children="
+                    + (original == null ? "-" : original.getNonEmptyChildren()));
         if (!within(position, neighbor ? 32 << WorldEngine.getLevel(position) : 0)) {
             if (DBG) System.err.println(" -> outsideRadius");
             outsideRadius.increment();
@@ -473,12 +470,11 @@ public final class CoarseVoxyRenderer implements CoarseRenderHooks.Provider {
                                 && storedColumns.contains(x * side + 8, z * side + 8))) {
             int sectionX = x * side, sectionZ = z * side;
             long[] sourceData = original._unsafeGetRawDataArray();
-            preserveOriginal =
-                    (wx, wz) -> {
-                        int lx = wx - sectionX, lz = wz - sectionZ, p = (lz / unit) * 32 + lx / unit;
-                        for (int vy = 0; vy < 32; vy++) if (sourceData[(vy << 10) + p] != 0L) return true;
-                        return false;
-                    };
+            preserveOriginal = (wx, wz) -> {
+                int lx = wx - sectionX, lz = wz - sectionZ, p = (lz / unit) * 32 + lx / unit;
+                for (int vy = 0; vy < 32; vy++) if (sourceData[(vy << 10) + p] != 0L) return true;
+                return false;
+            };
         }
         var copy = WorldSection._createRawUntrackedUnsafeSection(level, x, y, z);
         copy.acquire();
@@ -486,33 +482,31 @@ public final class CoarseVoxyRenderer implements CoarseRenderHooks.Provider {
         try {
             long[] target = copy._unsafeGetRawDataArray();
             if (original != null) original.copyDataTo(target);
-            var result =
-                    CoarseSectionComposer.fill(
-                            level,
-                            x,
-                            y,
-                            z,
-                            bottom,
-                            top,
-                            field,
-                            original == null ? null : target,
-                            target,
-                            this::exact,
-                            biome -> palettes.getOrDefault((short) biome, palettes.get((short) 229)),
-                            Mapper::isAir,
-                            corrections::adjustment,
-                            preserveOriginal);
+            var result = CoarseSectionComposer.fill(
+                    level,
+                    x,
+                    y,
+                    z,
+                    bottom,
+                    top,
+                    field,
+                    original == null ? null : target,
+                    target,
+                    this::exact,
+                    biome -> palettes.getOrDefault((short) biome, palettes.get((short) 229)),
+                    Mapper::isAir,
+                    corrections::adjustment,
+                    preserveOriginal);
             byte children = result.mergeChildren(original == null ? 0 : original.getNonEmptyChildren());
             if (original == null && !result.changed() && children == 0) return null;
             if (!result.changed() && original != null && children == original.getNonEmptyChildren()) {
                 if (DBG)
-                    System.err.println(
-                            " -> unchanged children="
-                                    + children
-                                    + " origChildren="
-                                    + original.getNonEmptyChildren()
-                                    + " nonAir="
-                                    + result.nonAir());
+                    System.err.println(" -> unchanged children="
+                            + children
+                            + " origChildren="
+                            + original.getNonEmptyChildren()
+                            + " nonAir="
+                            + result.nonAir());
                 return original;
             }
             if (level == 0) copy.addNonEmptyBlockCount(result.nonAir());

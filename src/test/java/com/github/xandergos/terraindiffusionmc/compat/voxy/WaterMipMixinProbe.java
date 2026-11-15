@@ -1,5 +1,6 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
+import com.github.xandergos.terraindiffusionmc.worldgen.settings.*;
 import java.nio.file.*;
 import java.util.*;
 import org.objectweb.asm.*;
@@ -7,7 +8,6 @@ import org.objectweb.asm.tree.*;
 import org.spongepowered.asm.launch.MixinBootstrap;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.service.MixinService;
-import com.github.xandergos.terraindiffusionmc.worldgen.settings.*;
 
 /** Actual Mixin transformation and execution of the pinned section mipper, no game/GL. */
 public final class WaterMipMixinProbe {
@@ -19,10 +19,9 @@ public final class WaterMipMixinProbe {
         var service = (CoarseMixinProbe.Service) MixinService.getService();
         var transformer = service.transformer();
         Map<String, byte[]> transformed = new HashMap<>();
-        for (String target :
-                List.of(
-                        "me.cortex.voxy.common.world.other.Mapper",
-                        "me.cortex.voxy.common.voxelization.WorldVoxilizedSectionMipper")) {
+        for (String target : List.of(
+                "me.cortex.voxy.common.world.other.Mapper",
+                "me.cortex.voxy.common.voxelization.WorldVoxilizedSectionMipper")) {
             var before = service.getClassNode(target);
             var w = new ClassWriter(0);
             before.accept(w);
@@ -34,14 +33,13 @@ public final class WaterMipMixinProbe {
                 if (!after.interfaces.contains(WaterMipMapping.class.getName().replace('.', '/')))
                     throw new AssertionError("Mapper classification interface absent");
             } else {
-                long redirects =
-                        after.methods.stream()
-                                .flatMap(m -> Arrays.stream(m.instructions.toArray()))
-                                .filter(i ->
-                                        i instanceof MethodInsnNode call
-                                                && call.owner.equals(WaterSurfaceMip.class.getName().replace('.', '/'))
-                                                && call.name.equals("correct"))
-                                .count();
+                long redirects = after.methods.stream()
+                        .flatMap(m -> Arrays.stream(m.instructions.toArray()))
+                        .filter(i -> i instanceof MethodInsnNode call
+                                && call.owner.equals(
+                                        WaterSurfaceMip.class.getName().replace('.', '/'))
+                                && call.name.equals("correct"))
+                        .count();
                 if (redirects != 1) throw new AssertionError("Expected one fine-surface correction: " + redirects);
             }
         }

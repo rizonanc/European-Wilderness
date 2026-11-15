@@ -60,38 +60,29 @@ final class SettingsProfileScreen extends Screen {
         if (preferences != null)
             for (var profile : preferences.profiles().entrySet()) {
                 Text label = Text.literal(profile.getKey());
-                rows.add(
-                        new ProfileRow(
-                                label,
-                                () -> select(label, profile.getValue()),
-                                draft == null ? null : () -> confirmDelete(profile.getKey())));
+                rows.add(new ProfileRow(
+                        label,
+                        () -> select(label, profile.getValue()),
+                        draft == null ? null : () -> confirmDelete(profile.getKey())));
             }
         boolean editable = draft != null && preferences != null;
         addDrawableChild(new ProfileList(Math.max(22, height - (editable ? 108 : 80)), rows));
         if (editable) {
-            var field =
-                    new TextFieldWidget(
-                            textRenderer,
-                            center - 145,
-                            height - 76,
-                            178,
-                            20,
-                            Text.translatable(PREFIX + "profile_name"));
+            var field = new TextFieldWidget(
+                    textRenderer, center - 145, height - 76, 178, 20, Text.translatable(PREFIX + "profile_name"));
             field.setMaxLength(32);
             field.setPlaceholder(Text.translatable(PREFIX + "profile_name"));
             field.setText(name);
             field.setChangedListener(value -> name = value);
             addDrawableChild(field);
-            addDrawableChild(
-                    ButtonWidget.builder(Text.translatable(PREFIX + "profile_save"), button -> save())
-                            .dimensions(center + 39, height - 76, 106, 20)
-                            .build());
+            addDrawableChild(ButtonWidget.builder(Text.translatable(PREFIX + "profile_save"), button -> save())
+                    .dimensions(center + 39, height - 76, 106, 20)
+                    .build());
         }
         feedback = addDrawableChild(new TextWidget(0, height - 48, width, 10, message, textRenderer));
-        addDrawableChild(
-                ButtonWidget.builder(Text.translatable("gui.back"), button -> close())
-                        .dimensions(center - 60, height - 28, 120, 20)
-                        .build());
+        addDrawableChild(ButtonWidget.builder(Text.translatable("gui.back"), button -> close())
+                .dimensions(center - 60, height - 28, 120, 20)
+                .build());
     }
 
     private void select(Text label, Map<String, String> values) {
@@ -112,20 +103,20 @@ final class SettingsProfileScreen extends Screen {
     }
 
     private void confirmDelete(String profile) {
-        client.setScreen(
-                new ConfirmScreen(
-                        confirmed -> {
-                            if (confirmed)
-                                try {
-                                    preferences.deleteProfile(profile);
-                                    message = Text.empty();
-                                } catch (IOException failure) {
-                                    message = Text.translatable(PREFIX + "preferences_error").formatted(Formatting.RED);
-                                }
-                            client.setScreen(this);
-                        },
-                        Text.translatable(PREFIX + "profile_delete"),
-                        Text.literal(profile)));
+        client.setScreen(new ConfirmScreen(
+                confirmed -> {
+                    if (confirmed)
+                        try {
+                            preferences.deleteProfile(profile);
+                            message = Text.empty();
+                        } catch (IOException failure) {
+                            message = Text.translatable(PREFIX + "preferences_error")
+                                    .formatted(Formatting.RED);
+                        }
+                    client.setScreen(this);
+                },
+                Text.translatable(PREFIX + "profile_delete"),
+                Text.literal(profile)));
     }
 
     @Override
@@ -151,17 +142,15 @@ final class SettingsProfileScreen extends Screen {
         private final ButtonWidget delete;
 
         ProfileRow(Text label, Runnable select, Runnable remove) {
-            use =
-                    ButtonWidget.builder(label, button -> select.run())
-                            .dimensions(0, 0, 150, 20)
-                            .tooltip(Tooltip.of(label))
+            use = ButtonWidget.builder(label, button -> select.run())
+                    .dimensions(0, 0, 150, 20)
+                    .tooltip(Tooltip.of(label))
+                    .build();
+            delete = remove == null
+                    ? null
+                    : ButtonWidget.builder(Text.translatable(PREFIX + "profile_delete"), button -> remove.run())
+                            .dimensions(0, 0, 76, 20)
                             .build();
-            delete =
-                    remove == null
-                            ? null
-                            : ButtonWidget.builder(Text.translatable(PREFIX + "profile_delete"), button -> remove.run())
-                                    .dimensions(0, 0, 76, 20)
-                                    .build();
         }
 
         @Override

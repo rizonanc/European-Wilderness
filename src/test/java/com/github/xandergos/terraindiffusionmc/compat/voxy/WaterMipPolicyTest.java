@@ -1,11 +1,12 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.lang.reflect.*;
 import java.util.*;
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.ClassNode;
-import static org.junit.jupiter.api.Assertions.*;
 
 public class WaterMipPolicyTest {
     private static final int WATER = 7, SAND = 171, STONE = 2;
@@ -50,12 +51,11 @@ public class WaterMipPolicyTest {
         return id == WATER ? value : id == 181 ? (value & ~(0xFFFFFL << 27)) | ((long) WATER << 27) : 0;
     }
 
-    private static final WaterMipMapping MARINE =
-            new WaterMipMapping() {
-                public boolean ewh$isWater(int id) {
-                    return water(id);
-                }
-            };
+    private static final WaterMipMapping MARINE = new WaterMipMapping() {
+        public boolean ewh$isWater(int id) {
+            return water(id);
+        }
+    };
 
     /** Only Mapper's environment-bound palette methods are stubbed. The mipper
      * bytecode is loaded unmodified from the exact supported Voxy JAR. */
@@ -73,19 +73,18 @@ public class WaterMipPolicyTest {
             this.definitions = definitions;
             Class<?> map = loadClass("me.cortex.voxy.common.world.other.Mapper");
             mapper = map.getConstructor().newInstance();
-            mip =
-                    loadClass("me.cortex.voxy.common.world.other.Mipper")
-                            .getMethod(
-                                    "mip",
-                                    long.class,
-                                    long.class,
-                                    long.class,
-                                    long.class,
-                                    long.class,
-                                    long.class,
-                                    long.class,
-                                    long.class,
-                                    map);
+            mip = loadClass("me.cortex.voxy.common.world.other.Mipper")
+                    .getMethod(
+                            "mip",
+                            long.class,
+                            long.class,
+                            long.class,
+                            long.class,
+                            long.class,
+                            long.class,
+                            long.class,
+                            long.class,
+                            map);
         }
 
         @Override
@@ -162,13 +161,12 @@ public class WaterMipPolicyTest {
                                 null,
                                 0)
                         .visitEnd();
-                var m =
-                        w.visitMethod(
-                                Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC,
-                                "isVerificationFlagOn",
-                                "(Ljava/lang/String;)Z",
-                                null,
-                                null);
+                var m = w.visitMethod(
+                        Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC,
+                        "isVerificationFlagOn",
+                        "(Ljava/lang/String;)Z",
+                        null,
+                        null);
                 m.visitCode();
                 m.visitInsn(Opcodes.ICONST_0);
                 m.visitInsn(Opcodes.IRETURN);
@@ -260,22 +258,20 @@ public class WaterMipPolicyTest {
     void testMixedShoreRoofAndNonWaterCasesRetainPinnedDecision() throws Exception {
         var f = new Fixture();
         long s = voxel(SAND), w = voxel(WATER), roof = voxel(STONE);
-        for (long[] cell :
-                new long[][] {
-                    {s, s, s, s, w, w, w, 0}, {s, s, s, s, w, w, roof, w}, {w, w, w, w, roof, roof, roof, roof},
-                    {s, s, s, s, roof, roof, roof, roof}, {0, 0, 0, 0, w, w, w, w}, {s, s, s, s, 0, 0, 0, 0}
-                }) assertEquals(f.reduce(cell, false), f.reduce(cell, true));
+        for (long[] cell : new long[][] {
+            {s, s, s, s, w, w, w, 0}, {s, s, s, s, w, w, roof, w}, {w, w, w, w, roof, roof, roof, roof},
+            {s, s, s, s, roof, roof, roof, roof}, {0, 0, 0, 0, w, w, w, w}, {s, s, s, s, 0, 0, 0, 0}
+        }) assertEquals(f.reduce(cell, false), f.reduce(cell, true));
         long top = voxel(WATER) | (23L << 47);
         assertEquals(top, WaterMipPolicy.preserve(s, w, w, w, top, id -> id == WATER));
     }
 
     @Test
     void uniformTerrainAndExistingWaterUseNoPaletteClassification() {
-        WaterMipMapping forbidden =
-                id -> {
-                    fail("Uniform cell must use quick path");
-                    return false;
-                };
+        WaterMipMapping forbidden = id -> {
+            fail("Uniform cell must use quick path");
+            return false;
+        };
         for (int id = 0; id < 1024; id++)
             assertEquals(
                     voxel(id),
@@ -285,44 +281,33 @@ public class WaterMipPolicyTest {
     @Test
     void testPinnedAbiSupportsClassification() throws Exception {
         var mapper = node("me/cortex/voxy/common/world/other/Mapper");
-        assertTrue(
-                mapper.fields.stream()
-                        .anyMatch(f ->
-                                f.name.equals("blockId2stateEntry")
-                                        && f.desc.equals("Lit/unimi/dsi/fastutil/objects/ObjectArrayList;")));
-        assertTrue(
-                node("me/cortex/voxy/common/world/other/Mapper$StateEntry").fields.stream()
-                        .anyMatch(f -> f.name.equals("state") && (f.access & Opcodes.ACC_PUBLIC) != 0));
-        assertTrue(
-                node("me/cortex/voxy/common/world/WorldSection").methods.stream()
-                        .anyMatch(m -> m.name.equals("copyData") && m.desc.equals("()[J")));
-        assertTrue(
-                node("me/cortex/voxy/common/world/WorldUpdater").methods.stream()
-                        .anyMatch(m ->
-                                m.name.equals("insertSectionLvlIntoWorld")
-                                        && m.desc.equals(
-                                                "(Lme/cortex/voxy/common/voxelization/VoxelizedSection;Lme/cortex/voxy/common/world/WorldSection;)J")
-                                        && (m.access & Opcodes.ACC_STATIC) != 0));
+        assertTrue(mapper.fields.stream()
+                .anyMatch(f -> f.name.equals("blockId2stateEntry")
+                        && f.desc.equals("Lit/unimi/dsi/fastutil/objects/ObjectArrayList;")));
+        assertTrue(node("me/cortex/voxy/common/world/other/Mapper$StateEntry").fields.stream()
+                .anyMatch(f -> f.name.equals("state") && (f.access & Opcodes.ACC_PUBLIC) != 0));
+        assertTrue(node("me/cortex/voxy/common/world/WorldSection").methods.stream()
+                .anyMatch(m -> m.name.equals("copyData") && m.desc.equals("()[J")));
+        assertTrue(node("me/cortex/voxy/common/world/WorldUpdater").methods.stream()
+                .anyMatch(m -> m.name.equals("insertSectionLvlIntoWorld")
+                        && m.desc.equals(
+                                "(Lme/cortex/voxy/common/voxelization/VoxelizedSection;Lme/cortex/voxy/common/world/WorldSection;)J")
+                        && (m.access & Opcodes.ACC_STATIC) != 0));
         var engine = node("me/cortex/voxy/common/world/WorldEngine");
-        assertTrue(
-                engine.methods.stream()
-                        .anyMatch(m ->
-                                m.name.equals("markDirty")
-                                        && m.desc.equals("(Lme/cortex/voxy/common/world/WorldSection;II)V")));
-        assertTrue(
-                engine.fields.stream()
-                        .anyMatch(f -> f.name.equals("UPDATE_TYPE_BLOCK_BIT") && (f.access & Opcodes.ACC_PUBLIC) != 0));
+        assertTrue(engine.methods.stream()
+                .anyMatch(m -> m.name.equals("markDirty")
+                        && m.desc.equals("(Lme/cortex/voxy/common/world/WorldSection;II)V")));
+        assertTrue(engine.fields.stream()
+                .anyMatch(f -> f.name.equals("UPDATE_TYPE_BLOCK_BIT") && (f.access & Opcodes.ACC_PUBLIC) != 0));
         var sectionMipper = node("me/cortex/voxy/common/voxelization/WorldVoxilizedSectionMipper");
-        long sites =
-                sectionMipper.methods.stream()
-                        .filter(m -> m.name.equals("mipSection"))
-                        .flatMap(m -> Arrays.stream(m.instructions.toArray()))
-                        .filter(i ->
-                                i instanceof org.objectweb.asm.tree.MethodInsnNode call
-                                        && call.owner.equals("me/cortex/voxy/common/world/other/Mipper")
-                                        && call.name.equals("mip")
-                                        && call.desc.equals("(JJJJJJJJLme/cortex/voxy/common/world/other/Mapper;)J"))
-                        .count();
+        long sites = sectionMipper.methods.stream()
+                .filter(m -> m.name.equals("mipSection"))
+                .flatMap(m -> Arrays.stream(m.instructions.toArray()))
+                .filter(i -> i instanceof org.objectweb.asm.tree.MethodInsnNode call
+                        && call.owner.equals("me/cortex/voxy/common/world/other/Mipper")
+                        && call.name.equals("mip")
+                        && call.desc.equals("(JJJJJJJJLme/cortex/voxy/common/world/other/Mapper;)J"))
+                .count();
         assertEquals(4, sites);
     }
 
@@ -337,18 +322,18 @@ public class WaterMipPolicyTest {
         long[] base = Arrays.copyOf(data, 4096), fixed = data.clone();
         Arrays.fill(fixed, 4096, fixed.length, voxel(WATER));
         voxel.getMethod("setPosition", int.class, int.class, int.class).invoke(input, -3, 3, -5);
-        Method write =
-                f.loadClass("me.cortex.voxy.common.world.WorldUpdater")
-                        .getDeclaredMethod("insertSectionLvlIntoWorld", voxel, section);
+        Method write = f.loadClass("me.cortex.voxy.common.world.WorldUpdater")
+                .getDeclaredMethod("insertSectionLvlIntoWorld", voxel, section);
         write.setAccessible(true);
         Method index = section.getMethod("getIndex", int.class, int.class, int.class);
         for (int level = 1; level <= 4; level++) {
-            Object parent =
-                    section.getMethod("_createRawUntrackedUnsafeSection", int.class, int.class, int.class, int.class)
-                            .invoke(null, level, -3 >> (level + 1), 3 >> (level + 1), -5 >> (level + 1));
+            Object parent = section.getMethod(
+                            "_createRawUntrackedUnsafeSection", int.class, int.class, int.class, int.class)
+                    .invoke(null, level, -3 >> (level + 1), 3 >> (level + 1), -5 >> (level + 1));
             section.getMethod("acquire").invoke(parent);
             try {
-                long[] values = (long[]) section.getMethod("_unsafeGetRawDataArray").invoke(parent);
+                long[] values =
+                        (long[]) section.getMethod("_unsafeGetRawDataArray").invoke(parent);
                 Arrays.fill(values, voxel(STONE));
                 assertEquals(1, (long) write.invoke(null, input, parent) & 1);
                 int expected = 1 << (3 * (4 - level));
@@ -363,10 +348,15 @@ public class WaterMipPolicyTest {
                         WaterMipRepairData.patch(level, -3, 3, -5, values, data, fixed, id -> id == WATER));
                 assertEquals(voxel(STONE), values[protectedIndex]);
                 assertEquals(
-                        expected - 1, Arrays.stream(values).filter(v -> WaterMipPolicy.blockId(v) == WATER).count());
+                        expected - 1,
+                        Arrays.stream(values)
+                                .filter(v -> WaterMipPolicy.blockId(v) == WATER)
+                                .count());
                 assertEquals(
                         32768 - expected + 1,
-                        Arrays.stream(values).filter(v -> WaterMipPolicy.blockId(v) == STONE).count());
+                        Arrays.stream(values)
+                                .filter(v -> WaterMipPolicy.blockId(v) == STONE)
+                                .count());
                 assertEquals(0, WaterMipRepairData.patch(level, -3, 3, -5, values, data, fixed, id -> id == WATER));
                 assertArrayEquals(base, Arrays.copyOf(data, 4096));
             } finally {

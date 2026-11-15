@@ -1,8 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.hydrology;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.*;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class RiverDetailsTest {
     private static PreparedWaterArea area(int ox, int oz) {
@@ -19,17 +20,10 @@ class RiverDetailsTest {
         for (int i = 0; i < 16; i++) {
             int chunk = reverse ? 15 - i : i;
             int bx = a.x() + chunk % 4 * 16, bz = a.z() + chunk / 4 * 16;
-            RiverDetailPlanning.forChunk(
-                    a,
-                    83,
-                    bx,
-                    bz,
-                    -64,
-                    320,
-                    d -> {
-                        assertTrue(d.x() >= bx && d.x() < bx + 16 && d.z() >= bz && d.z() < bz + 16);
-                        result.add(d);
-                    });
+            RiverDetailPlanning.forChunk(a, 83, bx, bz, -64, 320, d -> {
+                assertTrue(d.x() >= bx && d.x() < bx + 16 && d.z() >= bz && d.z() < bz + 16);
+                result.add(d);
+            });
         }
         return result;
     }
@@ -96,27 +90,28 @@ class RiverDetailsTest {
                 if (d.kind() == RiverDetailPlanning.Kind.TALL_SEAGRASS)
                     decorations.add(d.x() + "," + (d.y() + 1) + "," + d.z());
             }
-        var columns =
-                new RiverWaterPlanning.ColumnAccess() {
-                    public boolean isAir(int x, int y, int z) {
-                        return y >= a.carvedHeight(x, z, 105) && !decorations.contains(x + "," + y + "," + z);
-                    }
+        var columns = new RiverWaterPlanning.ColumnAccess() {
+            public boolean isAir(int x, int y, int z) {
+                return y >= a.carvedHeight(x, z, 105) && !decorations.contains(x + "," + y + "," + z);
+            }
 
-                    public boolean isWater(int x, int y, int z) {
-                        return decorations.contains(x + "," + y + "," + z);
-                    }
+            public boolean isWater(int x, int y, int z) {
+                return decorations.contains(x + "," + y + "," + z);
+            }
 
-                    public boolean isSolidDry(int x, int y, int z) {
-                        return y < a.carvedHeight(x, z, 105) && !isWater(x, y, z);
-                    }
+            public boolean isSolidDry(int x, int y, int z) {
+                return y < a.carvedHeight(x, z, 105) && !isWater(x, y, z);
+            }
 
-                    public boolean hasBedSupport(int x, int y, int z) {
-                        return isSolidDry(x, y, z) || isWater(x, y, z) && y == a.bedY(x, z, 0);
-                    }
-                };
+            public boolean hasBedSupport(int x, int y, int z) {
+                return isSolidDry(x, y, z) || isWater(x, y, z) && y == a.bedY(x, z, 0);
+            }
+        };
         int expected = 0;
         for (int z = 16; z < 32; z++) for (int x = 16; x < 32; x++) expected += a.waterY(x, z) - a.bedY(x, z, 0);
-        assertEquals(expected, RiverWaterPlanning.planChunk(a, 1, 1, -64, 320, columns).size());
+        assertEquals(
+                expected,
+                RiverWaterPlanning.planChunk(a, 1, 1, -64, 320, columns).size());
     }
 
     @Test

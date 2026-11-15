@@ -33,11 +33,8 @@ public final class PerformanceOverheadProbe {
             clock[0] += 7_000_000;
             budget.observe(7_000_000, 3_000_000);
         }
-        StringBuilder result =
-                new StringBuilder(
-                        "{\"scope\":\"isolated CPU probe, not game FPS\",\"iterations_per_trial\":"
-                                + count
-                                + ",\"trials\":[");
+        StringBuilder result = new StringBuilder(
+                "{\"scope\":\"isolated CPU probe, not game FPS\",\"iterations_per_trial\":" + count + ",\"trials\":[");
         for (int trial = 0; trial < 3; trial++) {
             long memory = allocated(), start = System.nanoTime();
             spans(trace, count);

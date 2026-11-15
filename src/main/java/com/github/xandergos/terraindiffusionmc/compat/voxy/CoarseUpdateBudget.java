@@ -20,10 +20,9 @@ public final class CoarseUpdateBudget {
         int floor = clamped >= 4 ? 2 : 1;
         int target = Math.max(floor, base / factor);
         int cap = meshQueue >= 256 ? 4 : meshQueue >= 128 ? 16 : meshQueue < 0 ? 16 : 64;
-        allowance =
-                allowance < target
-                        ? Math.min(target, allowance + 1)
-                        : allowance > target ? Math.max(target, allowance / 2) : allowance;
+        allowance = allowance < target
+                ? Math.min(target, allowance + 1)
+                : allowance > target ? Math.max(target, allowance / 2) : allowance;
         return Math.min(allowance, cap);
     }
 

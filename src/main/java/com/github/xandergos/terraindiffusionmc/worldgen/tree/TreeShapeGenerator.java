@@ -12,10 +12,10 @@ import java.util.Random;
 import java.util.Set;
 
 public final class TreeShapeGenerator {
-    public static final Comparator<TreeShapeGenerator.Voxel> VOXEL_ORDER =
-            Comparator.comparingInt(TreeShapeGenerator.Voxel::y)
-                    .thenComparingInt(TreeShapeGenerator.Voxel::x)
-                    .thenComparingInt(TreeShapeGenerator.Voxel::z);
+    public static final Comparator<TreeShapeGenerator.Voxel> VOXEL_ORDER = Comparator.comparingInt(
+                    TreeShapeGenerator.Voxel::y)
+            .thenComparingInt(TreeShapeGenerator.Voxel::x)
+            .thenComparingInt(TreeShapeGenerator.Voxel::z);
     private static final int[][] DIRECTIONS =
             new int[][] {{1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1}};
     private static final int MAX_HEIGHT = 36;
@@ -80,8 +80,10 @@ public final class TreeShapeGenerator {
 
         voxels.sort(VOXEL_ORDER);
         int actualHeight = voxels.stream().mapToInt(voxel -> voxel.y + 1).max().orElseThrow();
-        int radius =
-                voxels.stream().mapToInt(voxel -> Math.max(Math.abs(voxel.x), Math.abs(voxel.z))).max().orElseThrow();
+        int radius = voxels.stream()
+                .mapToInt(voxel -> Math.max(Math.abs(voxel.x), Math.abs(voxel.z)))
+                .max()
+                .orElseThrow();
         if (actualHeight <= 36 && radius <= 8 && voxels.size() <= 12000) {
             return new TreeShapeGenerator.Shape(voxels, actualHeight, radius, age, profile.base());
         } else {
@@ -147,10 +149,9 @@ public final class TreeShapeGenerator {
 
         for (int y = bottom; y < height; y++) {
             double fraction = (double) (height - 1 - y) / denominator;
-            int radius =
-                    species == TreeSpecies.SPRUCE
-                            ? (int) Math.ceil(4.0 * fraction)
-                            : (int) Math.ceil(4.0 * Math.min(1.0, fraction * 2.0));
+            int radius = species == TreeSpecies.SPRUCE
+                    ? (int) Math.ceil(4.0 * fraction)
+                    : (int) Math.ceil(4.0 * Math.min(1.0, fraction * 2.0));
             if (age == TreeAge.YOUNG) {
                 radius = Math.min(radius, 3);
             }
@@ -201,9 +202,8 @@ public final class TreeShapeGenerator {
             int next = distance.get(point) + 1;
             if (next <= 6) {
                 for (int[] direction : DIRECTIONS) {
-                    TreeShapeGenerator.Point neighbor =
-                            new TreeShapeGenerator.Point(
-                                    point.x + direction[0], point.y + direction[1], point.z + direction[2]);
+                    TreeShapeGenerator.Point neighbor = new TreeShapeGenerator.Point(
+                            point.x + direction[0], point.y + direction[1], point.z + direction[2]);
                     if (leaves.contains(neighbor) && !distance.containsKey(neighbor)) {
                         distance.put(neighbor, next);
                         queue.add(neighbor);

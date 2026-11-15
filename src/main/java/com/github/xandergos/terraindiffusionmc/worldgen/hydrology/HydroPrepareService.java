@@ -100,9 +100,8 @@ public final class HydroPrepareService {
             }
 
             List<HydroPrepareService.ParentCoord> coords = new ArrayList<>(parentBases.keySet());
-            coords.sort(
-                    Comparator.comparingInt(HydroPrepareService.ParentCoord::parentZ)
-                            .thenComparingInt(HydroPrepareService.ParentCoord::parentX));
+            coords.sort(Comparator.comparingInt(HydroPrepareService.ParentCoord::parentZ)
+                    .thenComparingInt(HydroPrepareService.ParentCoord::parentX));
             int minX = coords.get(0).parentX();
             int minZ = coords.get(0).parentZ();
             int maxX = minX;
@@ -116,14 +115,13 @@ public final class HydroPrepareService {
             long spanX = (long) maxX - minX + 1L;
             long spanZ = (long) maxZ - minZ + 1L;
             if (spanX * spanZ != coords.size()) {
-                throw new IllegalArgumentException(
-                        "parent grids must tile a full rectangle, got "
-                                + coords.size()
-                                + " grids over a "
-                                + spanX
-                                + "x"
-                                + spanZ
-                                + " span");
+                throw new IllegalArgumentException("parent grids must tile a full rectangle, got "
+                        + coords.size()
+                        + " grids over a "
+                        + spanX
+                        + "x"
+                        + spanZ
+                        + " span");
             }
 
             int unitW = Math.toIntExact(Math.multiplyExact(spanX, parentCoarseW));
@@ -228,10 +226,8 @@ public final class HydroPrepareService {
                         if (rim != Integer.MIN_VALUE) {
                             carved[dz][dx] = rim;
                             bank[dz][dx] = true;
-                            int slope =
-                                    Math.min(
-                                            7,
-                                            (int) Math.min(2147483647L, Math.abs((long) raw - this.bankWater(lx, lz))));
+                            int slope = Math.min(7, (int)
+                                    Math.min(2147483647L, Math.abs((long) raw - this.bankWater(lx, lz))));
                             materials[dz][dx] = RiverRasterizer.bankMaterial(this.plan.seed(), worldX, worldZ, slope);
                         }
                     }

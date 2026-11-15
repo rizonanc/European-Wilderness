@@ -14,7 +14,8 @@ abstract class ChunkyRenderDistanceMixin {
     private static void terrainDiffusion$preserveRenderDistance(CallbackInfo ci) {
         FabricLoader.getInstance()
                 .getModContainer("chunkypregen")
-                .filter(mod -> mod.getMetadata().getVersion().getFriendlyString().equals("2.2.0"))
+                .filter(mod ->
+                        mod.getMetadata().getVersion().getFriendlyString().equals("2.2.0"))
                 .ifPresent(mod -> ci.cancel());
     }
 }

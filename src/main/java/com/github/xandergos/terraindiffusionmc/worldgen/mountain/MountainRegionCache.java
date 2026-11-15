@@ -3,9 +3,9 @@ package com.github.xandergos.terraindiffusionmc.worldgen.mountain;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -61,21 +61,20 @@ public final class MountainRegionCache {
             return cached;
         }
 
-        FutureTask<MountainSurfaceRegion> task =
-                new FutureTask<>(() -> {
-                    MountainSurfaceRegion raced = this.get(key).orElse(null);
-                    if (raced != null) {
-                        return raced;
-                    }
+        FutureTask<MountainSurfaceRegion> task = new FutureTask<>(() -> {
+            MountainSurfaceRegion raced = this.get(key).orElse(null);
+            if (raced != null) {
+                return raced;
+            }
 
-                    MountainSurfaceRegion computed = this.computeUncached(key, computer);
-                    WorldSession.requireActive(session);
-                    if (computed.payloadBytes() <= this.maxBytes) {
-                        this.publishForSession(key, computed, session);
-                    }
+            MountainSurfaceRegion computed = this.computeUncached(key, computer);
+            WorldSession.requireActive(session);
+            if (computed.payloadBytes() <= this.maxBytes) {
+                this.publishForSession(key, computed, session);
+            }
 
-                    return computed;
-                });
+            return computed;
+        });
         Future<MountainSurfaceRegion> flight = this.pending.putIfAbsent(key, task);
         boolean ownsFlight = flight == null;
         if (ownsFlight) {
@@ -112,15 +111,14 @@ public final class MountainRegionCache {
         if (computed.width() == key.width() && computed.height() == key.height()) {
             return computed;
         } else {
-            throw new IllegalArgumentException(
-                    "computed surface "
-                            + computed.width()
-                            + "x"
-                            + computed.height()
-                            + " does not match key "
-                            + key.width()
-                            + "x"
-                            + key.height());
+            throw new IllegalArgumentException("computed surface "
+                    + computed.width()
+                    + "x"
+                    + computed.height()
+                    + " does not match key "
+                    + key.width()
+                    + "x"
+                    + key.height());
         }
     }
 
@@ -148,7 +146,8 @@ public final class MountainRegionCache {
             this.usedBytes = this.usedBytes - previous.payloadBytes();
         }
 
-        Iterator<Entry<MountainRegionCache.Key, MountainSurfaceRegion>> eldest = this.entries.entrySet().iterator();
+        Iterator<Entry<MountainRegionCache.Key, MountainSurfaceRegion>> eldest =
+                this.entries.entrySet().iterator();
 
         while ((this.usedBytes > this.maxBytes - value.payloadBytes() || this.entries.size() >= 4096)
                 && eldest.hasNext()) {

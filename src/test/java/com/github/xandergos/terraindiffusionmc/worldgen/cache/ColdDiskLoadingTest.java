@@ -1,7 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.cache;
 
-import com.github.xandergos.terraindiffusionmc.worldgen.terrain.*;
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.*;
+import com.github.xandergos.terraindiffusionmc.worldgen.terrain.*;
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
@@ -10,11 +12,11 @@ import java.util.concurrent.atomic.*;
 import java.util.zip.CRC32;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;
-import static org.junit.jupiter.api.Assertions.*;
 
 @Timeout(30)
 class ColdDiskLoadingTest {
-    @TempDir Path temp;
+    @TempDir
+    Path temp;
 
     @AfterEach
     void retire() {
@@ -67,15 +69,12 @@ class ColdDiskLoadingTest {
         var entered = new CountDownLatch(1);
         var release = new CountDownLatch(1);
         var calls = new AtomicInteger();
-        var store =
-                new DiskTerrainStore(
-                        temp,
-                        p -> {
-                            calls.incrementAndGet();
-                            entered.countDown();
-                            await(release);
-                            return Files.readAllBytes(p);
-                        });
+        var store = new DiskTerrainStore(temp, p -> {
+            calls.incrementAndGet();
+            entered.countDown();
+            await(release);
+            return Files.readAllBytes(p);
+        });
         var repo = repo(store);
         assertTrue(repo.peekRam(key).isEmpty());
         assertEquals(0, calls.get());
@@ -85,11 +84,10 @@ class ColdDiskLoadingTest {
             List<Future<TerrainTile>> jobs = new ArrayList<>();
             for (int i = 0; i < 16; i++) {
                 final boolean peek = (i & 1) == 0;
-                jobs.add(
-                        workers.submit(() -> {
-                            threads.add(Thread.currentThread());
-                            return peek ? repo.peek(key).orElseThrow() : repo.get(key);
-                        }));
+                jobs.add(workers.submit(() -> {
+                    threads.add(Thread.currentThread());
+                    return peek ? repo.peek(key).orElseThrow() : repo.get(key);
+                }));
             }
             assertTrue(entered.await(5, TimeUnit.SECONDS));
             long end = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
@@ -120,15 +118,11 @@ class ColdDiskLoadingTest {
         writer.store(b, tile(b));
         var entered = new CountDownLatch(2);
         var release = new CountDownLatch(1);
-        var repo =
-                repo(
-                        new DiskTerrainStore(
-                                temp,
-                                p -> {
-                                    entered.countDown();
-                                    await(release);
-                                    return Files.readAllBytes(p);
-                                }));
+        var repo = repo(new DiskTerrainStore(temp, p -> {
+            entered.countDown();
+            await(release);
+            return Files.readAllBytes(p);
+        }));
         var pool = Executors.newFixedThreadPool(2);
         try {
             var first = pool.submit(() -> repo.get(a));
@@ -151,26 +145,21 @@ class ColdDiskLoadingTest {
         var calls = new AtomicInteger();
         var entered = new CountDownLatch(1);
         var release = new CountDownLatch(1);
-        var repo =
-                repo(
-                        new DiskTerrainStore(
-                                temp,
-                                p -> {
-                                    calls.incrementAndGet();
-                                    entered.countDown();
-                                    await(release);
-                                    return Files.readAllBytes(p);
-                                }));
+        var repo = repo(new DiskTerrainStore(temp, p -> {
+            calls.incrementAndGet();
+            entered.countDown();
+            await(release);
+            return Files.readAllBytes(p);
+        }));
         var pool = Executors.newFixedThreadPool(2);
         var waiterThread = new AtomicReference<Thread>();
         try {
             var initiating = pool.submit(() -> repo.get(key));
             assertTrue(entered.await(5, TimeUnit.SECONDS));
-            var waiter =
-                    pool.submit(() -> {
-                        waiterThread.set(Thread.currentThread());
-                        return repo.get(key);
-                    });
+            var waiter = pool.submit(() -> {
+                waiterThread.set(Thread.currentThread());
+                return repo.get(key);
+            });
             long end = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
             while (waiterThread.get() == null && System.nanoTime() < end) Thread.sleep(1);
             waitForRepoWait(waiterThread.get());
@@ -191,28 +180,23 @@ class ColdDiskLoadingTest {
         new DiskTerrainStore(temp).store(key, tile(key));
         var entered = new CountDownLatch(1);
         var release = new CountDownLatch(1);
-        var repo =
-                repo(
-                        new DiskTerrainStore(
-                                temp,
-                                p -> {
-                                    entered.countDown();
-                                    await(release);
-                                    return Files.readAllBytes(p);
-                                }));
+        var repo = repo(new DiskTerrainStore(temp, p -> {
+            entered.countDown();
+            await(release);
+            return Files.readAllBytes(p);
+        }));
         var pool = Executors.newFixedThreadPool(2);
         try {
             var owner = pool.submit(() -> repo.get(key));
             assertTrue(entered.await(5, TimeUnit.SECONDS));
             var failure = new AtomicReference<Throwable>();
-            var waiter =
-                    new Thread(() -> {
-                        try {
-                            assertThrows(InterruptedException.class, () -> repo.get(key));
-                        } catch (Throwable e) {
-                            failure.set(e);
-                        }
-                    });
+            var waiter = new Thread(() -> {
+                try {
+                    assertThrows(InterruptedException.class, () -> repo.get(key));
+                } catch (Throwable e) {
+                    failure.set(e);
+                }
+            });
             waiter.start();
             waitForRepoWait(waiter);
             waiter.interrupt();
@@ -235,13 +219,10 @@ class ColdDiskLoadingTest {
         var writer = new DiskTerrainStore(temp);
         writer.store(key, tile(key));
         var calls = new AtomicInteger();
-        var store =
-                new DiskTerrainStore(
-                        temp,
-                        p -> {
-                            if (calls.incrementAndGet() == 1) throw new IllegalStateException("retry");
-                            return Files.readAllBytes(p);
-                        });
+        var store = new DiskTerrainStore(temp, p -> {
+            if (calls.incrementAndGet() == 1) throw new IllegalStateException("retry");
+            return Files.readAllBytes(p);
+        });
         var repo = repo(store);
         assertThrows(IllegalStateException.class, () -> repo.get(key));
         assertEquals(tile(key), repo.get(key));
@@ -260,22 +241,18 @@ class ColdDiskLoadingTest {
     void missingReadAndIoFailureRetainTheInferenceFallback() throws Exception {
         var key = key(0);
         var calls = new AtomicInteger();
-        var store =
-                new DiskTerrainStore(
-                        temp,
-                        p -> {
-                            throw new IOException("unreadable");
-                        });
-        var repo =
-                new TerrainRepository(
-                        store,
-                        k -> {
-                            calls.incrementAndGet();
-                            return tile(k);
-                        },
-                        16,
-                        1 << 20,
-                        1 << 24);
+        var store = new DiskTerrainStore(temp, p -> {
+            throw new IOException("unreadable");
+        });
+        var repo = new TerrainRepository(
+                store,
+                k -> {
+                    calls.incrementAndGet();
+                    return tile(k);
+                },
+                16,
+                1 << 20,
+                1 << 24);
         assertTrue(repo.peek(key).isEmpty());
         assertEquals(tile(key), repo.get(key));
         assertEquals(1, calls.get());
@@ -334,22 +311,19 @@ class ColdDiskLoadingTest {
         var session = WorldSession.activate(GenerationProfile.defaultsFor(2, "model", "cpu", "cpu"), 7);
         var entered = new CountDownLatch(1);
         var release = new CountDownLatch(1);
-        var repo =
-                new TerrainRepository(
-                        new DiskTerrainStore(
-                                temp,
-                                p -> {
-                                    entered.countDown();
-                                    await(release);
-                                    return Files.readAllBytes(p);
-                                }),
-                        k -> {
-                            throw new AssertionError();
-                        },
-                        16,
-                        1 << 20,
-                        1 << 24,
-                        session);
+        var repo = new TerrainRepository(
+                new DiskTerrainStore(temp, p -> {
+                    entered.countDown();
+                    await(release);
+                    return Files.readAllBytes(p);
+                }),
+                k -> {
+                    throw new AssertionError();
+                },
+                16,
+                1 << 20,
+                1 << 24,
+                session);
         var pool = Executors.newSingleThreadExecutor();
         try {
             var old = pool.submit(() -> repo.get(key));
@@ -358,16 +332,15 @@ class ColdDiskLoadingTest {
             release.countDown();
             assertThrows(ExecutionException.class, () -> old.get(5, TimeUnit.SECONDS));
             var next = WorldSession.activate(session.profile(), 7);
-            var reopened =
-                    new TerrainRepository(
-                            new DiskTerrainStore(temp),
-                            k -> {
-                                throw new AssertionError();
-                            },
-                            16,
-                            1 << 20,
-                            1 << 24,
-                            next);
+            var reopened = new TerrainRepository(
+                    new DiskTerrainStore(temp),
+                    k -> {
+                        throw new AssertionError();
+                    },
+                    16,
+                    1 << 20,
+                    1 << 24,
+                    next);
             assertEquals(tile(key), reopened.get(key));
         } finally {
             release.countDown();
@@ -382,15 +355,11 @@ class ColdDiskLoadingTest {
         for (int i = 0; i < 80; i++) writer.store(key(i), tile(key(i)));
         var entered = new CountDownLatch(2);
         var release = new CountDownLatch(1);
-        var repo =
-                repo(
-                        new DiskTerrainStore(
-                                temp,
-                                p -> {
-                                    entered.countDown();
-                                    await(release);
-                                    return Files.readAllBytes(p);
-                                }));
+        var repo = repo(new DiskTerrainStore(temp, p -> {
+            entered.countDown();
+            await(release);
+            return Files.readAllBytes(p);
+        }));
         var pool = Executors.newFixedThreadPool(80);
         try {
             List<Future<TerrainTile>> jobs = new ArrayList<>();
@@ -417,32 +386,30 @@ class ColdDiskLoadingTest {
         var entered = new CountDownLatch(1);
         var release = new CountDownLatch(1);
         var reads = new AtomicInteger();
-        var store =
-                new DiskTerrainStore(
-                        temp,
-                        p -> {
-                            byte[] data = Files.readAllBytes(p);
-                            if (reads.incrementAndGet() == 1) {
-                                entered.countDown();
-                                await(release);
-                            }
-                            return data;
-                        },
-                        (source, target, options) -> {
-                            if (Arrays.asList(options).contains(StandardCopyOption.ATOMIC_MOVE))
-                                throw new AtomicMoveNotSupportedException(
-                                        source.toString(), target.toString(), "forced test fallback");
-                            return Files.move(source, target, options);
-                        });
+        var store = new DiskTerrainStore(
+                temp,
+                p -> {
+                    byte[] data = Files.readAllBytes(p);
+                    if (reads.incrementAndGet() == 1) {
+                        entered.countDown();
+                        await(release);
+                    }
+                    return data;
+                },
+                (source, target, options) -> {
+                    if (Arrays.asList(options).contains(StandardCopyOption.ATOMIC_MOVE))
+                        throw new AtomicMoveNotSupportedException(
+                                source.toString(), target.toString(), "forced test fallback");
+                    return Files.move(source, target, options);
+                });
         var pool = Executors.newFixedThreadPool(2);
         try {
             var old = pool.submit(() -> store.load(key));
             assertTrue(entered.await(5, TimeUnit.SECONDS));
-            pool.submit(
-                            () -> {
-                                store.store(key, replacement);
-                                return null;
-                            })
+            pool.submit(() -> {
+                        store.store(key, replacement);
+                        return null;
+                    })
                     .get(5, TimeUnit.SECONDS);
             assertEquals(2, reads.get(), "commit must validate new bytes without waiting for the old flight");
             release.countDown();
@@ -459,20 +426,15 @@ class ColdDiskLoadingTest {
     @Test
     void nonAtomicCorruptCommitIsRejectedAndQuotaRecovers() throws Exception {
         var key = key(0);
-        var store =
-                new DiskTerrainStore(
-                        temp,
-                        Files::readAllBytes,
-                        (source, target, options) -> {
-                            if (Arrays.asList(options).contains(StandardCopyOption.ATOMIC_MOVE))
-                                throw new AtomicMoveNotSupportedException(
-                                        source.toString(), target.toString(), "forced test fallback");
-                            var result = Files.move(source, target, options);
-                            byte[] data = Files.readAllBytes(target);
-                            data[data.length - 1] ^= 1;
-                            Files.write(target, data);
-                            return result;
-                        });
+        var store = new DiskTerrainStore(temp, Files::readAllBytes, (source, target, options) -> {
+            if (Arrays.asList(options).contains(StandardCopyOption.ATOMIC_MOVE))
+                throw new AtomicMoveNotSupportedException(source.toString(), target.toString(), "forced test fallback");
+            var result = Files.move(source, target, options);
+            byte[] data = Files.readAllBytes(target);
+            data[data.length - 1] ^= 1;
+            Files.write(target, data);
+            return result;
+        });
         assertThrows(IOException.class, () -> store.store(key, tile(key)));
         assertFalse(Files.exists(temp.resolve(key.fileName())));
         assertEquals(0, store.usedBytes());

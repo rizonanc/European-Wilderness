@@ -1,7 +1,7 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.mountain;
 
-import com.github.xandergos.terraindiffusionmc.world.TerrainDiffusionBiomeSource;
 import com.github.xandergos.terraindiffusionmc.compat.roadweaver.RoadWeaverTerrain;
+import com.github.xandergos.terraindiffusionmc.world.TerrainDiffusionBiomeSource;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.PerformanceProfile;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
 import com.github.xandergos.terraindiffusionmc.worldgen.terrain.PreparedFallback;
@@ -41,91 +41,65 @@ public final class MountainPassCampFeature extends Feature<DefaultFeatureConfig>
             int chunkZ = Math.floorDiv(context.getOrigin().getZ(), 16);
             int scale = session.profile().worldScale();
             long seed = world.getSeed();
-            TerrainTileKey key =
-                    TerrainTileKey.forBlock(
-                            Math.multiplyExact(chunkX, 16),
-                            Math.multiplyExact(chunkZ, 16),
-                            repository.tileSize(),
-                            seed,
-                            session.fingerprint());
+            TerrainTileKey key = TerrainTileKey.forBlock(
+                    Math.multiplyExact(chunkX, 16),
+                    Math.multiplyExact(chunkZ, 16),
+                    repository.tileSize(),
+                    seed,
+                    session.fingerprint());
             PerformanceProfile.PreparationMode mode = PreparedFallback.mode();
 
             try {
-                PassCampDecisionStore.Decision decision =
-                        decisions.decide(
-                                key,
-                                scale,
-                                8,
-                                requested ->
-                                        repository
-                                                .peek(requested)
-                                                .orElseGet(() -> {
-                                                    if (mode == PerformanceProfile.PreparationMode.ON_DEMAND) {
-                                                        throw new IllegalStateException(
-                                                                "ON_DEMAND terrain tile was not ready before decoration: "
-                                                                        + requested);
-                                                    } else {
-                                                        return null;
-                                                    }
-                                                }));
+                PassCampDecisionStore.Decision decision = decisions.decide(
+                        key,
+                        scale,
+                        8,
+                        requested -> repository.peek(requested).orElseGet(() -> {
+                            if (mode == PerformanceProfile.PreparationMode.ON_DEMAND) {
+                                throw new IllegalStateException(
+                                        "ON_DEMAND terrain tile was not ready before decoration: " + requested);
+                            } else {
+                                return null;
+                            }
+                        }));
                 if (decision == PassCampDecisionStore.Decision.DISABLED) {
                     return false;
                 }
 
-                TerrainTile tile =
-                        repository
-                                .peek(key)
-                                .orElseThrow(
-                                        () -> new IllegalStateException("Active pass/camp tile disappeared: " + key));
+                TerrainTile tile = repository
+                        .peek(key)
+                        .orElseThrow(() -> new IllegalStateException("Active pass/camp tile disappeared: " + key));
                 WorldSession.requireActive(session);
-                PassCampPlanCache.Plan plan =
-                        session.passCampPlans()
-                                .getOrCompute(
-                                        key,
-                                        () -> {
-                                            Optional<MountainPassPlanner.PassPlan> pass =
-                                                    MountainPassPlanner.plan(
-                                                            seed,
-                                                            key.tileX(),
-                                                            key.tileZ(),
-                                                            key.tileSize(),
-                                                            scale,
-                                                            world.getTopYInclusive(),
-                                                            tile);
-                                            Optional<AbandonedCampPlanner.CampPlan> campx =
-                                                    pass.flatMap(p ->
-                                                            AbandonedCampPlanner.plan(
-                                                                    seed, tile, scale, world.getTopYInclusive(), p));
-                                            return new PassCampPlanCache.Plan(pass, campx);
-                                        });
+                PassCampPlanCache.Plan plan = session.passCampPlans().getOrCompute(key, () -> {
+                    Optional<MountainPassPlanner.PassPlan> pass = MountainPassPlanner.plan(
+                            seed, key.tileX(), key.tileZ(), key.tileSize(), scale, world.getTopYInclusive(), tile);
+                    Optional<AbandonedCampPlanner.CampPlan> campx = pass.flatMap(
+                            p -> AbandonedCampPlanner.plan(seed, tile, scale, world.getTopYInclusive(), p));
+                    return new PassCampPlanCache.Plan(pass, campx);
+                });
                 if (plan.pass().isEmpty()) {
                     return false;
                 }
 
-                List<MountainPassCampPlanning.RouteColumn> route =
-                        MountainPassCampPlanning.routeForChunk(
-                                seed,
-                                tile,
-                                scale,
-                                world.getTopYInclusive(),
-                                plan.pass().orElseThrow(),
-                                chunkX,
-                                chunkZ,
-                                session.profile().newLandforms());
-                List<AbandonedCampPlanner.Voxel> camp =
-                        plan.camp()
-                                .filter(c -> !waterChangesCamp(c, session, tile, scale, world.getTopYInclusive()))
-                                .map(c -> c.voxelsForChunk(chunkX, chunkZ))
-                                .orElseGet(List::of);
+                List<MountainPassCampPlanning.RouteColumn> route = MountainPassCampPlanning.routeForChunk(
+                        seed,
+                        tile,
+                        scale,
+                        world.getTopYInclusive(),
+                        plan.pass().orElseThrow(),
+                        chunkX,
+                        chunkZ,
+                        session.profile().newLandforms());
+                List<AbandonedCampPlanner.Voxel> camp = plan.camp()
+                        .filter(c -> !waterChangesCamp(c, session, tile, scale, world.getTopYInclusive()))
+                        .map(c -> c.voxelsForChunk(chunkX, chunkZ))
+                        .orElseGet(List::of);
                 if (session.riverOverlay() != null)
-                    route =
-                            route.stream()
-                                    .filter(p ->
-                                            session.riverOverlay().waterY(p.x(), p.z()) == Integer.MIN_VALUE
-                                                    && session.riverOverlay()
-                                                                    .carvedHeight(p.x(), p.z(), p.naturalGroundY() + 1)
-                                                            == p.naturalGroundY() + 1)
-                                    .toList();
+                    route = route.stream()
+                            .filter(p -> session.riverOverlay().waterY(p.x(), p.z()) == Integer.MIN_VALUE
+                                    && session.riverOverlay().carvedHeight(p.x(), p.z(), p.naturalGroundY() + 1)
+                                            == p.naturalGroundY() + 1)
+                            .toList();
                 WorldSession.requireActive(session);
                 return writeRoute(world, route) | writeCamp(world, camp);
             } catch (Exception failed) {
@@ -145,15 +119,15 @@ public final class MountainPassCampFeature extends Feature<DefaultFeatureConfig>
             long key = (long) voxel.x() << 32 ^ voxel.z() & 0xffffffffL;
             if (!columns.add(key)) continue;
             if (water.waterY(voxel.x(), voxel.z()) != Integer.MIN_VALUE) return true;
-            int raw =
-                    MountainHeightField.sampleForWorld(
-                                    session.worldSeed(),
-                                    voxel.x(),
-                                    voxel.z(),
-                                    tile.heightAt(tile.key().localX(voxel.x()), tile.key().localZ(voxel.z())),
-                                    scale,
-                                    WorldHeightProfile.surfaceCapY(top))
-                            .surfaceY();
+            int raw = MountainHeightField.sampleForWorld(
+                            session.worldSeed(),
+                            voxel.x(),
+                            voxel.z(),
+                            tile.heightAt(
+                                    tile.key().localX(voxel.x()), tile.key().localZ(voxel.z())),
+                            scale,
+                            WorldHeightProfile.surfaceCapY(top))
+                    .surfaceY();
             if (water.carvedHeight(voxel.x(), voxel.z(), raw) != raw) return true;
         }
         return false;
@@ -185,9 +159,8 @@ public final class MountainPassCampFeature extends Feature<DefaultFeatureConfig>
 
             BlockState next = routeSurface(natural);
             for (int y = placement.naturalGroundY() + 1; y < placement.groundY(); y++) {
-                changed |=
-                        world.setBlockState(
-                                new BlockPos(placement.x(), y, placement.z()), Blocks.STONE.getDefaultState(), 2);
+                changed |= world.setBlockState(
+                        new BlockPos(placement.x(), y, placement.z()), Blocks.STONE.getDefaultState(), 2);
             }
 
             BlockPos groundPos = new BlockPos(placement.x(), placement.groundY(), placement.z());
@@ -305,7 +278,8 @@ public final class MountainPassCampFeature extends Feature<DefaultFeatureConfig>
             case WHITE_WOOL -> Blocks.WHITE_WOOL.getDefaultState();
             case SNOW -> Blocks.SNOW.getDefaultState();
             case BARREL -> Blocks.BARREL.getDefaultState();
-            case CAMPFIRE_UNLIT -> (BlockState) Blocks.CAMPFIRE.getDefaultState().with(CampfireBlock.LIT, false);
+            case CAMPFIRE_UNLIT ->
+                (BlockState) Blocks.CAMPFIRE.getDefaultState().with(CampfireBlock.LIT, false);
         };
     }
 

@@ -46,18 +46,8 @@ public class MemoryTileStore {
             return this.tensors.get(id);
         }
 
-        InfiniteTensor tensor =
-                new InfiniteTensor(
-                        id,
-                        shape,
-                        outputWindow,
-                        null,
-                        batchFunction,
-                        batchSize,
-                        deps,
-                        depWindows,
-                        this,
-                        cacheLimitBytes);
+        InfiniteTensor tensor = new InfiniteTensor(
+                id, shape, outputWindow, null, batchFunction, batchSize, deps, depWindows, this, cacheLimitBytes);
         this.register(id, tensor);
         return tensor;
     }
@@ -90,7 +80,8 @@ public class MemoryTileStore {
             LinkedHashMap<List<Integer>, FloatTensor> cache = this.windowCaches.get(id);
             long[] size = this.cacheSizes.get(id);
             if (cache != null) {
-                Iterator<Entry<List<Integer>, FloatTensor>> it = cache.entrySet().iterator();
+                Iterator<Entry<List<Integer>, FloatTensor>> it =
+                        cache.entrySet().iterator();
 
                 while (size[0] > limitBytes && cache.size() > 1 && it.hasNext()) {
                     Entry<List<Integer>, FloatTensor> entry = it.next();

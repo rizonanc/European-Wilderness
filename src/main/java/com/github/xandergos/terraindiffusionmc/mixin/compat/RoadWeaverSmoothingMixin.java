@@ -1,8 +1,8 @@
 package com.github.xandergos.terraindiffusionmc.mixin.compat;
 
+import com.github.xandergos.terraindiffusionmc.compat.roadweaver.RoadWeaverTerrain;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
-import com.github.xandergos.terraindiffusionmc.compat.roadweaver.RoadWeaverTerrain;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;

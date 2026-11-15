@@ -1,12 +1,12 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.hydrology;
 
 import com.github.xandergos.terraindiffusionmc.compat.voxy.LodTerrainSource;
+import com.github.xandergos.terraindiffusionmc.worldgen.cache.DiskTerrainStore;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.*;
 import com.github.xandergos.terraindiffusionmc.worldgen.terrain.*;
-import com.github.xandergos.terraindiffusionmc.worldgen.cache.DiskTerrainStore;
+import java.lang.management.ManagementFactory;
 import java.nio.file.*;
 import java.util.*;
-import java.lang.management.ManagementFactory;
 
 /** Standalone hot-export allocation probe, executable against the old 2.5.0 named JAR too. */
 public final class LodExportProbe {
@@ -16,28 +16,26 @@ public final class LodExportProbe {
         Path output = Path.of(args[0]);
         if (Files.exists(output.resolve("water"))) throw new IllegalArgumentException("Use a fresh output directory");
         var ticket = WorldSession.activate(GenerationProfile.defaultsFor(2, "export-probe", "cpu", "cpu"), 7);
-        var repo =
-                new TerrainRepository(
-                        new DiskTerrainStore(output.resolve("raw")),
-                        key -> {
-                            short[] heights = new short[65536], biomes = new short[65536];
-                            Arrays.fill(heights, (short) 600);
-                            Arrays.fill(biomes, (short) 8);
-                            return new TerrainTile(key, heights, biomes);
-                        },
-                        256,
-                        64L * 1024 * 1024,
-                        1024L * 1024 * 1024,
-                        ticket);
+        var repo = new TerrainRepository(
+                new DiskTerrainStore(output.resolve("raw")),
+                key -> {
+                    short[] heights = new short[65536], biomes = new short[65536];
+                    Arrays.fill(heights, (short) 600);
+                    Arrays.fill(biomes, (short) 8);
+                    return new TerrainTile(key, heights, biomes);
+                },
+                256,
+                64L * 1024 * 1024,
+                1024L * 1024 * 1024,
+                ticket);
         ticket.attachRepository(repo);
         var store = new WorldWaterStore(output.resolve("water"), 7, ticket.fingerprint(), 256, WorldWaterGrid.DEFAULT);
         for (int core = 0; core < 8; core++) {
             int[] air = new int[512 * 512], levels = new int[air.length];
             Arrays.fill(air, 103);
             Arrays.fill(levels, Integer.MIN_VALUE);
-            store.save(
-                    new WorldWaterTile(
-                            WorldWaterGrid.DEFAULT, new WorldWaterGrid.Cell(core, 0), air, levels, List.of()));
+            store.save(new WorldWaterTile(
+                    WorldWaterGrid.DEFAULT, new WorldWaterGrid.Cell(core, 0), air, levels, List.of()));
             for (int z = -1; z <= 2; z++)
                 for (int x = core * 2 - 1; x <= core * 2 + 2; x++)
                     repo.get(TerrainTileKey.ofTile(7, x, z, 256, ticket.fingerprint()));
@@ -62,14 +60,13 @@ public final class LodExportProbe {
             }
             long elapsed = System.nanoTime() - start, bytes = bean.getThreadAllocatedBytes(thread) - allocated;
             checksum = sum;
-            String result =
-                    "{\"samples\":800,\"nanoseconds\":"
-                            + elapsed
-                            + ",\"allocatedBytes\":"
-                            + bytes
-                            + ",\"checksum\":"
-                            + checksum
-                            + "}\n";
+            String result = "{\"samples\":800,\"nanoseconds\":"
+                    + elapsed
+                    + ",\"allocatedBytes\":"
+                    + bytes
+                    + ",\"checksum\":"
+                    + checksum
+                    + "}\n";
             Files.writeString(output.resolve("result.json"), result);
             System.out.print(result);
         } finally {

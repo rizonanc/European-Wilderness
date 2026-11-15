@@ -60,16 +60,12 @@ final class RiverBanks {
                 int naturalDepth = water[p] - (air[p] - 1), d = distance[p];
                 boolean inLake = lake[(p / side / 2) * n + (p % side / 2)] && naturalDepth > 0;
                 int ripple = d <= 4 ? 0 : (int) Math.round(relief(seed, originX + p % side, originZ + p / side));
-                int depth =
-                        inLake
-                                ? Math.min(naturalDepth, Math.max(1, d - 2 + ripple))
-                                : Math.min(5, Math.max(1, 1 + (d - 1) / 3 + ripple));
+                int depth = inLake
+                        ? Math.min(naturalDepth, Math.max(1, d - 2 + ripple))
+                        : Math.min(5, Math.max(1, 1 + (d - 1) / 3 + ripple));
                 if (!inLake && d >= 2 && currents != null && currents[p] != 0) {
-                    int variation =
-                            (int)
-                                    Math.round(
-                                            relief(seed ^ 0x4b17L, originX + p % side, originZ + p / side)
-                                                    * (depthVariation.applyAsInt(p) / 100.0));
+                    int variation = (int) Math.round(relief(seed ^ 0x4b17L, originX + p % side, originZ + p / side)
+                            * (depthVariation.applyAsInt(p) / 100.0));
                     depth = Math.clamp(depth + variation, 1, 6);
                 }
                 depth = Math.min(PreparedWaterArea.MAX_DEPTH, depth);

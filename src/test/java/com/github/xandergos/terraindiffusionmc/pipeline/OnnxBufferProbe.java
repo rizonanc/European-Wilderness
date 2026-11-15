@@ -19,17 +19,15 @@ public final class OnnxBufferProbe {
                 try (var input = OnnxTensor.createTensor(env, FloatBuffer.wrap(values), new long[] {values.length});
                         var result = session.run(Map.of("x", input))) {
                     var buffer = ((OnnxTensor) result.get(0)).getFloatBuffer();
-                    sum +=
-                            Float.floatToRawIntBits(buffer.get(0))
-                                    + Float.floatToRawIntBits(buffer.get(values.length - 1));
+                    sum += Float.floatToRawIntBits(buffer.get(0))
+                            + Float.floatToRawIntBits(buffer.get(values.length - 1));
                 }
             } else
                 try (var lease = pool.prepare(env, new Object[][] {{"x", values, new long[] {values.length}}});
                         var result = session.run(lease.feed())) {
                     var buffer = ((OnnxTensor) result.get(0)).getFloatBuffer();
-                    sum +=
-                            Float.floatToRawIntBits(buffer.get(0))
-                                    + Float.floatToRawIntBits(buffer.get(values.length - 1));
+                    sum += Float.floatToRawIntBits(buffer.get(0))
+                            + Float.floatToRawIntBits(buffer.get(values.length - 1));
                 }
         }
         checksum = sum;
@@ -66,18 +64,17 @@ public final class OnnxBufferProbe {
                     bytes[mode] = bean.getThreadAllocatedBytes(id) - before;
                 }
                 if (checks[0] != checks[1]) throw new AssertionError("Changed output");
-                rounds.add(
-                        "{\"nanoseconds\":"
-                                + Arrays.toString(ns)
-                                + ",\"javaAllocatedBytes\":"
-                                + Arrays.toString(bytes)
-                                + ",\"legacyInputTensors\":64,\"pooledCreated\":"
-                                + created
-                                + ",\"pooledReused\":"
-                                + reused
-                                + ",\"checksum\":"
-                                + checks[0]
-                                + "}");
+                rounds.add("{\"nanoseconds\":"
+                        + Arrays.toString(ns)
+                        + ",\"javaAllocatedBytes\":"
+                        + Arrays.toString(bytes)
+                        + ",\"legacyInputTensors\":64,\"pooledCreated\":"
+                        + created
+                        + ",\"pooledReused\":"
+                        + reused
+                        + ",\"checksum\":"
+                        + checks[0]
+                        + "}");
             }
         }
         String result =

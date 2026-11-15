@@ -36,12 +36,11 @@ final class MountainSurfacePlanning {
             return null;
         }
 
-        boolean clearCap =
-                singleSnowCap
-                        && (material == MountainSurfaceMaterials.Material.ROCK
-                                || material == MountainSurfaceMaterials.Material.SCREE
-                                || material == MountainSurfaceMaterials.Material.SNOW
-                                || material == MountainSurfaceMaterials.Material.MORAINE);
+        boolean clearCap = singleSnowCap
+                && (material == MountainSurfaceMaterials.Material.ROCK
+                        || material == MountainSurfaceMaterials.Material.SCREE
+                        || material == MountainSurfaceMaterials.Material.SNOW
+                        || material == MountainSurfaceMaterials.Material.MORAINE);
         if (!aboveAir && !clearCap) {
             return null;
         }
@@ -84,23 +83,13 @@ final class MountainSurfacePlanning {
                 int southY = terrain.firstAirNeighbour(x, z, 0, 1);
                 int westY = terrain.firstAirNeighbour(x, z, -1, 0);
                 int eastY = terrain.firstAirNeighbour(x, z, 1, 0);
-                MountainSurfaceMaterials.Material material =
-                        Objects.requireNonNull(
-                                classifier.classify(
-                                        seed,
-                                        x,
-                                        z,
-                                        surface.firstAir(),
-                                        surface.temperatureC(),
-                                        northY,
-                                        southY,
-                                        westY,
-                                        eastY),
-                                "classifier material");
+                MountainSurfaceMaterials.Material material = Objects.requireNonNull(
+                        classifier.classify(
+                                seed, x, z, surface.firstAir(), surface.temperatureC(), northY, southY, westY, eastY),
+                        "classifier material");
                 if (material != MountainSurfaceMaterials.Material.NONE) {
-                    placements.add(
-                            new MountainSurfacePlanning.Placement(
-                                    x, z, Math.subtractExact(surface.firstAir(), 1), material));
+                    placements.add(new MountainSurfacePlanning.Placement(
+                            x, z, Math.subtractExact(surface.firstAir(), 1), material));
                 }
             }
         }

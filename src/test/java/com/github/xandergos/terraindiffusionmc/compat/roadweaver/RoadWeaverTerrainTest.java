@@ -1,13 +1,13 @@
 package com.github.xandergos.terraindiffusionmc.compat.roadweaver;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.github.xandergos.terraindiffusionmc.worldgen.hydrology.PreparedWaterArea;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.GenerationProfile;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class RoadWeaverTerrainTest {
     @Test
@@ -22,18 +22,17 @@ final class RoadWeaverTerrainTest {
     void bridgeDepthUsesTheLocalWaterSurface() {
         var session = WorldSession.activate(GenerationProfile.defaultsFor(2, "road-test", "cpu", "cpu"));
         try {
-            session.attachRiverOverlay(
-                    new WorldSession.RiverOverlay() {
-                        @Override
-                        public int carvedHeight(int x, int z, int raw) {
-                            return raw;
-                        }
+            session.attachRiverOverlay(new WorldSession.RiverOverlay() {
+                @Override
+                public int carvedHeight(int x, int z, int raw) {
+                    return raw;
+                }
 
-                        @Override
-                        public int waterY(int x, int z) {
-                            return x == -16 && z == 15 ? 200 : PreparedWaterArea.NONE;
-                        }
-                    });
+                @Override
+                public int waterY(int x, int z) {
+                    return x == -16 && z == 15 ? 200 : PreparedWaterArea.NONE;
+                }
+            });
             int seaLevel = 63;
             int riverSurface = RoadWeaverTerrain.waterFirstAir(session, -16, 15, seaLevel);
             assertEquals(201, riverSurface);

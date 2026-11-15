@@ -1,5 +1,8 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.diagnostics;
 
+import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.WorkTimeline.Stage.*;
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.github.xandergos.terraindiffusionmc.worldgen.preparation.FrameBudget;
 import com.google.gson.*;
 import java.nio.file.*;
@@ -8,8 +11,6 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import static org.junit.jupiter.api.Assertions.*;
-import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.WorkTimeline.Stage.*;
 
 class PerformanceDiagnosticsTest {
     @org.junit.jupiter.api.Test
@@ -21,7 +22,8 @@ class PerformanceDiagnosticsTest {
         org.junit.jupiter.api.Assertions.assertTrue(json.contains("used_bytes"));
     }
 
-    @TempDir Path temp;
+    @TempDir
+    Path temp;
 
     @Test
     void testTimelineCapturesCompleted() {
@@ -78,20 +80,19 @@ class PerformanceDiagnosticsTest {
         var release = new CountDownLatch(1);
         List<Thread> workers = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
-            var worker =
-                    new Thread(
-                            () -> {
-                                long token = trace.begin(WATER_PLAN);
-                                ready.countDown();
-                                try {
-                                    release.await();
-                                } catch (InterruptedException stop) {
-                                    Thread.currentThread().interrupt();
-                                } finally {
-                                    trace.end(token);
-                                }
-                            },
-                            "test-worker-" + i);
+            var worker = new Thread(
+                    () -> {
+                        long token = trace.begin(WATER_PLAN);
+                        ready.countDown();
+                        try {
+                            release.await();
+                        } catch (InterruptedException stop) {
+                            Thread.currentThread().interrupt();
+                        } finally {
+                            trace.end(token);
+                        }
+                    },
+                    "test-worker-" + i);
             workers.add(worker);
             worker.start();
         }
@@ -101,7 +102,9 @@ class PerformanceDiagnosticsTest {
             var active = trace.overlap(100, 120);
             assertEquals(4, active.size());
             assertTrue(active.stream().allMatch(WorkTimeline.Event::active));
-            assertEquals(4, active.stream().map(WorkTimeline.Event::thread).distinct().count());
+            assertEquals(
+                    4,
+                    active.stream().map(WorkTimeline.Event::thread).distinct().count());
         } finally {
             release.countDown();
             for (var worker : workers) worker.join(5000);
@@ -129,15 +132,15 @@ class PerformanceDiagnosticsTest {
         }
         assertEquals("untouched", Files.readString(unrelated));
         for (var file : List.of(log, backup))
-            for (var entry : Files.readAllLines(file)) assertTrue(JsonParser.parseString(entry).isJsonObject());
+            for (var entry : Files.readAllLines(file))
+                assertTrue(JsonParser.parseString(entry).isJsonObject());
         assertThrows(java.io.IOException.class, () -> writer.append("x".repeat(101)));
     }
 
     @Test
     void testReportRetainsUnknownCauses() {
-        var spike =
-                new PerformanceDiagnostics.Spike(
-                        1, 0, 100, 120, 20_000_000, 6_000_000, new FrameBudget.Decision(7_000_000, 12_000_000, 2));
+        var spike = new PerformanceDiagnostics.Spike(
+                1, 0, 100, 120, 20_000_000, 6_000_000, new FrameBudget.Decision(7_000_000, 12_000_000, 2));
         var gc = new PerformanceDiagnostics.GcWindow(50, 200, 1, 4, true);
         var event = new WorkTimeline.Event(INFERENCE_EXECUTE, "test", 80, 140, false, 20);
         var report = PerformanceDiagnostics.report(spike, List.of(event), List.of(gc));
@@ -146,7 +149,13 @@ class PerformanceDiagnosticsTest {
         assertEquals(7, json.get("baseline_ms").getAsDouble());
         assertEquals(1, json.getAsJsonArray("overlapping_work").size());
         assertTrue(json.get("interpretation").getAsString().contains("not proven causation"));
-        assertEquals(50, json.getAsJsonArray("gc_sampling_windows").get(0).getAsJsonObject().get("from").getAsLong());
+        assertEquals(
+                50,
+                json.getAsJsonArray("gc_sampling_windows")
+                        .get(0)
+                        .getAsJsonObject()
+                        .get("from")
+                        .getAsLong());
         assertTrue(
                 PerformanceDiagnostics.summary(spike, List.of(), List.of()).contains("нет зарегистрированной работы"));
         assertTrue(PerformanceDiagnostics.summary(spike, List.of(), List.of()).contains("нет доступной выборки"));

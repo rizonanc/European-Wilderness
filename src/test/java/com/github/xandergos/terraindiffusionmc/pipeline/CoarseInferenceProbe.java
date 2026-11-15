@@ -2,9 +2,9 @@ package com.github.xandergos.terraindiffusionmc.pipeline;
 
 import com.github.xandergos.terraindiffusionmc.compat.voxy.CoarseLodPatch;
 import com.github.xandergos.terraindiffusionmc.infinitetensor.FloatTensor;
+import java.lang.reflect.*;
 import java.nio.*;
 import java.nio.file.*;
-import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import net.fabricmc.loader.impl.FabricLoaderImpl;
@@ -22,17 +22,13 @@ public final class CoarseInferenceProbe {
         for (String file : List.of("world_pipeline_config.json", "pipeline_data.json"))
             Files.copy(source.resolve(file), models.resolve(file), StandardCopyOption.REPLACE_EXISTING);
         Files.writeString(config.resolve("european-wilderness.properties"), "inference.device=cpu\n");
-        var provider =
-                (GameProvider)
-                        Proxy.newProxyInstance(
-                                CoarseInferenceProbe.class.getClassLoader(),
-                                new Class[] {GameProvider.class},
-                                (p, m, a) -> {
-                                    if (m.getName().equals("getLaunchDirectory")) return out;
-                                    if (m.getName().equals("getGameId")) return "coarse-probe";
-                                    if (m.getReturnType() == boolean.class) return false;
-                                    return null;
-                                });
+        var provider = (GameProvider) Proxy.newProxyInstance(
+                CoarseInferenceProbe.class.getClassLoader(), new Class[] {GameProvider.class}, (p, m, a) -> {
+                    if (m.getName().equals("getLaunchDirectory")) return out;
+                    if (m.getName().equals("getGameId")) return "coarse-probe";
+                    if (m.getReturnType() == boolean.class) return false;
+                    return null;
+                });
         FabricLoaderImpl.INSTANCE.setGameProvider(provider);
         // This process tests just the coarse graph. Prevent the normal
         // all-assets downloader from fetching/validating the unused 2GB base model.
@@ -89,7 +85,10 @@ public final class CoarseInferenceProbe {
             report.put("incrementalEqualsDirect", true);
             report.put("baseDecoderLoaded", false);
             report.put("native", OnnxModel.statistics());
-            String json = new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(report);
+            String json = new com.google.gson.GsonBuilder()
+                    .setPrettyPrinting()
+                    .create()
+                    .toJson(report);
             Files.writeString(out.resolve("report.json"), json + "\n");
             System.out.println(json);
         }

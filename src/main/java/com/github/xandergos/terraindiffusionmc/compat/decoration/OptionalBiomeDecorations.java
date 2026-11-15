@@ -1,7 +1,7 @@
 package com.github.xandergos.terraindiffusionmc.compat.decoration;
 
-import com.github.xandergos.terraindiffusionmc.mixin.decoration.BiomeSelectionRegistries;
 import com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfig;
+import com.github.xandergos.terraindiffusionmc.mixin.decoration.BiomeSelectionRegistries;
 import com.github.xandergos.terraindiffusionmc.world.TerrainDiffusionBiomeSource;
 import java.util.List;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
@@ -48,7 +48,8 @@ public final class OptionalBiomeDecorations {
         BiomeModifications.create(Identifier.of(MOD, "optional_biome_decorations"))
                 .add(
                         ModificationPhase.POST_PROCESSING,
-                        context -> isTerrainDiffusion(context) && !features(context.getBiomeKey().getValue()).isEmpty(),
+                        context -> isTerrainDiffusion(context)
+                                && !features(context.getBiomeKey().getValue()).isEmpty(),
                         (context, modification) -> {
                             var registries = ((BiomeSelectionRegistries) context).terrainDiffusion$getRegistries();
                             var placed = registries.getOrThrow(RegistryKeys.PLACED_FEATURE);
@@ -82,7 +83,7 @@ public final class OptionalBiomeDecorations {
             case "snowy_taiga" -> List.of("geophilic:taiga/grove/logs");
             case "plains", "meadow" -> meadow();
             case "swamp" ->
-                    List.of("geophilic:swamp/logs", "wilderwild:cattail_uncommon", "wilderwild:patch_algae_small");
+                List.of("geophilic:swamp/logs", "wilderwild:cattail_uncommon", "wilderwild:patch_algae_small");
             case "jungle" -> List.of("geophilic:jungle/bushes", "geophilic:jungle/logs");
             case "windswept_hills" -> List.of("geophilic:windswept/rocks");
             default -> List.of();

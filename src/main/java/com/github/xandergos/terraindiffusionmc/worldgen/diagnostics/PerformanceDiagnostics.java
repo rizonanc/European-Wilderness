@@ -1,5 +1,7 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.diagnostics;
 
+import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.WorkTimeline.Stage;
+
 import com.github.xandergos.terraindiffusionmc.worldgen.preparation.FrameBudget;
 import com.google.gson.Gson;
 import java.lang.management.*;
@@ -10,7 +12,6 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.WorkTimeline.Stage;
 
 /** Best-effort overlap evidence. No filesystem, GC queries or formatting on the render hook. */
 public final class PerformanceDiagnostics {
@@ -289,14 +290,12 @@ public final class PerformanceDiagnostics {
     static String summary(Spike spike, List<WorkTimeline.Event> events, List<GcWindow> gc) {
         Map<Stage, Long> totals = new EnumMap<>(Stage.class);
         for (var event : events) totals.merge(event.stage(), event.overlapNanos(), Long::sum);
-        StringBuilder text =
-                new StringBuilder(
-                        String.format(
-                                Locale.ROOT,
-                                "Последний пик: кадр %.1fмс, render %.1fмс, обычный %.1fмс. Совпало: ",
-                                spike.gap() / 1e6,
-                                spike.render() / 1e6,
-                                spike.decision().baselineNanos() / 1e6));
+        StringBuilder text = new StringBuilder(String.format(
+                Locale.ROOT,
+                "Последний пик: кадр %.1fмс, render %.1fмс, обычный %.1fмс. Совпало: ",
+                spike.gap() / 1e6,
+                spike.render() / 1e6,
+                spike.decision().baselineNanos() / 1e6));
         if (totals.isEmpty()) text.append("нет зарегистрированной работы мода");
         else
             totals.entrySet().stream()
@@ -307,7 +306,12 @@ public final class PerformanceDiagnostics {
         long count = gc.stream().mapToLong(GcWindow::collections).sum(),
                 time = gc.stream().mapToLong(GcWindow::timeMillis).sum();
         if (gc.isEmpty() || gc.stream().noneMatch(GcWindow::available)) text.append(" GC: нет доступной выборки.");
-        else text.append(" GC в пересекающихся окнах: ").append(count).append(" / ").append(time).append("мс.");
+        else
+            text.append(" GC в пересекающихся окнах: ")
+                    .append(count)
+                    .append(" / ")
+                    .append(time)
+                    .append("мс.");
         text.append(" Совпадение не доказывает причину.");
         return text.toString();
     }

@@ -1,7 +1,8 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 class CoarseMeshLifecycleTest {
     @Test
@@ -40,20 +41,19 @@ class CoarseMeshLifecycleTest {
         var tracker = new CoarseMeshTracker(4);
         long version = tracker.request(1);
         Object snapshot = new Object();
-        var provider =
-                new CoarseRenderHooks.Provider() {
-                    public Object render(Object e, long p, Object o) {
-                        return o;
-                    }
+        var provider = new CoarseRenderHooks.Provider() {
+            public Object render(Object e, long p, Object o) {
+                return o;
+            }
 
-                    public byte children(Object e, Object s, byte actual) {
-                        return actual;
-                    }
+            public byte children(Object e, Object s, byte actual) {
+                return actual;
+            }
 
-                    public boolean meshCurrent(long position, long revision) {
-                        return tracker.current(position, revision);
-                    }
-                };
+            public boolean meshCurrent(long position, long revision) {
+                return tracker.current(position, revision);
+            }
+        };
         try {
             CoarseRenderHooks.attach(provider);
             CoarseRenderHooks.tag(snapshot, provider, 1, version);

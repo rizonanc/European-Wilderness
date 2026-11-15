@@ -1,8 +1,8 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.diagnostics;
 
-import java.nio.file.*;
-import java.nio.charset.StandardCharsets;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
 
 /** Called only by the diagnostics worker. Bounds storage to the active file and one backup. */
 final class RotatingPerformanceLog {

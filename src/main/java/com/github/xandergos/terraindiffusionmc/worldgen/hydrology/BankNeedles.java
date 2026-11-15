@@ -11,14 +11,13 @@ final class BankNeedles {
                 int level = PreparedWaterArea.NONE, count = 0;
                 boolean different = false;
                 for (int direction = 0; direction < 4; direction++) {
-                    int q =
-                            p
-                                    + switch (direction) {
-                                        case 0 -> -1;
-                                        case 1 -> 1;
-                                        case 2 -> -side;
-                                        default -> side;
-                                    };
+                    int q = p
+                            + switch (direction) {
+                                case 0 -> -1;
+                                case 1 -> 1;
+                                case 2 -> -side;
+                                default -> side;
+                            };
                     int v = original[q];
                     if (v == PreparedWaterArea.NONE) continue;
                     if (level != PreparedWaterArea.NONE && v != level) {

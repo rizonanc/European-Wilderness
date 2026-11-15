@@ -41,10 +41,9 @@ final class MountainPassCampPlanning {
                 continue;
             }
 
-            int naturalY =
-                    MountainHeightField.sampleForWorld(
-                                    seed, x, z, tile.heightAt(key.localX(x), key.localZ(z)), scale, cap)
-                            .surfaceY();
+            int naturalY = MountainHeightField.sampleForWorld(
+                            seed, x, z, tile.heightAt(key.localX(x), key.localZ(z)), scale, cap)
+                    .surfaceY();
             if (naturalY != point.naturalFirstAir()) {
                 throw new IllegalStateException("Pass height disagrees with the prepared terrain tile");
             }

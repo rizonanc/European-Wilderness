@@ -34,7 +34,8 @@ public final class CoarseLodCache {
     public synchronized void put(CoarseLodPatch patch) {
         if (patch.span != span) throw new IllegalArgumentException("Mismatched patch span");
         patches.put(patch.key, patch);
-        while (patches.size() > limit) patches.remove(patches.keySet().iterator().next());
+        while (patches.size() > limit)
+            patches.remove(patches.keySet().iterator().next());
         snapshot = Map.copyOf(patches);
     }
 

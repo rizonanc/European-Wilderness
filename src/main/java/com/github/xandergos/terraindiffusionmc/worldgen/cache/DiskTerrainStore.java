@@ -1,12 +1,13 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.cache;
 
+import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors.*;
+import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.WorkTimeline.Stage.*;
+
+import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors;
 import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.GenerationMetrics;
 import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.PerformanceDiagnostics;
-import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.WorkTimeline.Stage.*;
 import com.github.xandergos.terraindiffusionmc.worldgen.terrain.TerrainTile;
 import com.github.xandergos.terraindiffusionmc.worldgen.terrain.TerrainTileKey;
-import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors;
-import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -46,33 +47,32 @@ public final class DiskTerrainStore {
 
     private static ThreadPoolExecutor createReaders() {
         // Only filesystem reads/validation run here. Never inference, chunk work or nested submissions.
-        var pool =
-                new ThreadPoolExecutor(
-                        2,
-                        2,
-                        30,
-                        TimeUnit.SECONDS,
-                        new ArrayBlockingQueue<>(64),
-                        work -> {
-                            var thread = new Thread(work, "terrain-cache-read-" + READER_IDS.incrementAndGet());
-                            thread.setDaemon(true);
-                            return thread;
-                        },
-                        (work, executor) -> {
-                            // Backpressure cannot abandon a published shared flight when its submitter is interrupted.
-                            boolean interrupted = false;
+        var pool = new ThreadPoolExecutor(
+                2,
+                2,
+                30,
+                TimeUnit.SECONDS,
+                new ArrayBlockingQueue<>(64),
+                work -> {
+                    var thread = new Thread(work, "terrain-cache-read-" + READER_IDS.incrementAndGet());
+                    thread.setDaemon(true);
+                    return thread;
+                },
+                (work, executor) -> {
+                    // Backpressure cannot abandon a published shared flight when its submitter is interrupted.
+                    boolean interrupted = false;
+                    try {
+                        while (true)
                             try {
-                                while (true)
-                                    try {
-                                        executor.getQueue().put(work);
-                                        return;
-                                    } catch (InterruptedException retry) {
-                                        interrupted = true;
-                                    }
-                            } finally {
-                                if (interrupted) Thread.currentThread().interrupt();
+                                executor.getQueue().put(work);
+                                return;
+                            } catch (InterruptedException retry) {
+                                interrupted = true;
                             }
-                        });
+                    } finally {
+                        if (interrupted) Thread.currentThread().interrupt();
+                    }
+                });
         pool.allowCoreThreadTimeOut(true);
         return pool;
     }
@@ -167,9 +167,8 @@ public final class DiskTerrainStore {
 
     private Optional<TerrainTile> readValidated(TerrainTileKey key) {
         long trace = PerformanceDiagnostics.begin(RAW_IO_READ);
-        try (var diagnostic =
-                DiagnosticErrors.scope(
-                        DiagnosticErrors.context("CACHE_READ", "tile=(" + key.tileX() + "," + key.tileZ() + ")"))) {
+        try (var diagnostic = DiagnosticErrors.scope(
+                DiagnosticErrors.context("CACHE_READ", "tile=(" + key.tileX() + "," + key.tileZ() + ")"))) {
             Path file = this.root.resolve(key.fileName());
 
             byte[] raw;

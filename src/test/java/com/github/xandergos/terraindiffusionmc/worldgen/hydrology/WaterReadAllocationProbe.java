@@ -1,8 +1,8 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.hydrology;
 
+import com.github.xandergos.terraindiffusionmc.worldgen.cache.DiskTerrainStore;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.*;
 import com.github.xandergos.terraindiffusionmc.worldgen.terrain.*;
-import com.github.xandergos.terraindiffusionmc.worldgen.cache.DiskTerrainStore;
 import java.lang.management.ManagementFactory;
 import java.nio.file.Path;
 import java.util.*;
@@ -25,16 +25,15 @@ public final class WaterReadAllocationProbe {
         bean.setThreadAllocatedMemoryEnabled(true);
         var session = WorldSession.activate(GenerationProfile.defaultsFor(2, "probe", "cpu", "cpu"), 7);
         var root = Path.of("unused-allocation-probe-root");
-        session.attachRepository(
-                new TerrainRepository(
-                        new DiskTerrainStore(root.resolve("raw")),
-                        key -> {
-                            throw new AssertionError("Hot reads cannot load terrain");
-                        },
-                        256,
-                        1048576,
-                        1073741824L,
-                        session));
+        session.attachRepository(new TerrainRepository(
+                new DiskTerrainStore(root.resolve("raw")),
+                key -> {
+                    throw new AssertionError("Hot reads cannot load terrain");
+                },
+                256,
+                1048576,
+                1073741824L,
+                session));
         var grid = new WorldWaterGrid(64, 32, 128);
         try (var water = new WorldWaterController(session, root.resolve("water"), 300, grid, 2, 4)) {
             int[] air = new int[4096], levels = new int[4096];
@@ -60,18 +59,17 @@ public final class WaterReadAllocationProbe {
                     start = System.nanoTime(),
                     checksum = read(water, count);
             long elapsed = System.nanoTime() - start, allocated = bean.getThreadAllocatedBytes(thread) - before;
-            System.out.println(
-                    "{\"iterations\":"
-                            + count
-                            + ",\"water_queries\":"
-                            + (count * 3)
-                            + ",\"elapsed_ns\":"
-                            + elapsed
-                            + ",\"allocated_bytes\":"
-                            + allocated
-                            + ",\"checksum\":"
-                            + checksum
-                            + "}");
+            System.out.println("{\"iterations\":"
+                    + count
+                    + ",\"water_queries\":"
+                    + (count * 3)
+                    + ",\"elapsed_ns\":"
+                    + elapsed
+                    + ",\"allocated_bytes\":"
+                    + allocated
+                    + ",\"checksum\":"
+                    + checksum
+                    + "}");
         } finally {
             WorldSession.deactivate(session);
         }

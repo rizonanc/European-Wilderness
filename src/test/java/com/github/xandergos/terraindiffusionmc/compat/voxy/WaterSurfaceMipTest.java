@@ -1,35 +1,34 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
-import java.util.*;
-import java.lang.management.ManagementFactory;
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.lang.management.ManagementFactory;
+import java.util.*;
+import org.junit.jupiter.api.Test;
 
 class WaterSurfaceMipTest {
     private static long value(int id) {
         return (long) id << 27;
     }
 
-    private static final WaterMipMapping MARINE =
-            new WaterMipMapping() {
-                public boolean ewh$isWater(int id) {
-                    return id == 7;
-                }
+    private static final WaterMipMapping MARINE = new WaterMipMapping() {
+        public boolean ewh$isWater(int id) {
+            return id == 7;
+        }
 
-                public long ewh$surfaceWaterValue(long v) {
-                    return WaterMipPolicyTest.surfaceWater(v);
-                }
-            };
+        public long ewh$surfaceWaterValue(long v) {
+            return WaterMipPolicyTest.surfaceWater(v);
+        }
+    };
 
     private static long[] reef(int surface, boolean plants) {
         long[] data = new long[4681];
         for (int y = 0; y < 16; y++)
             for (int z = 0; z < 16; z++)
                 for (int x = 0; x < 16; x++) {
-                    int id =
-                            y < surface
-                                    ? ((x + z + y) % 3 == 0 ? 180 : 171)
-                                    : y == surface ? (plants && (x + z) % 3 == 0 ? 181 : 7) : 0;
+                    int id = y < surface
+                            ? ((x + z + y) % 3 == 0 ? 180 : 171)
+                            : y == surface ? (plants && (x + z) % 3 == 0 ? 181 : 7) : 0;
                     data[y * 256 + z * 16 + x] = value(id) | (23L << 47) | (15L << 56);
                 }
         return data;
@@ -42,8 +41,7 @@ class WaterSurfaceMipTest {
     }
 
     @Test
-    void testFullCoverageWithReef()
-            throws Exception {
+    void testFullCoverageWithReef() throws Exception {
         for (int surface = 0; surface < 16; surface++) {
             long[] data = reef(surface, true);
             stock(data);

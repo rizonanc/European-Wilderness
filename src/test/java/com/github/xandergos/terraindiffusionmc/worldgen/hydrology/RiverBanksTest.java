@@ -1,8 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.hydrology;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.*;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class RiverBanksTest {
     private static int[] channel() {
@@ -63,16 +64,15 @@ class RiverBanksTest {
         Arrays.fill(air, 105);
         RiverBanks.shape(7, 0, 0, 64, air, water, new boolean[1024]);
         var area = new PreparedWaterArea(0, 0, 64, air, water);
-        var columns =
-                new RiverWaterPlanning.ColumnAccess() {
-                    public boolean isAir(int x, int y, int z) {
-                        return y >= area.carvedHeight(x, z, 105);
-                    }
+        var columns = new RiverWaterPlanning.ColumnAccess() {
+            public boolean isAir(int x, int y, int z) {
+                return y >= area.carvedHeight(x, z, 105);
+            }
 
-                    public boolean isSolidDry(int x, int y, int z) {
-                        return !isAir(x, y, z);
-                    }
-                };
+            public boolean isSolidDry(int x, int y, int z) {
+                return !isAir(x, y, z);
+            }
+        };
         assertTrue(columns.isAir(23, 101, 32));
         assertTrue(columns.isSolidDry(23, 100, 32));
         assertTrue(FluidContainment.canPlace(FluidContainment.Fluid.WATER, area, 24, 32, 99, 100, -64, 320, columns));

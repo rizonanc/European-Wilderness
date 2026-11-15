@@ -1,8 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.*;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class LodPreparationFrontierTest {
     @Test
@@ -33,26 +34,16 @@ class LodPreparationFrontierTest {
         var frontier = new LodPreparationFrontier(512);
         int[] lookups = {0};
         for (int i = 0; i < 20; i++)
-            assertNull(
-                    frontier.next(
-                            0,
-                            0,
-                            64,
-                            (x, z) -> {
-                                lookups[0]++;
-                                assertTrue(Math.abs(x) <= 1024 && Math.abs(z) <= 1024);
-                                return true;
-                            }));
+            assertNull(frontier.next(0, 0, 64, (x, z) -> {
+                lookups[0]++;
+                assertTrue(Math.abs(x) <= 1024 && Math.abs(z) <= 1024);
+                return true;
+            }));
         int before = lookups[0];
-        assertNull(
-                frontier.next(
-                        0,
-                        0,
-                        64,
-                        (x, z) -> {
-                            fail("finished frontier should not repeatedly probe disk");
-                            return false;
-                        }));
+        assertNull(frontier.next(0, 0, 64, (x, z) -> {
+            fail("finished frontier should not repeatedly probe disk");
+            return false;
+        }));
         assertTrue(before > 0);
         assertThrows(IllegalArgumentException.class, () -> new LodPreparationFrontier(33));
     }

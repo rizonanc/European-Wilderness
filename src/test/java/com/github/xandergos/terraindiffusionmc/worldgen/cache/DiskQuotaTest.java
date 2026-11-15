@@ -1,5 +1,7 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.cache;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.github.xandergos.terraindiffusionmc.worldgen.terrain.*;
 import java.io.IOException;
 import java.nio.file.*;
@@ -10,10 +12,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import static org.junit.jupiter.api.Assertions.*;
 
 class DiskQuotaTest {
-    @TempDir Path temp;
+    @TempDir
+    Path temp;
 
     static TerrainTileKey key(int x) {
         return TerrainTileKey.ofTile(7, x, -1, 16, "phase1");
@@ -105,14 +107,13 @@ class DiskQuotaTest {
             List<Future<?>> jobs = new ArrayList<>();
             for (int i = 0; i < 64; i++) {
                 final int x = i;
-                jobs.add(
-                        pool.submit(() -> {
-                            var key = key(x);
-                            store.store(key, tile(key, true));
-                            store.store(key, tile(key, false));
-                            if ((x & 1) == 0) store.delete(key);
-                            return null;
-                        }));
+                jobs.add(pool.submit(() -> {
+                    var key = key(x);
+                    store.store(key, tile(key, true));
+                    store.store(key, tile(key, false));
+                    if ((x & 1) == 0) store.delete(key);
+                    return null;
+                }));
             }
             for (var job : jobs) job.get(10, TimeUnit.SECONDS);
         }
@@ -142,28 +143,26 @@ class DiskQuotaTest {
         var store = new DiskTerrainStore(temp);
         var calls = new AtomicInteger();
         var key = key(0);
-        var low =
-                new TerrainRepository(
-                        store,
-                        k -> {
-                            calls.incrementAndGet();
-                            return tile(k, false);
-                        },
-                        16,
-                        10000,
-                        1);
+        var low = new TerrainRepository(
+                store,
+                k -> {
+                    calls.incrementAndGet();
+                    return tile(k, false);
+                },
+                16,
+                10000,
+                1);
         assertThrows(TerrainRepository.DiskQuotaExceededException.class, () -> low.get(key));
         assertEquals(0, calls.get());
-        var retry =
-                new TerrainRepository(
-                        store,
-                        k -> {
-                            if (calls.incrementAndGet() == 1) throw new IOException("retry");
-                            return tile(k, false);
-                        },
-                        16,
-                        10000,
-                        1000000);
+        var retry = new TerrainRepository(
+                store,
+                k -> {
+                    if (calls.incrementAndGet() == 1) throw new IOException("retry");
+                    return tile(k, false);
+                },
+                16,
+                10000,
+                1000000);
         assertThrows(Exception.class, () -> retry.get(key));
         assertEquals(0, store.quotaStatistics().reservedBytes());
         assertEquals(tile(key, false), retry.get(key));

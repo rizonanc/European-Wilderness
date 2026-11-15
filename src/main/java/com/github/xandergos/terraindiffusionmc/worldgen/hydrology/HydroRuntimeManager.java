@@ -25,45 +25,45 @@ public final class HydroRuntimeManager {
     private final int tileSize;
     private final int surfaceCapY;
     private volatile Map<HydroRuntimeManager.Extent, WorldSession.RiverOverlay> active = Map.of();
-    private final WorldSession.RiverOverlay composite =
-            new WorldSession.RiverOverlay() {
-                @Override
-                public boolean isReady(int worldX, int worldZ) {
-                    if (!HydroRuntimeManager.this.ticket.isActive()) {
-                        return false;
-                    }
+    private final WorldSession.RiverOverlay composite = new WorldSession.RiverOverlay() {
+        @Override
+        public boolean isReady(int worldX, int worldZ) {
+            if (!HydroRuntimeManager.this.ticket.isActive()) {
+                return false;
+            }
 
-                    WorldSession.RiverOverlay overlay = HydroRuntimeManager.this.overlayAt(worldX, worldZ);
-                    return overlay != null && overlay.isReady(worldX, worldZ);
-                }
+            WorldSession.RiverOverlay overlay = HydroRuntimeManager.this.overlayAt(worldX, worldZ);
+            return overlay != null && overlay.isReady(worldX, worldZ);
+        }
 
-                @Override
-                public int carvedHeight(int worldX, int worldZ, int rawY) {
-                    if (!HydroRuntimeManager.this.ticket.isActive()) {
-                        return rawY;
-                    }
+        @Override
+        public int carvedHeight(int worldX, int worldZ, int rawY) {
+            if (!HydroRuntimeManager.this.ticket.isActive()) {
+                return rawY;
+            }
 
-                    WorldSession.RiverOverlay overlay = HydroRuntimeManager.this.overlayAt(worldX, worldZ);
-                    return overlay == null ? rawY : overlay.carvedHeight(worldX, worldZ, rawY);
-                }
+            WorldSession.RiverOverlay overlay = HydroRuntimeManager.this.overlayAt(worldX, worldZ);
+            return overlay == null ? rawY : overlay.carvedHeight(worldX, worldZ, rawY);
+        }
 
-                @Override
-                public int waterY(int worldX, int worldZ) {
-                    if (!HydroRuntimeManager.this.ticket.isActive()) {
-                        return Integer.MIN_VALUE;
-                    }
+        @Override
+        public int waterY(int worldX, int worldZ) {
+            if (!HydroRuntimeManager.this.ticket.isActive()) {
+                return Integer.MIN_VALUE;
+            }
 
-                    WorldSession.RiverOverlay overlay = HydroRuntimeManager.this.overlayAt(worldX, worldZ);
-                    return overlay == null ? Integer.MIN_VALUE : overlay.waterY(worldX, worldZ);
-                }
-            };
+            WorldSession.RiverOverlay overlay = HydroRuntimeManager.this.overlayAt(worldX, worldZ);
+            return overlay == null ? Integer.MIN_VALUE : overlay.waterY(worldX, worldZ);
+        }
+    };
 
     public HydroRuntimeManager(
             WorldSession ticket, TerrainRepository repository, Path sidecarDirectory, int surfaceCapY) {
         this.ticket = Objects.requireNonNull(ticket, "ticket");
         this.repository = Objects.requireNonNull(repository, "repository");
-        this.sidecarDirectory =
-                Objects.requireNonNull(sidecarDirectory, "sidecarDirectory").toAbsolutePath().normalize();
+        this.sidecarDirectory = Objects.requireNonNull(sidecarDirectory, "sidecarDirectory")
+                .toAbsolutePath()
+                .normalize();
         this.sidecars = new WatershedStore(this.sidecarDirectory);
         this.tileSize = repository.tileSize();
         if (this.tileSize % 2 != 0 || this.tileSize > 256) {
@@ -102,21 +102,19 @@ public final class HydroRuntimeManager {
         } else {
             for (int dz = 0; dz < 2; dz++) {
                 for (int dx = 0; dx < 2; dx++) {
-                    Optional<WatershedStore.Decision> frozen =
-                            this.sidecars.readDecision(
-                                    this.childKey(extent, dx, dz),
-                                    this.ticket.profile().worldScale(),
-                                    this.ticket.profile().generatorVersion());
+                    Optional<WatershedStore.Decision> frozen = this.sidecars.readDecision(
+                            this.childKey(extent, dx, dz),
+                            this.ticket.profile().worldScale(),
+                            this.ticket.profile().generatorVersion());
                     if (frozen.orElse(null) == WatershedStore.Decision.DISABLED) {
                         if (saved.isPresent()) {
-                            throw new IllegalStateException(
-                                    "Frozen watershed has a disabled tile: "
-                                            + extent
-                                            + " child ("
-                                            + dx
-                                            + ","
-                                            + dz
-                                            + ")");
+                            throw new IllegalStateException("Frozen watershed has a disabled tile: "
+                                    + extent
+                                    + " child ("
+                                    + dx
+                                    + ","
+                                    + dz
+                                    + ")");
                         }
 
                         return false;
@@ -128,14 +126,13 @@ public final class HydroRuntimeManager {
                     }
 
                     if (saved.isPresent() && frozen.isEmpty()) {
-                        throw new IllegalStateException(
-                                "Frozen watershed is missing a tile decision: "
-                                        + extent
-                                        + " child ("
-                                        + dx
-                                        + ","
-                                        + dz
-                                        + ")");
+                        throw new IllegalStateException("Frozen watershed is missing a tile decision: "
+                                + extent
+                                + " child ("
+                                + dx
+                                + ","
+                                + dz
+                                + ")");
                     }
                 }
             }
@@ -151,12 +148,11 @@ public final class HydroRuntimeManager {
             for (int dz = 0; dz < 2; dz++) {
                 for (int dx = 0; dx < 2; dx++) {
                     WorldSession.requireActive(this.ticket);
-                    WatershedStore.Decision decision =
-                            this.sidecars.freezeTileDecision(
-                                    this.childKey(extent, dx, dz),
-                                    this.ticket.profile().worldScale(),
-                                    this.ticket.profile().generatorVersion(),
-                                    true);
+                    WatershedStore.Decision decision = this.sidecars.freezeTileDecision(
+                            this.childKey(extent, dx, dz),
+                            this.ticket.profile().worldScale(),
+                            this.ticket.profile().generatorVersion(),
+                            true);
                     if (decision != WatershedStore.Decision.ACTIVE) {
                         return false;
                     }
@@ -188,20 +184,18 @@ public final class HydroRuntimeManager {
 
         for (int dz = 0; dz < 2; dz++) {
             for (int dx = 0; dx < 2; dx++) {
-                Optional<WatershedStore.Decision> decision =
-                        this.sidecars.readDecision(
-                                this.childKey(extent, dx, dz),
-                                this.ticket.profile().worldScale(),
-                                this.ticket.profile().generatorVersion());
+                Optional<WatershedStore.Decision> decision = this.sidecars.readDecision(
+                        this.childKey(extent, dx, dz),
+                        this.ticket.profile().worldScale(),
+                        this.ticket.profile().generatorVersion());
                 if (decision.isEmpty()) {
-                    throw new IllegalStateException(
-                            "Frozen watershed is missing a tile decision: "
-                                    + extent
-                                    + " child ("
-                                    + dx
-                                    + ","
-                                    + dz
-                                    + ")");
+                    throw new IllegalStateException("Frozen watershed is missing a tile decision: "
+                            + extent
+                            + " child ("
+                            + dx
+                            + ","
+                            + dz
+                            + ")");
                 }
 
                 if (decision.get() != WatershedStore.Decision.ACTIVE) {
@@ -229,14 +223,12 @@ public final class HydroRuntimeManager {
 
         List<Path> paths;
         try (Stream<Path> files = Files.list(this.sidecarDirectory)) {
-            paths =
-                    files.filter(
-                                    pathx -> {
-                                        String name = pathx.getFileName().toString();
-                                        return name.startsWith(prefix) && name.endsWith(".wss");
-                                    })
-                            .sorted(Comparator.comparing(pathx -> pathx.getFileName().toString()))
-                            .toList();
+            paths = files.filter(pathx -> {
+                        String name = pathx.getFileName().toString();
+                        return name.startsWith(prefix) && name.endsWith(".wss");
+                    })
+                    .sorted(Comparator.comparing(pathx -> pathx.getFileName().toString()))
+                    .toList();
         }
 
         if (paths.size() > 8) {
@@ -257,16 +249,14 @@ public final class HydroRuntimeManager {
 
     private void register(HydroRuntimeManager.Extent extent, WatershedPlan plan, SeamContract seam) {
         WorldSession.requireActive(this.ticket);
-        WorldSession.RiverOverlay river =
-                new HydroPrepareService(
-                                plan,
-                                seam,
-                                (tileX, tileZ) ->
-                                        tileX.intValue() >= extent.tileX()
-                                                && tileX.intValue() < extent.tileX() + 2L
-                                                && tileZ.intValue() >= extent.tileZ()
-                                                && tileZ.intValue() < extent.tileZ() + 2L)
-                        .asOverlay();
+        WorldSession.RiverOverlay river = new HydroPrepareService(
+                        plan,
+                        seam,
+                        (tileX, tileZ) -> tileX.intValue() >= extent.tileX()
+                                && tileX.intValue() < extent.tileX() + 2L
+                                && tileZ.intValue() >= extent.tileZ()
+                                && tileZ.intValue() < extent.tileZ() + 2L)
+                .asOverlay();
         Map<HydroRuntimeManager.Extent, WorldSession.RiverOverlay> next = new HashMap<>(this.active);
         next.put(extent, river);
         this.active = Map.copyOf(next);
@@ -341,16 +331,15 @@ public final class HydroRuntimeManager {
                 int dx = Math.floorDiv(worldX, this.tileSize) - extent.tileX();
                 int localX = Math.floorMod(worldX, this.tileSize);
                 short metres = raw[dz][dx].heightAt(localX, localZ);
-                coarse[cz][cx] =
-                        MountainHeightField.sample(
-                                        this.ticket.worldSeed(),
-                                        worldX,
-                                        worldZ,
-                                        metres,
-                                        this.ticket.profile().worldScale(),
-                                        this.surfaceCapY,
-                                        this.ticket.profile().mountainRelief())
-                                .surfaceY();
+                coarse[cz][cx] = MountainHeightField.sample(
+                                this.ticket.worldSeed(),
+                                worldX,
+                                worldZ,
+                                metres,
+                                this.ticket.profile().worldScale(),
+                                this.surfaceCapY,
+                                this.ticket.profile().mountainRelief())
+                        .surfaceY();
             }
         }
 

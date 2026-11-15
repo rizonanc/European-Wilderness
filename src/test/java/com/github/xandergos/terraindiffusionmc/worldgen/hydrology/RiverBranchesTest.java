@@ -1,8 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.hydrology;
 
-import org.junit.jupiter.api.Test;
-import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.*;
+import org.junit.jupiter.api.Test;
 
 class RiverBranchesTest {
     private static DrainagePlanner.DrainagePlan terrain() {

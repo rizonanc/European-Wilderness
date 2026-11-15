@@ -28,13 +28,12 @@ public final class MountainHeightField {
 
     public static Sample sampleForWorld(long seed, int x, int z, short metres, int scale, int cap) {
         var session = WorldSession.current();
-        int relief =
-                session != null
-                                && session.isActive()
-                                && session.worldSeed() == seed
-                                && session.profile().worldScale() == scale
-                        ? session.profile().mountainRelief()
-                        : 100;
+        int relief = session != null
+                        && session.isActive()
+                        && session.worldSeed() == seed
+                        && session.profile().worldScale() == scale
+                ? session.profile().mountainRelief()
+                : 100;
         return sample(seed, x, z, metres, scale, cap, relief);
     }
 
@@ -177,13 +176,12 @@ public final class MountainHeightField {
             }
 
             if (sourceMetres[z].length != width) {
-                throw new IllegalArgumentException(
-                        "sourceMetres must be rectangular: row "
-                                + z
-                                + " has width "
-                                + sourceMetres[z].length
-                                + " instead of "
-                                + width);
+                throw new IllegalArgumentException("sourceMetres must be rectangular: row "
+                        + z
+                        + " has width "
+                        + sourceMetres[z].length
+                        + " instead of "
+                        + width);
             }
         }
 

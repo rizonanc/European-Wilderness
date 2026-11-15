@@ -1,10 +1,11 @@
 package com.github.xandergos.terraindiffusionmc.pipeline;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class GpuSessionCacheTest {
     static final class Session {
@@ -19,12 +20,11 @@ class GpuSessionCacheTest {
     static final class Fixture {
         int creates;
         final List<Integer> closed = new ArrayList<>();
-        final GpuSessionCache<String, Session> cache =
-                new GpuSessionCache<>((k, v) -> {
-                    assertFalse(v.closed);
-                    v.closed = true;
-                    closed.add(v.id);
-                });
+        final GpuSessionCache<String, Session> cache = new GpuSessionCache<>((k, v) -> {
+            assertFalse(v.closed);
+            v.closed = true;
+            closed.add(v.id);
+        });
 
         Session run(String key, int capacity) throws Exception {
             return cache.execute(
@@ -104,16 +104,15 @@ class GpuSessionCacheTest {
         var f = new Fixture();
         f.run("a", 3);
         AtomicInteger runs = new AtomicInteger();
-        Session result =
-                f.cache.execute(
-                        "b",
-                        3,
-                        () -> new Session(++f.creates),
-                        s -> {
-                            if (runs.getAndIncrement() == 0) throw new Exception("memory");
-                            return s;
-                        },
-                        e -> true);
+        Session result = f.cache.execute(
+                "b",
+                3,
+                () -> new Session(++f.creates),
+                s -> {
+                    if (runs.getAndIncrement() == 0) throw new Exception("memory");
+                    return s;
+                },
+                e -> true);
         assertEquals(3, result.id);
         assertEquals(List.of(1, 2), f.closed);
         assertEquals(2, runs.get());
@@ -123,19 +122,17 @@ class GpuSessionCacheTest {
     void testSecondFailureIsReportedWithOriginal() throws Exception {
         var f = new Fixture();
         AtomicInteger runs = new AtomicInteger();
-        Exception failure =
-                assertThrows(
-                        Exception.class,
-                        () ->
-                                f.cache.execute(
-                                        "a",
-                                        3,
-                                        () -> new Session(++f.creates),
-                                        s -> {
-                                            runs.incrementAndGet();
-                                            throw new Exception("memory");
-                                        },
-                                        e -> true));
+        Exception failure = assertThrows(
+                Exception.class,
+                () -> f.cache.execute(
+                        "a",
+                        3,
+                        () -> new Session(++f.creates),
+                        s -> {
+                            runs.incrementAndGet();
+                            throw new Exception("memory");
+                        },
+                        e -> true));
         assertEquals(2, runs.get());
         assertEquals(1, failure.getSuppressed().length);
         assertEquals(List.of(1, 2), f.closed);
@@ -143,15 +140,14 @@ class GpuSessionCacheTest {
         var ordinary = new Fixture();
         assertThrows(
                 IllegalArgumentException.class,
-                () ->
-                        ordinary.cache.execute(
-                                "a",
-                                3,
-                                () -> new Session(++ordinary.creates),
-                                s -> {
-                                    throw new IllegalArgumentException("shape");
-                                },
-                                e -> false));
+                () -> ordinary.cache.execute(
+                        "a",
+                        3,
+                        () -> new Session(++ordinary.creates),
+                        s -> {
+                            throw new IllegalArgumentException("shape");
+                        },
+                        e -> false));
         assertEquals(1, ordinary.creates);
         assertTrue(ordinary.closed.isEmpty());
     }
@@ -163,28 +159,25 @@ class GpuSessionCacheTest {
         var release = new CountDownLatch(1);
         var pool = Executors.newFixedThreadPool(2);
         try {
-            var running =
-                    pool.submit(() ->
-                            f.cache.execute(
-                                    "a",
-                                    1,
-                                    () -> new Session(++f.creates),
-                                    s -> {
-                                        entered.countDown();
-                                        assertTrue(release.await(3, TimeUnit.SECONDS));
-                                        assertFalse(s.closed);
-                                        return s;
-                                    },
-                                    e -> false));
+            var running = pool.submit(() -> f.cache.execute(
+                    "a",
+                    1,
+                    () -> new Session(++f.creates),
+                    s -> {
+                        entered.countDown();
+                        assertTrue(release.await(3, TimeUnit.SECONDS));
+                        assertFalse(s.closed);
+                        return s;
+                    },
+                    e -> false));
             assertTrue(entered.await(3, TimeUnit.SECONDS));
             assertTimeoutPreemptively(java.time.Duration.ofSeconds(1), () -> assertNotNull(f.cache.statistics()));
             var closingStarted = new CountDownLatch(1);
-            var closing =
-                    pool.submit(() -> {
-                        closingStarted.countDown();
-                        f.cache.remove("a");
-                        return true;
-                    });
+            var closing = pool.submit(() -> {
+                closingStarted.countDown();
+                f.cache.remove("a");
+                return true;
+            });
             assertTrue(closingStarted.await(3, TimeUnit.SECONDS));
             assertFalse(closing.isDone());
             release.countDown();
@@ -201,35 +194,34 @@ class GpuSessionCacheTest {
     void testActualNativeSessionsReuse() throws Exception {
         var created = new AtomicInteger();
         var closed = new AtomicInteger();
-        var cache =
-                new GpuSessionCache<String, ai.onnxruntime.OrtSession>((k, s) -> {
-                    s.close();
-                    closed.incrementAndGet();
-                });
+        var cache = new GpuSessionCache<String, ai.onnxruntime.OrtSession>((k, s) -> {
+            s.close();
+            closed.incrementAndGet();
+        });
         try (var inputs = new OnnxInputBuffers(1024)) {
             for (int i = 0; i < 12; i++)
                 for (String stage : List.of("coarse", "base", "decoder")) {
                     float[] values = {i, -i, Float.intBitsToFloat(0x80000000)};
-                    float[] actual =
-                            cache.execute(
-                                    stage,
-                                    3,
-                                    () -> {
-                                        created.incrementAndGet();
-                                        return OnnxInputBuffersTest.session();
-                                    },
-                                    session -> {
-                                        try (var lease =
-                                                        inputs.prepare(
-                                                                ai.onnxruntime.OrtEnvironment.getEnvironment(),
-                                                                new Object[][] {{"x", values, new long[] {3}}});
-                                                var result = session.run(lease.feed())) {
-                                            float[] output = new float[3];
-                                            ((ai.onnxruntime.OnnxTensor) result.get(0)).getFloatBuffer().get(output);
-                                            return output;
-                                        }
-                                    },
-                                    e -> false);
+                    float[] actual = cache.execute(
+                            stage,
+                            3,
+                            () -> {
+                                created.incrementAndGet();
+                                return OnnxInputBuffersTest.session();
+                            },
+                            session -> {
+                                try (var lease = inputs.prepare(
+                                                ai.onnxruntime.OrtEnvironment.getEnvironment(),
+                                                new Object[][] {{"x", values, new long[] {3}}});
+                                        var result = session.run(lease.feed())) {
+                                    float[] output = new float[3];
+                                    ((ai.onnxruntime.OnnxTensor) result.get(0))
+                                            .getFloatBuffer()
+                                            .get(output);
+                                    return output;
+                                }
+                            },
+                            e -> false);
                     for (int n = 0; n < 3; n++)
                         assertEquals(Float.floatToRawIntBits(values[n]), Float.floatToRawIntBits(actual[n]));
                 }

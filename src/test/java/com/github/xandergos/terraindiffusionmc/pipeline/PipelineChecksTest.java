@@ -1,16 +1,16 @@
 package com.github.xandergos.terraindiffusionmc.pipeline;
 
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+
 import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors;
+import org.junit.jupiter.api.Test;
 
 class PipelineChecksTest {
     @Test
     void testInvalidShapeIsExplicit() {
-        var failure =
-                assertThrows(
-                        PipelineChecks.Invalid.class,
-                        () -> PipelineChecks.inputs(new Object[][] {{"x", new float[3], new long[] {2, 2}}}));
+        var failure = assertThrows(
+                PipelineChecks.Invalid.class,
+                () -> PipelineChecks.inputs(new Object[][] {{"x", new float[3], new long[] {2, 2}}}));
         assertEquals(DiagnosticErrors.Code.INF_INPUT, failure.code);
         assertThrows(
                 PipelineChecks.Invalid.class,
@@ -23,12 +23,10 @@ class PipelineChecksTest {
 
     @Test
     void variableBatchBufferLongerThanShapeIsRejectedWithExactFieldMessage() {
-        var failure =
-                assertThrows(
-                        PipelineChecks.Invalid.class,
-                        () ->
-                                PipelineChecks.inputs(
-                                        new Object[][] {{"x", new float[4 * 5 * 64 * 64], new long[] {2, 5, 64, 64}}}));
+        var failure = assertThrows(
+                PipelineChecks.Invalid.class,
+                () -> PipelineChecks.inputs(new Object[][] {{"x", new float[4 * 5 * 64 * 64], new long[] {2, 5, 64, 64}}
+                }));
         assertEquals(DiagnosticErrors.Code.INF_INPUT, failure.code);
         assertTrue(failure.getMessage().contains("Tensor shape/data mismatch: x"), failure.getMessage());
         assertTrue(failure.getMessage().contains("[2, 5, 64, 64]"), failure.getMessage());

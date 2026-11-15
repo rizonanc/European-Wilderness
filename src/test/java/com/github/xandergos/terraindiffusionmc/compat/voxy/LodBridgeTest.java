@@ -1,9 +1,10 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.*;
 import java.util.concurrent.atomic.*;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 class LodBridgeTest {
     private LodColumn column() {
@@ -57,23 +58,22 @@ class LodBridgeTest {
     void testExistingVoxyCubesAreNeverWritten() throws Exception {
         var occupied = new HashSet<Integer>(Set.of(0));
         var written = new ArrayList<Integer>();
-        var sink =
-                new LodPublisher.Sink() {
-                    public boolean active() {
-                        return true;
-                    }
+        var sink = new LodPublisher.Sink() {
+            public boolean active() {
+                return true;
+            }
 
-                    public boolean occupied(int x, int y, int z) {
-                        assertEquals(-1, x);
-                        assertEquals(0, z);
-                        return occupied.contains(y);
-                    }
+            public boolean occupied(int x, int y, int z) {
+                assertEquals(-1, x);
+                assertEquals(0, z);
+                return occupied.contains(y);
+            }
 
-                    public void write(LodColumn column, int y) {
-                        assertTrue(occupied.add(y));
-                        written.add(y);
-                    }
-                };
+            public void write(LodColumn column, int y) {
+                assertTrue(occupied.add(y));
+                written.add(y);
+            }
+        };
         var first = LodPublisher.publish(column(), sink, () -> true);
         assertTrue(first.complete());
         assertEquals(1, first.skipped());
@@ -88,21 +88,20 @@ class LodBridgeTest {
     void testCancellationOrWorldRetirementStopsBetweenWholeCubes() throws Exception {
         var valid = new AtomicBoolean(true);
         var writes = new AtomicInteger();
-        var sink =
-                new LodPublisher.Sink() {
-                    public boolean active() {
-                        return true;
-                    }
+        var sink = new LodPublisher.Sink() {
+            public boolean active() {
+                return true;
+            }
 
-                    public boolean occupied(int x, int y, int z) {
-                        return false;
-                    }
+            public boolean occupied(int x, int y, int z) {
+                return false;
+            }
 
-                    public void write(LodColumn column, int y) {
-                        writes.incrementAndGet();
-                        valid.set(false);
-                    }
-                };
+            public void write(LodColumn column, int y) {
+                writes.incrementAndGet();
+                valid.set(false);
+            }
+        };
         var result = LodPublisher.publish(column(), sink, valid::get);
         assertFalse(result.complete());
         assertEquals(1, result.written());
@@ -112,24 +111,23 @@ class LodBridgeTest {
 
     @Test
     void inactiveEngineReceivesNoWrites() throws Exception {
-        var result =
-                LodPublisher.publish(
-                        column(),
-                        new LodPublisher.Sink() {
-                            public boolean active() {
-                                return false;
-                            }
+        var result = LodPublisher.publish(
+                column(),
+                new LodPublisher.Sink() {
+                    public boolean active() {
+                        return false;
+                    }
 
-                            public boolean occupied(int x, int y, int z) {
-                                fail();
-                                return false;
-                            }
+                    public boolean occupied(int x, int y, int z) {
+                        fail();
+                        return false;
+                    }
 
-                            public void write(LodColumn c, int y) {
-                                fail();
-                            }
-                        },
-                        () -> true);
+                    public void write(LodColumn c, int y) {
+                        fail();
+                    }
+                },
+                () -> true);
         assertFalse(result.complete());
         assertEquals(0, result.written());
     }
@@ -160,20 +158,19 @@ class LodBridgeTest {
     @Test
     void testCursorWritesAtMostOneCube() throws Exception {
         var writes = new AtomicInteger();
-        var sink =
-                new LodPublisher.Sink() {
-                    public boolean active() {
-                        return true;
-                    }
+        var sink = new LodPublisher.Sink() {
+            public boolean active() {
+                return true;
+            }
 
-                    public boolean occupied(int x, int y, int z) {
-                        return false;
-                    }
+            public boolean occupied(int x, int y, int z) {
+                return false;
+            }
 
-                    public void write(LodColumn c, int y) {
-                        writes.incrementAndGet();
-                    }
-                };
+            public void write(LodColumn c, int y) {
+                writes.incrementAndGet();
+            }
+        };
         var cursor = new LodPublisher.Cursor(column());
         assertEquals(0, cursor.step(sink, () -> false).written());
         for (int i = 0; i < 6; i++) {
@@ -198,15 +195,12 @@ class LodBridgeTest {
             }
         var column = new LodColumn(-32, 32, -64, 319, air, water, biomes);
         var resolutions = new AtomicInteger();
-        var encoder =
-                new LodVoxelEncoder(
-                        column,
-                        b -> {
-                            resolutions.incrementAndGet();
-                            long[][] p = new long[7][2];
-                            for (int k = 0; k < 7; k++) for (int l = 0; l < 2; l++) p[k][l] = b * 10000 + k * 100 + l;
-                            return p;
-                        });
+        var encoder = new LodVoxelEncoder(column, b -> {
+            resolutions.incrementAndGet();
+            long[][] p = new long[7][2];
+            for (int k = 0; k < 7; k++) for (int l = 0; l < 2; l++) p[k][l] = b * 10000 + k * 100 + l;
+            return p;
+        });
         assertEquals(1024, resolutions.get());
         long[] buffer = new long[4681];
         Arrays.fill(buffer, -999);

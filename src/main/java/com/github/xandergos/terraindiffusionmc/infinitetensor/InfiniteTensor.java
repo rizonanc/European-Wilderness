@@ -55,36 +55,33 @@ public class InfiniteTensor {
         FloatTensor output = new FloatTensor(outShape);
         int[] lo = this.outputWindow.getLowestIntersection(pixelRange);
         int[] hi = this.outputWindow.getHighestIntersection(pixelRange);
-        iterateWindows(
-                lo,
-                hi,
-                windowIndex -> {
-                    FloatTensor cached = this.store.getCachedWindow(this.id, windowIndex);
-                    if (cached != null) {
-                        int[][] wBounds = this.outputWindow.getBounds(windowIndex);
-                        int[][] isect = new int[n][2];
+        iterateWindows(lo, hi, windowIndex -> {
+            FloatTensor cached = this.store.getCachedWindow(this.id, windowIndex);
+            if (cached != null) {
+                int[][] wBounds = this.outputWindow.getBounds(windowIndex);
+                int[][] isect = new int[n][2];
 
-                        for (int d = 0; d < n; d++) {
-                            isect[d][0] = Math.max(pixelRange[d][0], wBounds[d][0]);
-                            isect[d][1] = Math.min(pixelRange[d][1], wBounds[d][1]);
-                            if (isect[d][0] >= isect[d][1]) {
-                                return;
-                            }
-                        }
-
-                        int[][] srcRegion = new int[n][2];
-                        int[][] dstRegion = new int[n][2];
-
-                        for (int d = 0; d < n; d++) {
-                            srcRegion[d][0] = isect[d][0] - wBounds[d][0];
-                            srcRegion[d][1] = isect[d][1] - wBounds[d][0];
-                            dstRegion[d][0] = isect[d][0] - pixelRange[d][0];
-                            dstRegion[d][1] = isect[d][1] - pixelRange[d][0];
-                        }
-
-                        output.addFrom(cached, dstRegion, srcRegion);
+                for (int d = 0; d < n; d++) {
+                    isect[d][0] = Math.max(pixelRange[d][0], wBounds[d][0]);
+                    isect[d][1] = Math.min(pixelRange[d][1], wBounds[d][1]);
+                    if (isect[d][0] >= isect[d][1]) {
+                        return;
                     }
-                });
+                }
+
+                int[][] srcRegion = new int[n][2];
+                int[][] dstRegion = new int[n][2];
+
+                for (int d = 0; d < n; d++) {
+                    srcRegion[d][0] = isect[d][0] - wBounds[d][0];
+                    srcRegion[d][1] = isect[d][1] - wBounds[d][0];
+                    dstRegion[d][0] = isect[d][0] - pixelRange[d][0];
+                    dstRegion[d][1] = isect[d][1] - pixelRange[d][0];
+                }
+
+                output.addFrom(cached, dstRegion, srcRegion);
+            }
+        });
         this.store.evictIfNeeded(this.id, this.cacheLimitBytes);
         return output;
     }
@@ -96,15 +93,12 @@ public class InfiniteTensor {
         int[][] range = buildRange(start, end);
         int[] lo = outputWindow.getLowestIntersection(range), hi = outputWindow.getHighestIntersection(range);
         boolean[] computed = {false};
-        iterateWindows(
-                lo,
-                hi,
-                wi -> {
-                    if (!computed[0] && !store.isWindowCached(id, wi)) {
-                        computeSingle(wi);
-                        computed[0] = true;
-                    }
-                });
+        iterateWindows(lo, hi, wi -> {
+            if (!computed[0] && !store.isWindowCached(id, wi)) {
+                computeSingle(wi);
+                computed[0] = true;
+            }
+        });
         store.evictIfNeeded(id, cacheLimitBytes);
         return !computed[0];
     }
@@ -115,18 +109,15 @@ public class InfiniteTensor {
         int[][] range = buildRange(start, end);
         int[] lo = outputWindow.getLowestIntersection(range), hi = outputWindow.getHighestIntersection(range);
         boolean[] complete = {true}, computed = {false};
-        iterateWindows(
-                lo,
-                hi,
-                wi -> {
-                    if (!store.isWindowCached(id, wi)) {
-                        complete[0] = false;
-                        if (!computed[0]) {
-                            computeSingle(wi);
-                            computed[0] = true;
-                        }
-                    }
-                });
+        iterateWindows(lo, hi, wi -> {
+            if (!store.isWindowCached(id, wi)) {
+                complete[0] = false;
+                if (!computed[0]) {
+                    computeSingle(wi);
+                    computed[0] = true;
+                }
+            }
+        });
         store.evictIfNeeded(id, cacheLimitBytes);
         return computed[0] ? 1 : (complete[0] ? 0 : -1);
     }
@@ -141,26 +132,22 @@ public class InfiniteTensor {
         for (int[][] range : pixelRanges) {
             int[] lo = this.outputWindow.getLowestIntersection(range);
             int[] hi = this.outputWindow.getHighestIntersection(range);
-            iterateWindows(
-                    lo,
-                    hi,
-                    wix -> {
-                        if (!this.store.isWindowCached(this.id, wix)) {
-                            List<Integer> key = new ArrayList<>(wix.length);
+            iterateWindows(lo, hi, wix -> {
+                if (!this.store.isWindowCached(this.id, wix)) {
+                    List<Integer> key = new ArrayList<>(wix.length);
 
-                            for (int v : wix) {
-                                key.add(v);
-                            }
+                    for (int v : wix) {
+                        key.add(v);
+                    }
 
-                            pendingSet.add(key);
-                        }
-                    });
+                    pendingSet.add(key);
+                }
+            });
         }
 
-        List<int[]> pending =
-                pendingSet.stream()
-                        .map(k -> k.stream().mapToInt(Integer::intValue).toArray())
-                        .collect(Collectors.toList());
+        List<int[]> pending = pendingSet.stream()
+                .map(k -> k.stream().mapToInt(Integer::intValue).toArray())
+                .collect(Collectors.toList());
         if (!pending.isEmpty()) {
             for (int i = 0; i < this.deps.length; i++) {
                 List<int[][]> depRanges = new ArrayList<>(pending.size());
@@ -246,26 +233,24 @@ public class InfiniteTensor {
     private void validateOutputShape(FloatTensor result, int[] windowIndex) {
         int n = this.outputWindow.size.length;
         if (result.shape.length != n) {
-            throw new IllegalStateException(
-                    "Function for tensor '"
-                            + this.id
-                            + "' returned shape with "
-                            + result.shape.length
-                            + " dims, expected "
-                            + n);
+            throw new IllegalStateException("Function for tensor '"
+                    + this.id
+                    + "' returned shape with "
+                    + result.shape.length
+                    + " dims, expected "
+                    + n);
         }
 
         for (int d = 0; d < n; d++) {
             if (result.shape[d] != this.outputWindow.size[d]) {
-                throw new IllegalStateException(
-                        "Function for tensor '"
-                                + this.id
-                                + "' returned shape["
-                                + d
-                                + "]="
-                                + result.shape[d]
-                                + ", expected "
-                                + this.outputWindow.size[d]);
+                throw new IllegalStateException("Function for tensor '"
+                        + this.id
+                        + "' returned shape["
+                        + d
+                        + "]="
+                        + result.shape[d]
+                        + ", expected "
+                        + this.outputWindow.size[d]);
             }
         }
     }

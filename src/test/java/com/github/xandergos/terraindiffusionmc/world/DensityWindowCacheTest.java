@@ -1,13 +1,14 @@
 package com.github.xandergos.terraindiffusionmc.world;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.github.xandergos.terraindiffusionmc.pipeline.LocalTerrainProvider.HeightmapData;
 import com.github.xandergos.terraindiffusionmc.worldgen.mountain.MountainSurfaceRegion;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.*;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 class DensityWindowCacheTest {
     private WorldSession session;
@@ -31,15 +32,14 @@ class DensityWindowCacheTest {
                 surface[z][x] = 200 + offset + sx + x + sz + z;
             }
         if (complete) return new HeightmapData(height, biome, 16, 16, null, surface);
-        var constructor =
-                HeightmapData.class.getDeclaredConstructor(
-                        short[][].class,
-                        short[][].class,
-                        int.class,
-                        int.class,
-                        float[].class,
-                        MountainSurfaceRegion.class,
-                        boolean.class);
+        var constructor = HeightmapData.class.getDeclaredConstructor(
+                short[][].class,
+                short[][].class,
+                int.class,
+                int.class,
+                float[].class,
+                MountainSurfaceRegion.class,
+                boolean.class);
         constructor.setAccessible(true);
         return constructor.newInstance(height, biome, 16, 16, null, null, false);
     }
@@ -55,11 +55,10 @@ class DensityWindowCacheTest {
     @Test
     void allVerticalSamplesAndFillReuseCompleteWindowsWithUnchangedDensityAtNegativeCoordinates() {
         AtomicInteger calls = new AtomicInteger();
-        DensitySampler.Lookup lookup =
-                (z, x, ez, ex) -> {
-                    calls.incrementAndGet();
-                    return ready(x, z, 0);
-                };
+        DensitySampler.Lookup lookup = (z, x, ez, ex) -> {
+            calls.incrementAndGet();
+            return ready(x, z, 0);
+        };
         var density = new DensitySampler();
         for (int y = -64; y < 320; y++) assertEquals(200 - 1 - 17 - y, density.sample(session, lookup, -1, y, -17));
         assertEquals(1, calls.get());
@@ -119,17 +118,15 @@ class DensityWindowCacheTest {
     void testDynamicWaterOverlayIsEvaluatedOnEverySample() {
         DensitySampler.Lookup lookup = (z, x, ez, ex) -> ready(x, z, 0);
         AtomicInteger waterHeight = new AtomicInteger(180);
-        WorldSession.current()
-                .attachRiverOverlay(
-                        new WorldSession.RiverOverlay() {
-                            public int carvedHeight(int x, int z, int raw) {
-                                return waterHeight.get();
-                            }
+        WorldSession.current().attachRiverOverlay(new WorldSession.RiverOverlay() {
+            public int carvedHeight(int x, int z, int raw) {
+                return waterHeight.get();
+            }
 
-                            public int waterY(int x, int z) {
-                                return Integer.MIN_VALUE;
-                            }
-                        });
+            public int waterY(int x, int z) {
+                return Integer.MIN_VALUE;
+            }
+        });
         var density = new DensitySampler();
         assertEquals(80, density.sample(session, lookup, 0, 100, 0));
         waterHeight.set(170);
@@ -138,11 +135,10 @@ class DensityWindowCacheTest {
 
     @Test
     void retirementDuringALoadCannotPublishOrServeTheLoadedWindow() {
-        DensitySampler.Lookup lookup =
-                (z, x, ez, ex) -> {
-                    WorldSession.deactivate(WorldSession.current());
-                    return ready(x, z, 0);
-                };
+        DensitySampler.Lookup lookup = (z, x, ez, ex) -> {
+            WorldSession.deactivate(WorldSession.current());
+            return ready(x, z, 0);
+        };
         var density = new DensitySampler();
         assertThrows(IllegalStateException.class, () -> density.sample(session, lookup, 0, 100, 0));
         session = WorldSession.activate(GenerationProfile.defaultsFor(2, "model", "cpu", "cpu"), 18);
@@ -154,22 +150,20 @@ class DensityWindowCacheTest {
         var density = new DensitySampler();
         var barrier = new CyclicBarrier(2);
         AtomicInteger calls = new AtomicInteger();
-        DensitySampler.Lookup lookup =
-                (z, x, ez, ex) -> {
-                    calls.incrementAndGet();
-                    return ready(x, z, 0);
-                };
+        DensitySampler.Lookup lookup = (z, x, ez, ex) -> {
+            calls.incrementAndGet();
+            return ready(x, z, 0);
+        };
         try (var workers = Executors.newFixedThreadPool(2)) {
             List<Future<Double>> results = new ArrayList<>();
             for (int thread = 0; thread < 2; thread++) {
                 final int x = thread == 0 ? -1 : 1024;
-                results.add(
-                        workers.submit(() -> {
-                            barrier.await();
-                            double sum = 0;
-                            for (int i = 0; i < 1000; i++) sum += density.sample(session, lookup, x, 100, 0);
-                            return sum;
-                        }));
+                results.add(workers.submit(() -> {
+                    barrier.await();
+                    double sum = 0;
+                    for (int i = 0; i < 1000; i++) sum += density.sample(session, lookup, x, 100, 0);
+                    return sum;
+                }));
             }
             assertEquals(99000, results.get(0).get());
             assertEquals(1124000, results.get(1).get());

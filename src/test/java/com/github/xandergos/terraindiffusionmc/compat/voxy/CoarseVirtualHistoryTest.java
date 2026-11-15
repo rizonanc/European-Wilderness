@@ -1,7 +1,8 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 class CoarseVirtualHistoryTest {
     @Test
@@ -29,10 +30,9 @@ class CoarseVirtualHistoryTest {
             var jobs = new java.util.ArrayList<java.util.concurrent.Future<?>>();
             for (int n = 0; n < 4; n++) {
                 int id = n;
-                jobs.add(
-                        workers.submit(() -> {
-                            for (int i = 0; i < 20000; i++) history.mark(((long) id << 60) ^ (i * 1234567891L));
-                        }));
+                jobs.add(workers.submit(() -> {
+                    for (int i = 0; i < 20000; i++) history.mark(((long) id << 60) ^ (i * 1234567891L));
+                }));
             }
             for (var job : jobs) job.get();
         }

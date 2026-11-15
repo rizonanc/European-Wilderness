@@ -1,9 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.world;
 
 import com.github.xandergos.terraindiffusionmc.pipeline.LocalTerrainProvider;
-import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
-import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldGenerationOptions;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.PerformanceProfile;
+import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldGenerationOptions;
+import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
 import com.github.xandergos.terraindiffusionmc.worldgen.terrain.PreparedFallback;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.MapCodec;
@@ -37,16 +37,13 @@ public class TerrainDiffusionBiomeSource extends BiomeSource {
     private static final RegistryKey<Biome> SNOWY_TAIGA_SPARSE =
             RegistryKey.of(RegistryKeys.BIOME, Identifier.of("terrain-diffusion-mc", "snowy_taiga_sparse"));
     public static final MapCodec<TerrainDiffusionBiomeSource> CODEC =
-            RecordCodecBuilder.mapCodec(instance ->
-                    instance.group(
-                                    RegistryOps.getEntryLookupCodec(RegistryKeys.BIOME),
-                                    WorldGenerationOptions.CODEC
-                                            .optionalFieldOf("creation_options")
-                                            .forGetter(source -> source.creationOptions),
-                                    SpawnChoice.CODEC
-                                            .optionalFieldOf("spawn_choice")
-                                            .forGetter(source -> source.spawnChoice))
-                            .apply(instance, instance.stable(TerrainDiffusionBiomeSource::new)));
+            RecordCodecBuilder.mapCodec(instance -> instance.group(
+                            RegistryOps.getEntryLookupCodec(RegistryKeys.BIOME),
+                            WorldGenerationOptions.CODEC
+                                    .optionalFieldOf("creation_options")
+                                    .forGetter(source -> source.creationOptions),
+                            SpawnChoice.CODEC.optionalFieldOf("spawn_choice").forGetter(source -> source.spawnChoice))
+                    .apply(instance, instance.stable(TerrainDiffusionBiomeSource::new)));
     private final RegistryEntryLookup<Biome> biomeLookup;
     private final Optional<WorldGenerationOptions> creationOptions;
     private final Optional<SpawnChoice> spawnChoice;
@@ -89,68 +86,55 @@ public class TerrainDiffusionBiomeSource extends BiomeSource {
 
     private void requireBiomeIdMap() {
         if (this.biomeIdMap == null) {
-            this.biomeIdMap =
-                    Map.ofEntries(
-                            Map.entry((short) 1, this.biomeLookup.getOrThrow(BiomeKeys.PLAINS)),
-                            Map.entry((short) 3, this.biomeLookup.getOrThrow(BiomeKeys.SNOWY_PLAINS)),
-                            Map.entry((short) 5, this.biomeLookup.getOrThrow(BiomeKeys.DESERT)),
-                            Map.entry((short) 6, this.biomeLookup.getOrThrow(BiomeKeys.SWAMP)),
-                            Map.entry((short) 8, this.biomeLookup.getOrThrow(BiomeKeys.FOREST)),
-                            Map.entry((short) 15, this.biomeLookup.getOrThrow(BiomeKeys.TAIGA)),
-                            Map.entry((short) 16, this.biomeLookup.getOrThrow(BiomeKeys.SNOWY_TAIGA)),
-                            Map.entry((short) 17, this.biomeLookup.getOrThrow(BiomeKeys.SAVANNA)),
-                            Map.entry((short) 18, this.biomeLookup.getOrThrow(BiomeKeys.BEACH)),
-                            Map.entry((short) 19, this.biomeLookup.getOrThrow(BiomeKeys.WINDSWEPT_HILLS)),
-                            Map.entry((short) 23, this.biomeLookup.getOrThrow(BiomeKeys.JUNGLE)),
-                            Map.entry((short) 26, this.biomeLookup.getOrThrow(BiomeKeys.BADLANDS)),
-                            Map.entry((short) 29, this.biomeLookup.getOrThrow(BiomeKeys.MEADOW)),
-                            Map.entry(
-                                    (short) 31,
-                                    this.biomeLookup.getOrThrow(
-                                            RegistryKey.of(
-                                                    RegistryKeys.BIOME,
-                                                    Identifier.of("terrain-diffusion-mc", "grove")))),
-                            Map.entry((short) 32, this.biomeLookup.getOrThrow(BiomeKeys.SNOWY_SLOPES)),
-                            Map.entry((short) 33, this.biomeLookup.getOrThrow(BiomeKeys.FROZEN_PEAKS)),
-                            Map.entry((short) 35, this.biomeLookup.getOrThrow(BiomeKeys.STONY_PEAKS)),
-                            Map.entry((short) 41, this.biomeLookup.getOrThrow(BiomeKeys.WARM_OCEAN)),
-                            Map.entry((short) 44, this.biomeLookup.getOrThrow(BiomeKeys.OCEAN)),
-                            Map.entry((short) 46, this.biomeLookup.getOrThrow(BiomeKeys.COLD_OCEAN)),
-                            Map.entry((short) 48, this.biomeLookup.getOrThrow(BiomeKeys.FROZEN_OCEAN)),
-                            Map.entry(
-                                    (short) 215,
-                                    this.biomeLookup.getOrThrow(
-                                            RegistryKey.of(
-                                                    RegistryKeys.BIOME,
-                                                    Identifier.of("terrain-diffusion-mc", "european_coniferous")))),
-                            Map.entry(
-                                    (short) 216,
-                                    this.biomeLookup.getOrThrow(
-                                            RegistryKey.of(
-                                                    RegistryKeys.BIOME,
-                                                    Identifier.of("terrain-diffusion-mc", "european_coniferous")))),
-                            Map.entry(
-                                    (short) 208,
-                                    this.biomeLookup.getOrThrow(
-                                            RegistryKey.of(
-                                                    RegistryKeys.BIOME,
-                                                    Identifier.of("terrain-diffusion-mc", "european_deciduous")))),
-                            Map.entry(
-                                    (short) 209,
-                                    this.biomeLookup.getOrThrow(
-                                            RegistryKey.of(
-                                                    RegistryKeys.BIOME,
-                                                    Identifier.of("terrain-diffusion-mc", "european_mixed")))),
-                            Map.entry((short) 230, this.biomeLookup.getOrThrow(PALM_ISLAND)),
-                            Map.entry(
-                                    (short) 229,
-                                    this.biomeLookup.getOrThrow(
-                                            RegistryKey.of(
-                                                    RegistryKeys.BIOME,
-                                                    Identifier.of("terrain-diffusion-mc", "european_meadow")))),
-                            Map.entry((short) 108, this.biomeLookup.getOrThrow(FOREST_SPARSE)),
-                            Map.entry((short) 115, this.biomeLookup.getOrThrow(TAIGA_SPARSE)),
-                            Map.entry((short) 116, this.biomeLookup.getOrThrow(SNOWY_TAIGA_SPARSE)));
+            this.biomeIdMap = Map.ofEntries(
+                    Map.entry((short) 1, this.biomeLookup.getOrThrow(BiomeKeys.PLAINS)),
+                    Map.entry((short) 3, this.biomeLookup.getOrThrow(BiomeKeys.SNOWY_PLAINS)),
+                    Map.entry((short) 5, this.biomeLookup.getOrThrow(BiomeKeys.DESERT)),
+                    Map.entry((short) 6, this.biomeLookup.getOrThrow(BiomeKeys.SWAMP)),
+                    Map.entry((short) 8, this.biomeLookup.getOrThrow(BiomeKeys.FOREST)),
+                    Map.entry((short) 15, this.biomeLookup.getOrThrow(BiomeKeys.TAIGA)),
+                    Map.entry((short) 16, this.biomeLookup.getOrThrow(BiomeKeys.SNOWY_TAIGA)),
+                    Map.entry((short) 17, this.biomeLookup.getOrThrow(BiomeKeys.SAVANNA)),
+                    Map.entry((short) 18, this.biomeLookup.getOrThrow(BiomeKeys.BEACH)),
+                    Map.entry((short) 19, this.biomeLookup.getOrThrow(BiomeKeys.WINDSWEPT_HILLS)),
+                    Map.entry((short) 23, this.biomeLookup.getOrThrow(BiomeKeys.JUNGLE)),
+                    Map.entry((short) 26, this.biomeLookup.getOrThrow(BiomeKeys.BADLANDS)),
+                    Map.entry((short) 29, this.biomeLookup.getOrThrow(BiomeKeys.MEADOW)),
+                    Map.entry(
+                            (short) 31,
+                            this.biomeLookup.getOrThrow(RegistryKey.of(
+                                    RegistryKeys.BIOME, Identifier.of("terrain-diffusion-mc", "grove")))),
+                    Map.entry((short) 32, this.biomeLookup.getOrThrow(BiomeKeys.SNOWY_SLOPES)),
+                    Map.entry((short) 33, this.biomeLookup.getOrThrow(BiomeKeys.FROZEN_PEAKS)),
+                    Map.entry((short) 35, this.biomeLookup.getOrThrow(BiomeKeys.STONY_PEAKS)),
+                    Map.entry((short) 41, this.biomeLookup.getOrThrow(BiomeKeys.WARM_OCEAN)),
+                    Map.entry((short) 44, this.biomeLookup.getOrThrow(BiomeKeys.OCEAN)),
+                    Map.entry((short) 46, this.biomeLookup.getOrThrow(BiomeKeys.COLD_OCEAN)),
+                    Map.entry((short) 48, this.biomeLookup.getOrThrow(BiomeKeys.FROZEN_OCEAN)),
+                    Map.entry(
+                            (short) 215,
+                            this.biomeLookup.getOrThrow(RegistryKey.of(
+                                    RegistryKeys.BIOME, Identifier.of("terrain-diffusion-mc", "european_coniferous")))),
+                    Map.entry(
+                            (short) 216,
+                            this.biomeLookup.getOrThrow(RegistryKey.of(
+                                    RegistryKeys.BIOME, Identifier.of("terrain-diffusion-mc", "european_coniferous")))),
+                    Map.entry(
+                            (short) 208,
+                            this.biomeLookup.getOrThrow(RegistryKey.of(
+                                    RegistryKeys.BIOME, Identifier.of("terrain-diffusion-mc", "european_deciduous")))),
+                    Map.entry(
+                            (short) 209,
+                            this.biomeLookup.getOrThrow(RegistryKey.of(
+                                    RegistryKeys.BIOME, Identifier.of("terrain-diffusion-mc", "european_mixed")))),
+                    Map.entry((short) 230, this.biomeLookup.getOrThrow(PALM_ISLAND)),
+                    Map.entry(
+                            (short) 229,
+                            this.biomeLookup.getOrThrow(RegistryKey.of(
+                                    RegistryKeys.BIOME, Identifier.of("terrain-diffusion-mc", "european_meadow")))),
+                    Map.entry((short) 108, this.biomeLookup.getOrThrow(FOREST_SPARSE)),
+                    Map.entry((short) 115, this.biomeLookup.getOrThrow(TAIGA_SPARSE)),
+                    Map.entry((short) 116, this.biomeLookup.getOrThrow(SNOWY_TAIGA_SPARSE)));
         }
     }
 

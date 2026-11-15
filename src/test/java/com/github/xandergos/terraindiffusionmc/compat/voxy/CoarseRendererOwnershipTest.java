@@ -1,23 +1,25 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.BooleanSupplier;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import static org.junit.jupiter.api.Assertions.*;
 
 /** Real renderer + existing Voxy WorldSection; only the environment flag is stubbed. */
 class CoarseRendererOwnershipTest {
-    @TempDir Path temp;
+    @TempDir
+    Path temp;
 
     private void exercise(boolean realChunk) throws Exception {
         var loader = new CoarseRawAbiTest.RawLoader();
         var section = loader.loadClass("me.cortex.voxy.common.world.WorldSection");
         var renderer = loader.loadClass("com.github.xandergos.terraindiffusionmc.compat.voxy.CoarseVoxyRenderer");
-        Object source =
-                section.getMethod("_createRawUntrackedUnsafeSection", int.class, int.class, int.class, int.class)
-                        .invoke(null, 4, 4, 2, 0);
+        Object source = section.getMethod(
+                        "_createRawUntrackedUnsafeSection", int.class, int.class, int.class, int.class)
+                .invoke(null, 4, 4, 2, 0);
         section.getMethod("acquire").invoke(source);
         section.getMethod("_unsafeSetNonEmptyChildren", byte.class).invoke(source, (byte) 255);
         long[] data = (long[]) section.getMethod("_unsafeGetRawDataArray").invoke(source);
@@ -32,28 +34,26 @@ class CoarseRendererOwnershipTest {
         long[] colors = new long[13];
         for (int i = 1; i < colors.length; i++) colors[i] = (long) i << 27;
         BooleanSupplier active = () -> true;
-        var provider =
-                (CoarseRenderHooks.Provider)
-                        renderer.getConstructor(
-                                        Object.class,
-                                        CoarseLodCache.class,
-                                        CoarseCoverage.class,
-                                        LodChunkGuard.class,
-                                        BooleanSupplier.class,
-                                        Map.class,
-                                        int.class,
-                                        int.class,
-                                        CoarseLodCorrections.class)
-                                .newInstance(
-                                        engine,
-                                        cache,
-                                        new CoarseCoverage(),
-                                        guard,
-                                        active,
-                                        Map.of((short) 229, colors),
-                                        -64,
-                                        1871,
-                                        new CoarseLodCorrections(1024));
+        var provider = (CoarseRenderHooks.Provider) renderer.getConstructor(
+                        Object.class,
+                        CoarseLodCache.class,
+                        CoarseCoverage.class,
+                        LodChunkGuard.class,
+                        BooleanSupplier.class,
+                        Map.class,
+                        int.class,
+                        int.class,
+                        CoarseLodCorrections.class)
+                .newInstance(
+                        engine,
+                        cache,
+                        new CoarseCoverage(),
+                        guard,
+                        active,
+                        Map.of((short) 229, colors),
+                        -64,
+                        1871,
+                        new CoarseLodCorrections(1024));
         renderer.getMethod("range", int.class, int.class, int.class).invoke(provider, 2048, 0, 32768);
         Object preview = null;
         try {
@@ -71,9 +71,8 @@ class CoarseRendererOwnershipTest {
                     loader.loadClass("com.github.xandergos.terraindiffusionmc.compat.voxy.CoarseStoredColumns$Reader");
             Object absent =
                     java.lang.reflect.Proxy.newProxyInstance(loader, new Class<?>[] {reader}, (p, m, a) -> null);
-            var prepare =
-                    storedType.getDeclaredMethod(
-                            "prepare", int.class, int.class, int.class, reader, java.util.function.LongPredicate.class);
+            var prepare = storedType.getDeclaredMethod(
+                    "prepare", int.class, int.class, int.class, reader, java.util.function.LongPredicate.class);
             prepare.setAccessible(true);
             prepare.invoke(stored, 1, -64, 1871, absent, (java.util.function.LongPredicate) v -> v == 0);
             var invalidate = renderer.getDeclaredMethod("invalidateStoredColumns", int.class, int.class);
@@ -95,9 +94,8 @@ class CoarseRendererOwnershipTest {
             assertEquals(realChunk ? 99L << 27 : 0, output[0]);
             assertEquals(realChunk ? 99L << 27 : 0, output[1]);
             assertEquals(0, output[1024]);
-            assertEquals(
-                    realChunk ? 255 : 0,
-                    Byte.toUnsignedInt((byte) section.getMethod("getNonEmptyChildren").invoke(preview)));
+            assertEquals(realChunk ? 255 : 0, Byte.toUnsignedInt((byte)
+                    section.getMethod("getNonEmptyChildren").invoke(preview)));
             assertEquals(realChunk ? 255 : 0, Byte.toUnsignedInt(provider.children(engine, source, (byte) 255)));
             assertArrayEquals(unchanged, data);
             assertEquals(1, section.getMethod("getRefCount").invoke(source));
@@ -118,7 +116,8 @@ class CoarseRendererOwnershipTest {
                         "Old virtual sky still receives cleanup after exceeding the previous 65536-entry LRU");
             }
         } finally {
-            if (preview != null && preview != source) section.getMethod("release").invoke(preview);
+            if (preview != null && preview != source)
+                section.getMethod("release").invoke(preview);
             assertEquals(0, section.getMethod("release").invoke(source));
         }
     }

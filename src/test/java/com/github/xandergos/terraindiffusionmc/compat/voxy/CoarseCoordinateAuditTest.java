@@ -1,7 +1,8 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 class CoarseCoordinateAuditTest {
     @Test
@@ -14,20 +15,19 @@ class CoarseCoordinateAuditTest {
                     long[] raw = new long[32768];
                     CoarseSectionComposer.Protected owned =
                             (x, z) -> Math.floorMod(Math.floorDiv(x, 16) + 3 * Math.floorDiv(z, 16), 11) == 0;
-                    var result =
-                            CoarseSectionComposer.fill(
-                                    level,
-                                    sx,
-                                    sy,
-                                    sz,
-                                    -37,
-                                    1903,
-                                    CoarseSectionComposerTest.flat(133),
-                                    null,
-                                    raw,
-                                    owned,
-                                    b -> palette,
-                                    v -> v == 0);
+                    var result = CoarseSectionComposer.fill(
+                            level,
+                            sx,
+                            sy,
+                            sz,
+                            -37,
+                            1903,
+                            CoarseSectionComposerTest.flat(133),
+                            null,
+                            raw,
+                            owned,
+                            b -> palette,
+                            v -> v == 0);
                     int count = 0, children = 0;
                     for (int y = 0; y < 32; y++)
                         for (int z = 0; z < 32; z++)

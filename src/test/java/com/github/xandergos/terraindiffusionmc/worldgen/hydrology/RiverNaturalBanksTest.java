@@ -1,8 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.hydrology;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.*;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class RiverNaturalBanksTest {
     private static PreparedWaterArea area() {
@@ -64,37 +65,35 @@ class RiverNaturalBanksTest {
     void wetHalfBlockIsAValidFloorButAnUnsupportedHoleStillRejectsWater() {
         var a = area();
         int x = 16, z = 16, bed = a.bedY(x, z, 0);
-        var columns =
-                new RiverWaterPlanning.ColumnAccess() {
-                    public boolean isAir(int px, int y, int pz) {
-                        return y >= a.carvedHeight(px, pz, 105);
-                    }
+        var columns = new RiverWaterPlanning.ColumnAccess() {
+            public boolean isAir(int px, int y, int pz) {
+                return y >= a.carvedHeight(px, pz, 105);
+            }
 
-                    public boolean isWater(int px, int y, int pz) {
-                        return px == x && pz == z && y == bed;
-                    }
+            public boolean isWater(int px, int y, int pz) {
+                return px == x && pz == z && y == bed;
+            }
 
-                    public boolean isSolidDry(int px, int y, int pz) {
-                        return !isWater(px, y, pz) && !isAir(px, y, pz);
-                    }
+            public boolean isSolidDry(int px, int y, int pz) {
+                return !isWater(px, y, pz) && !isAir(px, y, pz);
+            }
 
-                    public boolean hasBedSupport(int px, int y, int pz) {
-                        return isSolidDry(px, y, pz) || isWater(px, y, pz) && isSolidDry(px, y - 1, pz);
-                    }
-                };
+            public boolean hasBedSupport(int px, int y, int pz) {
+                return isSolidDry(px, y, pz) || isWater(px, y, pz) && isSolidDry(px, y - 1, pz);
+            }
+        };
         assertFalse(columns.isSolidDry(x, bed, z));
         assertTrue(columns.hasBedSupport(x, bed, z));
         assertTrue(FluidContainment.canPlace(FluidContainment.Fluid.WATER, a, x, z, bed, 100, -64, 320, columns));
-        var hole =
-                new RiverWaterPlanning.ColumnAccess() {
-                    public boolean isAir(int px, int y, int pz) {
-                        return columns.isAir(px, y, pz) || px == x && pz == z && y <= bed;
-                    }
+        var hole = new RiverWaterPlanning.ColumnAccess() {
+            public boolean isAir(int px, int y, int pz) {
+                return columns.isAir(px, y, pz) || px == x && pz == z && y <= bed;
+            }
 
-                    public boolean isSolidDry(int px, int y, int pz) {
-                        return !isAir(px, y, pz);
-                    }
-                };
+            public boolean isSolidDry(int px, int y, int pz) {
+                return !isAir(px, y, pz);
+            }
+        };
         assertFalse(FluidContainment.canPlace(FluidContainment.Fluid.WATER, a, x, z, bed, 100, -64, 320, hole));
     }
 }

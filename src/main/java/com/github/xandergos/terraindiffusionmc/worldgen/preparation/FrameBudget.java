@@ -1,7 +1,7 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.preparation;
 
-import java.util.function.LongSupplier;
 import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.StageTimings;
+import java.util.function.LongSupplier;
 
 /** CPU frame pacing signal, not a GPU timer. Shared admission for speculative work. */
 public final class FrameBudget {

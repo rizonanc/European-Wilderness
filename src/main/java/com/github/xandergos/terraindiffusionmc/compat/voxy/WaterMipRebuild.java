@@ -10,12 +10,11 @@ import net.minecraft.text.Text;
 
 /** Explicit bounded migration of existing LOD data, independent of Chunky terrain generation. */
 public final class WaterMipRebuild {
-    private static final ExecutorService WORKER =
-            Executors.newSingleThreadExecutor(r -> {
-                Thread thread = new Thread(r, "td-water-lod-rebuild");
-                thread.setDaemon(true);
-                return thread;
-            });
+    private static final ExecutorService WORKER = Executors.newSingleThreadExecutor(r -> {
+        Thread thread = new Thread(r, "td-water-lod-rebuild");
+        thread.setDaemon(true);
+        return thread;
+    });
     private static final AtomicBoolean RUNNING = new AtomicBoolean();
     private static volatile boolean cancelled;
     private static volatile String status = "water-mips: пересчёт не запущен";
@@ -88,30 +87,28 @@ public final class WaterMipRebuild {
                             checked++;
                             changed += updates;
                             if ((checked & 63) == 0 || updates != 0)
-                                status =
-                                        "water-mips: колонки "
-                                                + columns
-                                                + "/"
-                                                + total
-                                                + ", секций "
-                                                + checked
-                                                + ", обновлений LOD "
-                                                + changed;
+                                status = "water-mips: колонки "
+                                        + columns
+                                        + "/"
+                                        + total
+                                        + ", секций "
+                                        + checked
+                                        + ", обновлений LOD "
+                                        + changed;
                             if (updates != 0) LockSupport.parkNanos(1_000_000L);
                         }
                         columns++;
                     }
-                end =
-                        "water-mips: "
-                                + (columns == total ? "готово" : "остановлено")
-                                + ", колонки "
-                                + columns
-                                + "/"
-                                + total
-                                + ", секций "
-                                + checked
-                                + ", обновлений LOD "
-                                + changed;
+                end = "water-mips: "
+                        + (columns == total ? "готово" : "остановлено")
+                        + ", колонки "
+                        + columns
+                        + "/"
+                        + total
+                        + ", секций "
+                        + checked
+                        + ", обновлений LOD "
+                        + changed;
             } catch (Exception | LinkageError failure) {
                 end = "water-mips: ошибка " + failure.getClass().getSimpleName();
                 org.slf4j.LoggerFactory.getLogger(WaterMipRebuild.class).warn("Water LOD rebuild failed", failure);

@@ -41,16 +41,8 @@ public final class PreparedFallback {
             throws Exception {
         return mode == PerformanceProfile.PreparationMode.PREPARED_ONLY
                 ? TileAssembler.assembleReady(
-                        i1,
-                        j1,
-                        i2,
-                        j2,
-                        repository.tileSize(),
-                        seed,
-                        fingerprint,
-                        repository::peek,
-                        (short) 100,
-                        (short) 1)
+                        i1, j1, i2, j2, repository.tileSize(), seed, fingerprint, repository::peek, (short) 100, (short)
+                                1)
                 : TileAssembler.assemble(i1, j1, i2, j2, repository.tileSize(), seed, fingerprint, repository::get);
     }
 

@@ -1,9 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.pipeline;
 
 import com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfig;
+import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -22,8 +22,8 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.GZIPInputStream;
 import net.fabricmc.loader.api.FabricLoader;
@@ -141,13 +141,12 @@ public final class ModelAssetManager {
                     gzip);
             String downloadedHash = sha256Hex(temporaryAssetPath);
             if (!downloadedHash.equalsIgnoreCase(assetMetadata.sha256)) {
-                throw new IOException(
-                        "SHA-256 mismatch for "
-                                + fileName
-                                + ". Expected "
-                                + assetMetadata.sha256
-                                + " but got "
-                                + downloadedHash);
+                throw new IOException("SHA-256 mismatch for "
+                        + fileName
+                        + ". Expected "
+                        + assetMetadata.sha256
+                        + " but got "
+                        + downloadedHash);
             }
             Files.move(
                     temporaryAssetPath,
@@ -197,13 +196,12 @@ public final class ModelAssetManager {
             if (status < 200 || status >= 300) throw new IOException("HTTP " + status + " downloading " + fileName);
             long declaredSize = connection.getContentLengthLong();
             if (!gzip && declaredSize >= 0 && declaredSize != expectedSize) {
-                throw new IOException(
-                        "Unexpected Content-Length for "
-                                + fileName
-                                + ": "
-                                + declaredSize
-                                + ", expected "
-                                + expectedSize);
+                throw new IOException("Unexpected Content-Length for "
+                        + fileName
+                        + ": "
+                        + declaredSize
+                        + ", expected "
+                        + expectedSize);
             }
             try (InputStream response = connection.getInputStream();
                     InputStream input = gzip ? new GZIPInputStream(response, 262144) : response;

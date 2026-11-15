@@ -14,7 +14,12 @@ Replace the old mod JAR. Existing worlds keep their mod and world-generation IDs
 
 ## Build
 
-Run `./gradlew build` with JDK 21, or `gradlew.bat build` on Windows. The JAR is in `build/libs/`. Gradle fetches the pinned Voxy dependency from Modrinth if a local copy is unavailable. The build bundles the upstream Windows DirectML runtime.
+Run `./gradlew build` with JDK 21, or `gradlew.bat build` on Windows. The JAR is in `build/libs/`. The build bundles the upstream Windows DirectML runtime.
+
+## Development
+
+- `./gradlew spotlessApply`
+- `./gradlew check`
 
 ## License and credits
 

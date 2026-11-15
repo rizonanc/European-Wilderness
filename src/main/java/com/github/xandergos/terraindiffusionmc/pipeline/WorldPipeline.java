@@ -208,9 +208,8 @@ public final class WorldPipeline implements AutoCloseable {
             EDMScheduler.preconditionInputsInPlace(scaledIn, sigma);
             System.arraycopy(scaledIn, 0, xIn, 0, 6 * S * S);
             System.arraycopy(condMixed, 0, xIn, 6 * S * S, 5 * S * S);
-            float[] modelOut =
-                    this.coarseModel.runModel(
-                            xIn, new long[] {1L, 11L, S, S}, new float[] {cnoise}, condInputs, condShapes);
+            float[] modelOut = this.coarseModel.runModel(
+                    xIn, new long[] {1L, 11L, S, S}, new float[] {cnoise}, condInputs, condShapes);
             PipelineChecks.output(modelOut, 6 * S * S, "COARSE");
             sample = sched.stepInto(modelOut, sample, x0Pred);
             x0Pred = x0Pred == predA ? predB : predA;
@@ -247,16 +246,15 @@ public final class WorldPipeline implements AutoCloseable {
         TensorWindow coarseWin = new TensorWindow(new int[] {7, 4, 4}, new int[] {7, 1, 1}, new int[] {0, -1, -1});
         float[] ww = linearWeightWindow(S);
         float tInit = (float) Math.atan(160.0);
-        InfiniteTensor initLatent =
-                this.tileStore.getOrCreateBatched(
-                        "init_latent_map",
-                        new Integer[] {6, null, null},
-                        (wis, args) -> this.latentBatch(wis, null, args.get(0), tInit, 5819, ww),
-                        outWin,
-                        new InfiniteTensor[] {this.coarse},
-                        new TensorWindow[] {coarseWin},
-                        104857600L,
-                        4);
+        InfiniteTensor initLatent = this.tileStore.getOrCreateBatched(
+                "init_latent_map",
+                new Integer[] {6, null, null},
+                (wis, args) -> this.latentBatch(wis, null, args.get(0), tInit, 5819, ww),
+                outWin,
+                new InfiniteTensor[] {this.coarse},
+                new TensorWindow[] {coarseWin},
+                104857600L,
+                4);
         float interT = (float) Math.atan(0.7F);
         return this.tileStore.getOrCreateBatched(
                 "step_latent_map_0",
@@ -340,13 +338,10 @@ public final class WorldPipeline implements AutoCloseable {
             noiseLabels[b] = t;
         }
 
-        float[] predBatch =
-                this.baseModel.runModel(
-                        modelInBatch,
-                        new long[] {batch, 5L, S, S},
-                        noiseLabels,
-                        new float[][] {condInputBatch},
-                        new long[][] {{batch, 58L}});
+        float[] predBatch = this.baseModel.runModel(
+                modelInBatch, new long[] {batch, 5L, S, S}, noiseLabels, new float[][] {condInputBatch}, new long[][] {
+                    {batch, 58L}
+                });
         PipelineChecks.output(predBatch, batch * 5 * S * S, "LATENT");
         List<FloatTensor> results = new ArrayList<>(batch);
 
@@ -625,9 +620,8 @@ public final class WorldPipeline implements AutoCloseable {
             coarseElev[px] = v * v;
         }
 
-        float[][][] lbt =
-                LaplacianUtils.localBaselineTemperature(
-                        to2D(coarseMap[2], cH, cW), to2D(coarseElev, cH, cW), win, 0.02F);
+        float[][][] lbt = LaplacianUtils.localBaselineTemperature(
+                to2D(coarseMap[2], cH, cW), to2D(coarseElev, cH, cW), win, 0.02F);
         int lH = lbt[0].length;
         int lW = lbt[0][0].length;
         int cenPad = win / 2;

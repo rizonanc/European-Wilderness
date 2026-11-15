@@ -12,10 +12,9 @@ public final class DensityReadAllocationProbe {
         double sum = 0;
         for (int i = 0; i < count; i++) {
             int x = -16 + (i & 15), z = -16 + ((i >>> 4) & 15), y = i % 320;
-            sum +=
-                    cache == null
-                            ? lookup.fetch(-16, -16, 0, 0).surfaceYAt(x + 16, z + 16, 2) - y
-                            : cache.sample(session, lookup, x, y, z);
+            sum += cache == null
+                    ? lookup.fetch(-16, -16, 0, 0).surfaceYAt(x + 16, z + 16, 2) - y
+                    : cache.sample(session, lookup, x, y, z);
         }
         return sum;
     }
@@ -25,23 +24,19 @@ public final class DensityReadAllocationProbe {
         bean.setThreadAllocatedMemoryEnabled(true);
         var session = WorldSession.activate(GenerationProfile.defaultsFor(2, "probe", "cpu", "cpu"), 7);
         var calls = new AtomicInteger();
-        DensitySampler.Lookup lookup =
-                (z, x, ez, ex) -> {
-                    calls.incrementAndGet();
-                    short[][] h = new short[16][16], b = new short[16][16];
-                    for (var row : h) Arrays.fill(row, (short) 600);
-                    return new HeightmapData(h, b, 16, 16);
-                };
+        DensitySampler.Lookup lookup = (z, x, ez, ex) -> {
+            calls.incrementAndGet();
+            short[][] h = new short[16][16], b = new short[16][16];
+            for (var row : h) Arrays.fill(row, (short) 600);
+            return new HeightmapData(h, b, 16, 16);
+        };
         sample(session, lookup, null, 20000);
         var cache = new DensitySampler();
         sample(session, lookup, cache, 20000);
         long thread = Thread.currentThread().threadId();
         int count = 100000;
-        StringBuilder result =
-                new StringBuilder(
-                        "{\"scope\":\"synthetic 16x16 raw-window read, not game FPS\",\"samples\":"
-                                + count
-                                + ",\"trials\":[");
+        StringBuilder result = new StringBuilder(
+                "{\"scope\":\"synthetic 16x16 raw-window read, not game FPS\",\"samples\":" + count + ",\"trials\":[");
         for (int pass = 0; pass < 2; pass++) {
             var sampler = pass == 0 ? null : new DensitySampler();
             calls.set(0);

@@ -1,10 +1,11 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 class CoarseStoredColumnsTest {
     @Test
@@ -35,15 +36,14 @@ class CoarseStoredColumnsTest {
         for (int i = 0; i < 10; i++) columns.ready(0, 0);
         assertThrows(
                 IllegalStateException.class,
-                () ->
-                        columns.prepare(
-                                2,
-                                -64,
-                                1871,
-                                (x, y, z) -> {
-                                    throw new IllegalStateException();
-                                },
-                                v -> v == 0));
+                () -> columns.prepare(
+                        2,
+                        -64,
+                        1871,
+                        (x, y, z) -> {
+                            throw new IllegalStateException();
+                        },
+                        v -> v == 0));
         assertTrue(columns.contains(0, 0));
         assertFalse(columns.ready(0, 0));
         assertEquals(1, columns.prepare(2, -64, 1871, (x, y, z) -> null, v -> v == 0));
@@ -56,22 +56,20 @@ class CoarseStoredColumnsTest {
         var started = new CountDownLatch(1);
         var resume = new CountDownLatch(1);
         try (var executor = Executors.newSingleThreadExecutor()) {
-            var old =
-                    executor.submit(() ->
-                            columns.prepare(
-                                    1,
-                                    0,
-                                    511,
-                                    (x, y, z) -> {
-                                        started.countDown();
-                                        try {
-                                            assertTrue(resume.await(5, TimeUnit.SECONDS));
-                                        } catch (InterruptedException e) {
-                                            throw new AssertionError(e);
-                                        }
-                                        return null;
-                                    },
-                                    v -> v == 0));
+            var old = executor.submit(() -> columns.prepare(
+                    1,
+                    0,
+                    511,
+                    (x, y, z) -> {
+                        started.countDown();
+                        try {
+                            assertTrue(resume.await(5, TimeUnit.SECONDS));
+                        } catch (InterruptedException e) {
+                            throw new AssertionError(e);
+                        }
+                        return null;
+                    },
+                    v -> v == 0));
             assertTrue(started.await(5, TimeUnit.SECONDS));
             for (int i = 0; i < 100; i++) columns.invalidate(-513, 1040);
             resume.countDown();

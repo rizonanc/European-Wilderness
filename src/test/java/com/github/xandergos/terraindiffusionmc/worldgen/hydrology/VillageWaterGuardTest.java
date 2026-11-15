@@ -1,9 +1,10 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.hydrology;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.Arrays;
 import net.minecraft.util.math.BlockBox;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class VillageWaterGuardTest {
     @Test

@@ -1,5 +1,6 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
+import com.github.xandergos.terraindiffusionmc.worldgen.settings.*;
 import java.nio.file.*;
 import java.util.*;
 import org.objectweb.asm.*;
@@ -7,7 +8,6 @@ import org.objectweb.asm.tree.*;
 import org.spongepowered.asm.launch.MixinBootstrap;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.service.MixinService;
-import com.github.xandergos.terraindiffusionmc.worldgen.settings.*;
 
 public final class GrassMipMixinProbe {
     public static void main(String[] args) throws Exception {
@@ -18,17 +18,17 @@ public final class GrassMipMixinProbe {
         var service = (CoarseMixinProbe.Service) MixinService.getService();
         var transformer = service.transformer();
         Map<String, byte[]> defs = new HashMap<>();
-        for (String target :
-                List.of(
-                        "me.cortex.voxy.common.world.other.Mapper",
-                        "me.cortex.voxy.common.voxelization.WorldVoxilizedSectionMipper")) {
+        for (String target : List.of(
+                "me.cortex.voxy.common.world.other.Mapper",
+                "me.cortex.voxy.common.voxelization.WorldVoxilizedSectionMipper")) {
             var w = new ClassWriter(0);
             service.getClassNode(target).accept(w);
             byte[] b = transformer.transformClassBytes(target, target, w.toByteArray());
             defs.put(target, b);
             var n = new ClassNode();
             new ClassReader(b).accept(n, 0);
-            if (target.endsWith("Mapper") && !n.interfaces.contains(GrassMipMapping.class.getName().replace('.', '/')))
+            if (target.endsWith("Mapper")
+                    && !n.interfaces.contains(GrassMipMapping.class.getName().replace('.', '/')))
                 throw new AssertionError("Missing grass palette interface");
         }
         var f = new WaterMipPolicyTest.Fixture(defs);

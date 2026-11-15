@@ -1,12 +1,13 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.tree;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.github.xandergos.terraindiffusionmc.worldgen.hydrology.RiverDetailPlanning;
 import com.github.xandergos.terraindiffusionmc.worldgen.hydrology.Waterfall;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.*;
 import java.util.*;
 import java.util.function.*;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class TreeIntegrityTest {
     private static final IntBinaryOperator NO_WATER = (x, z) -> Integer.MIN_VALUE;
@@ -54,8 +55,12 @@ class TreeIntegrityTest {
         assertTrue(
                 TreePlacement.parts(tree.shape(), 15, 94, 8, 1, 0).stream().allMatch(v -> !v.log() && v.y() >= 95),
                 "the neighbour's crown used to look placeable on its own");
-        assertTrue(EuropeanTreePlanner.planChunk(List.of(tree), 0, 0, allowed).voxels().isEmpty());
-        assertTrue(EuropeanTreePlanner.planChunk(List.of(tree), 1, 0, allowed).voxels().isEmpty());
+        assertTrue(EuropeanTreePlanner.planChunk(List.of(tree), 0, 0, allowed)
+                .voxels()
+                .isEmpty());
+        assertTrue(EuropeanTreePlanner.planChunk(List.of(tree), 1, 0, allowed)
+                .voxels()
+                .isEmpty());
     }
 
     @Test
@@ -78,9 +83,8 @@ class TreeIntegrityTest {
         for (Pos obstacle : List.of(new Pos(15, 102, 15), new Pos(17, 104, 15))) {
             for (int cx = 0; cx < 2; cx++)
                 for (int cz = 0; cz < 2; cz++) {
-                    var plan =
-                            EuropeanTreePlanner.planChunk(
-                                    List.of(t), cx, cz, v -> !new Pos(v.x(), v.y(), v.z()).equals(obstacle));
+                    var plan = EuropeanTreePlanner.planChunk(
+                            List.of(t), cx, cz, v -> !new Pos(v.x(), v.y(), v.z()).equals(obstacle));
                     assertTrue(plan.voxels().isEmpty());
                     assertTrue(plan.representedTrees().isEmpty());
                 }
@@ -100,32 +104,25 @@ class TreeIntegrityTest {
         Map<Pos, Boolean> placed = new HashMap<>();
         for (int i = 0; i < 4; i++) {
             int chunk = reverse ? 3 - i : i, cx = chunk % 2, cz = chunk / 2;
-            var plan =
-                    EuropeanTreePlanner.planChunk(
-                            List.of(t),
-                            cx,
-                            cz,
-                            (tree, v) -> {
-                                Boolean previous = placed.get(new Pos(v.x(), v.y(), v.z()));
-                                boolean soil = v.y() < 101;
-                                return TreePlacementValidator.mayPlaceWholeVoxel(
-                                        v.log(),
-                                        v.y() - tree.baseY(),
-                                        false,
-                                        previous != null && !previous || previous == null && !soil,
-                                        Boolean.TRUE.equals(previous),
-                                        soil);
-                            });
-            EuropeanTreePlanner.place(
-                    plan,
-                    v -> {
-                        assertEquals(cx, Math.floorDiv(v.x(), 16));
-                        assertEquals(cz, Math.floorDiv(v.z(), 16));
-                        Pos p = new Pos(v.x(), v.y(), v.z());
-                        if (Boolean.TRUE.equals(placed.get(p))) return false;
-                        placed.put(p, v.log());
-                        return true;
-                    });
+            var plan = EuropeanTreePlanner.planChunk(List.of(t), cx, cz, (tree, v) -> {
+                Boolean previous = placed.get(new Pos(v.x(), v.y(), v.z()));
+                boolean soil = v.y() < 101;
+                return TreePlacementValidator.mayPlaceWholeVoxel(
+                        v.log(),
+                        v.y() - tree.baseY(),
+                        false,
+                        previous != null && !previous || previous == null && !soil,
+                        Boolean.TRUE.equals(previous),
+                        soil);
+            });
+            EuropeanTreePlanner.place(plan, v -> {
+                assertEquals(cx, Math.floorDiv(v.x(), 16));
+                assertEquals(cz, Math.floorDiv(v.z(), 16));
+                Pos p = new Pos(v.x(), v.y(), v.z());
+                if (Boolean.TRUE.equals(placed.get(p))) return false;
+                placed.put(p, v.log());
+                return true;
+            });
         }
         return placed.keySet();
     }
@@ -170,24 +167,23 @@ class TreeIntegrityTest {
 
     @Test
     void finalShoreRocksAreIncludedInWholeCanopyClearance() {
-        WorldSession.RiverOverlay bank =
-                new WorldSession.RiverOverlay() {
-                    public int carvedHeight(int x, int z, int raw) {
-                        return x >= 32 ? 100 : x == 31 ? 101 : x == 30 ? 103 : x == 29 ? 104 : 105;
-                    }
+        WorldSession.RiverOverlay bank = new WorldSession.RiverOverlay() {
+            public int carvedHeight(int x, int z, int raw) {
+                return x >= 32 ? 100 : x == 31 ? 101 : x == 30 ? 103 : x == 29 ? 104 : 105;
+            }
 
-                    public int bedY(int x, int z, int raw) {
-                        return carvedHeight(x, z, raw) - 1;
-                    }
+            public int bedY(int x, int z, int raw) {
+                return carvedHeight(x, z, raw) - 1;
+            }
 
-                    public int waterY(int x, int z) {
-                        return x >= 32 && x < 48 && z >= 8 && z < 56 ? 100 : Integer.MIN_VALUE;
-                    }
+            public int waterY(int x, int z) {
+                return x >= 32 && x < 48 && z >= 8 && z < 56 ? 100 : Integer.MIN_VALUE;
+            }
 
-                    public boolean isReady(int x, int z) {
-                        return x >= 0 && z >= 0 && x < 64 && z < 64;
-                    }
-                };
+            public boolean isReady(int x, int z) {
+                return x >= 0 && z >= 0 && x < 64 && z < 64;
+            }
+        };
         int row = -1;
         long chosenSeed = 0;
         outer:
@@ -206,16 +202,14 @@ class TreeIntegrityTest {
         var s = new TreeShapeGenerator.Shape(v, 6, 2, TreeAge.ADULT, new TreeAge.Footprint(1, 1));
         IntBinaryOperator air = (x, z) -> bank.carvedHeight(x, z, 0);
         assertTrue(clear(s, 31, 100, row, air, bank::waterY));
-        assertFalse(
-                TreePlacementValidator.isWholeTreeClear(
-                        s,
-                        31,
-                        100,
-                        row,
-                        air,
-                        (x, z) ->
-                                RiverDetailPlanning.clearanceFirstAir(bank, seed, x, z, air.applyAsInt(x, z), -64, 320),
-                        bank::waterY));
+        assertFalse(TreePlacementValidator.isWholeTreeClear(
+                s,
+                31,
+                100,
+                row,
+                air,
+                (x, z) -> RiverDetailPlanning.clearanceFirstAir(bank, seed, x, z, air.applyAsInt(x, z), -64, 320),
+                bank::waterY));
     }
 
     @Test
@@ -223,40 +217,37 @@ class TreeIntegrityTest {
         var session = WorldSession.activate(GenerationProfile.defaultsFor(2, "model", "cpu", "cpu"), 7);
         try {
             var fall = new Waterfall(32, 32, 1, 0, 120, 108, 3, 12);
-            session.attachRiverOverlay(
-                    new WorldSession.RiverOverlay() {
-                        public int carvedHeight(int x, int z, int raw) {
-                            return raw;
-                        }
+            session.attachRiverOverlay(new WorldSession.RiverOverlay() {
+                public int carvedHeight(int x, int z, int raw) {
+                    return raw;
+                }
 
-                        public int waterY(int x, int z) {
-                            return 108;
-                        }
+                public int waterY(int x, int z) {
+                    return 108;
+                }
 
-                        public Waterfall waterfallAt(int x, int z) {
-                            return fall.contains(x, z) ? fall : null;
-                        }
-                    });
-            var view =
-                    new TreeTerrainView(
-                            256,
-                            7,
-                            session.fingerprint(),
-                            key -> {
-                                throw new AssertionError("No raw tile needed for water lookup");
-                            },
-                            metres -> 101);
+                public Waterfall waterfallAt(int x, int z) {
+                    return fall.contains(x, z) ? fall : null;
+                }
+            });
+            var view = new TreeTerrainView(
+                    256,
+                    7,
+                    session.fingerprint(),
+                    key -> {
+                        throw new AssertionError("No raw tile needed for water lookup");
+                    },
+                    metres -> 101);
             assertEquals(120, view.waterY(33, 32));
             assertEquals(108, view.waterY(35, 32));
-            var foreign =
-                    new TreeTerrainView(
-                            256,
-                            8,
-                            session.fingerprint(),
-                            key -> {
-                                throw new AssertionError();
-                            },
-                            metres -> 101);
+            var foreign = new TreeTerrainView(
+                    256,
+                    8,
+                    session.fingerprint(),
+                    key -> {
+                        throw new AssertionError();
+                    },
+                    metres -> 101);
             assertEquals(Integer.MIN_VALUE, foreign.waterY(33, 32));
         } finally {
             WorldSession.deactivate(session);

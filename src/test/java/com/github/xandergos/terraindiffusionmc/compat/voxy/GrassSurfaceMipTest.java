@@ -1,8 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.*;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class GrassSurfaceMipTest {
     private static final GrassMipMapping M = WaterMipPolicyTest::grassKind;
@@ -151,14 +152,12 @@ class GrassSurfaceMipTest {
         long[] fixed = baseline.clone();
         GrassSurfaceMip.correct(fixed, -3, -5, M);
         vs.getMethod("setPosition", int.class, int.class, int.class).invoke(input, -3, 3, -5);
-        var write =
-                f.loadClass("me.cortex.voxy.common.world.WorldUpdater")
-                        .getDeclaredMethod("insertSectionLvlIntoWorld", vs, ws);
+        var write = f.loadClass("me.cortex.voxy.common.world.WorldUpdater")
+                .getDeclaredMethod("insertSectionLvlIntoWorld", vs, ws);
         write.setAccessible(true);
         for (int level = 1; level <= 2; level++) {
-            Object parent =
-                    ws.getMethod("_createRawUntrackedUnsafeSection", int.class, int.class, int.class, int.class)
-                            .invoke(null, level, -3 >> (level + 1), 3 >> (level + 1), -5 >> (level + 1));
+            Object parent = ws.getMethod("_createRawUntrackedUnsafeSection", int.class, int.class, int.class, int.class)
+                    .invoke(null, level, -3 >> (level + 1), 3 >> (level + 1), -5 >> (level + 1));
             ws.getMethod("acquire").invoke(parent);
             try {
                 ws.getMethod("_unsafeSetNonEmptyChildren", byte.class).invoke(parent, (byte) 255);

@@ -1,8 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.hydrology;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.*;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class DrainageOwnershipTest {
     @Test
@@ -27,17 +28,15 @@ class DrainageOwnershipTest {
             var random = new Random(42);
             for (var row : a)
                 for (int x = 0; x < row.length; x++)
-                    row[x] =
-                            style == 0
-                                    ? 64
-                                    : style == 1
-                                            ? random.nextInt()
-                                            : random.nextBoolean() ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+                    row[x] = style == 0
+                            ? 64
+                            : style == 1
+                                    ? random.nextInt()
+                                    : random.nextBoolean() ? Integer.MIN_VALUE : Integer.MAX_VALUE;
             for (boolean prepared : new boolean[] {false, true}) {
-                var p =
-                        prepared
-                                ? DrainagePlanner.planPrepared(17, -500, 700, a)
-                                : DrainagePlanner.planCoarse(17, -500, 700, a);
+                var p = prepared
+                        ? DrainagePlanner.planPrepared(17, -500, 700, a)
+                        : DrainagePlanner.planCoarse(17, -500, 700, a);
                 long outlets = 0;
                 long[][] counted = new long[53][41];
                 for (int z = 0; z < 53; z++)

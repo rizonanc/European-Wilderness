@@ -1,8 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.mountain;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.EnumSet;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class RegionalGeologyTest {
     @Test

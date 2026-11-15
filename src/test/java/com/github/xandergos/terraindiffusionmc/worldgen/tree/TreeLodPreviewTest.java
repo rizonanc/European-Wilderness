@@ -1,8 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.tree;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.*;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class TreeLodPreviewTest {
     private record Voxel(int x, int y, int z, TreeSpecies species, boolean log) {}
@@ -74,9 +75,8 @@ class TreeLodPreviewTest {
         for (long seed = 0; seed < 100; seed++)
             for (var candidate : TreeCandidates.rawAdultRootsForChunk(seed, 0, 0)) {
                 if (candidate.x() < 8 || candidate.x() > 23 || candidate.z() < 8 || candidate.z() > 23) continue;
-                var ecology =
-                        com.github.xandergos.terraindiffusionmc.worldgen.ecology.EuropeanEcology.evaluate(
-                                seed, 12, 900, 300, 0, Double.POSITIVE_INFINITY, candidate.x(), candidate.z());
+                var ecology = com.github.xandergos.terraindiffusionmc.worldgen.ecology.EuropeanEcology.evaluate(
+                        seed, 12, 900, 300, 0, Double.POSITIVE_INFINITY, candidate.x(), candidate.z());
                 if (!VegetationDistribution.acceptsAdult(candidate, seed, ecology)
                         || ForestComposition.at(seed, candidate.x(), candidate.z(), ecology)
                                         .choose(candidate.speciesRoll())
@@ -85,29 +85,27 @@ class TreeLodPreviewTest {
                 Set<Voxel> expected = new HashSet<>(), actual = new HashSet<>();
                 for (var voxel : full.voxels())
                     if (voxel.y() > 0)
-                        expected.add(
-                                new Voxel(
-                                        candidate.x() + voxel.x(),
-                                        100 + voxel.y(),
-                                        candidate.z() + voxel.z(),
-                                        TreeSpecies.BIRCH,
-                                        voxel.log()));
-                var field =
-                        new TreeLodPreview.Field() {
-                            public TreeLodPreview.Climate climate(int x, int z) {
-                                return x == candidate.x() && z == candidate.z()
-                                        ? new TreeLodPreview.Climate((short) 208, (short) 300, 12, 900)
-                                        : null;
-                            }
+                        expected.add(new Voxel(
+                                candidate.x() + voxel.x(),
+                                100 + voxel.y(),
+                                candidate.z() + voxel.z(),
+                                TreeSpecies.BIRCH,
+                                voxel.log()));
+                var field = new TreeLodPreview.Field() {
+                    public TreeLodPreview.Climate climate(int x, int z) {
+                        return x == candidate.x() && z == candidate.z()
+                                ? new TreeLodPreview.Climate((short) 208, (short) 300, 12, 900)
+                                : null;
+                    }
 
-                            public int firstAir(int x, int z) {
-                                return 101;
-                            }
+                    public int firstAir(int x, int z) {
+                        return 101;
+                    }
 
-                            public int waterY(int x, int z) {
-                                return Integer.MIN_VALUE;
-                            }
-                        };
+                    public int waterY(int x, int z) {
+                        return Integer.MIN_VALUE;
+                    }
+                };
                 assertEquals(
                         1,
                         TreeLodPreview.paint(

@@ -1,9 +1,10 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.Test;
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 class VoxyStartupTest {
     private ClassNode code(String name) throws Exception {
@@ -35,7 +36,10 @@ class VoxyStartupTest {
         assertTrue(constructor);
         assertTrue(gate);
         var api = code("compat/voxy/Voxy016Api");
-        var ready = api.methods.stream().filter(m -> m.name.equals("runtimeReady")).findFirst().orElseThrow();
+        var ready = api.methods.stream()
+                .filter(m -> m.name.equals("runtimeReady"))
+                .findFirst()
+                .orElseThrow();
         for (var instruction : ready.instructions)
             if (instruction instanceof LdcInsnNode literal)
                 assertFalse(String.valueOf(literal.cst).contains("VoxyConfig"));
@@ -46,9 +50,11 @@ class VoxyStartupTest {
         var plugin = new com.github.xandergos.terraindiffusionmc.mixin.compat.CoarseVoxyMixinPlugin();
         assertFalse(plugin.shouldApplyMixin("anything", "anything"));
         var config = code("config/TerrainDiffusionConfig");
-        var coarse = config.methods.stream().filter(m -> m.name.equals("voxyCoarse")).findFirst().orElseThrow();
-        assertTrue(
-                java.util.stream.StreamSupport.stream(coarse.instructions.spliterator(), false)
-                        .anyMatch(i -> i.getOpcode() == Opcodes.ICONST_0));
+        var coarse = config.methods.stream()
+                .filter(m -> m.name.equals("voxyCoarse"))
+                .findFirst()
+                .orElseThrow();
+        assertTrue(java.util.stream.StreamSupport.stream(coarse.instructions.spliterator(), false)
+                .anyMatch(i -> i.getOpcode() == Opcodes.ICONST_0));
     }
 }

@@ -1,13 +1,16 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.hydrology;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.nio.file.Path;
 import java.util.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import java.nio.file.Path;
-import static org.junit.jupiter.api.Assertions.*;
 
 class BankPeaksTest {
-    @TempDir Path temp;
+    @TempDir
+    Path temp;
+
     private static final int SIDE = 64, NONE = PreparedWaterArea.NONE;
 
     private int[] water() {
@@ -70,15 +73,8 @@ class BankPeaksTest {
         var store = new WorldWaterStore(temp, 7, "fp", 256, grid);
         for (int revision : new int[] {2, 3}) {
             var key = new WorldWaterGrid.Cell(revision, 0);
-            var unit =
-                    new WorldWaterUnit(
-                            grid,
-                            key,
-                            new int[] {64 * 128 + 64},
-                            new short[] {100},
-                            new byte[] {0},
-                            List.of(),
-                            revision);
+            var unit = new WorldWaterUnit(
+                    grid, key, new int[] {64 * 128 + 64}, new short[] {100}, new byte[] {0}, List.of(), revision);
             store.save(unit);
             assertEquals(revision, store.loadUnit(key).revision);
             int[] air = new int[4096], water = new int[4096];
@@ -104,7 +100,10 @@ class BankPeaksTest {
         RiverDetailPlanning.forChunk(view, 83, 16, 16, -64, 320, details::add);
         for (int x = 30; x <= 31; x++) {
             final int px = x;
-            var cap = details.stream().filter(d -> d.x() == px && d.z() == 30).findFirst().orElseThrow();
+            var cap = details.stream()
+                    .filter(d -> d.x() == px && d.z() == 30)
+                    .findFirst()
+                    .orElseThrow();
             assertEquals(100, cap.y());
             assertTrue(cap.waterlogged());
             assertTrue(cap.kind().slab());
@@ -148,29 +147,27 @@ class BankPeaksTest {
         water[30 * 64 + 30] = NONE;
         air[30 * 64 + 30] = 101;
         var view = new PreparedWaterView(0, 0, 64, air, water, List.of());
-        var columns =
-                new RiverWaterPlanning.ColumnAccess() {
-                    public boolean isWaterloggedBankCap(int x, int y, int z) {
-                        return x == 30 && z == 30 && y == 100;
-                    }
+        var columns = new RiverWaterPlanning.ColumnAccess() {
+            public boolean isWaterloggedBankCap(int x, int y, int z) {
+                return x == 30 && z == 30 && y == 100;
+            }
 
-                    public boolean isWater(int x, int y, int z) {
-                        return isWaterloggedBankCap(x, y, z);
-                    }
+            public boolean isWater(int x, int y, int z) {
+                return isWaterloggedBankCap(x, y, z);
+            }
 
-                    public boolean isAir(int x, int y, int z) {
-                        return y >= air[z * 64 + x] && !isWater(x, y, z);
-                    }
+            public boolean isAir(int x, int y, int z) {
+                return y >= air[z * 64 + x] && !isWater(x, y, z);
+            }
 
-                    public boolean isSolidDry(int x, int y, int z) {
-                        return y < air[z * 64 + x] && !isWater(x, y, z);
-                    }
-                };
+            public boolean isSolidDry(int x, int y, int z) {
+                return y < air[z * 64 + x] && !isWater(x, y, z);
+            }
+        };
         assertTrue(FluidContainment.canPlace(FluidContainment.Fluid.WATER, view, 29, 30, 99, 100, -64, 320, columns));
         assertFalse(FluidContainment.canPlace(FluidContainment.Fluid.LAVA, view, 29, 30, 99, 100, -64, 320, columns));
-        assertTrue(
-                RiverWaterPlanning.planChunk(view, 1, 1, -64, 320, columns).stream()
-                        .anyMatch(p -> p.getX() == 29 && p.getY() == 100 && p.getZ() == 30));
+        assertTrue(RiverWaterPlanning.planChunk(view, 1, 1, -64, 320, columns).stream()
+                .anyMatch(p -> p.getX() == 29 && p.getY() == 100 && p.getZ() == 30));
     }
 
     @Test

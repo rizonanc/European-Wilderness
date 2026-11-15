@@ -77,14 +77,8 @@ public final class WatershedPlan {
 
                             int worldX = Math.addExact(coarseOriginX, Math.multiplyExact(x, 2));
                             int worldZ = Math.addExact(coarseOriginZ, Math.multiplyExact(z, 2));
-                            BasinOutlet outlet =
-                                    BasinOutlet.create(
-                                            seed,
-                                            worldX,
-                                            worldZ,
-                                            inner.filledHeight(x, z),
-                                            inner.accumulation(x, z),
-                                            8);
+                            BasinOutlet outlet = BasinOutlet.create(
+                                    seed, worldX, worldZ, inner.filledHeight(x, z), inner.accumulation(x, z), 8);
                             outlets.add(outlet);
                             byLocal.put(code(x, z, coarseW), outlet);
                         }
@@ -95,15 +89,14 @@ public final class WatershedPlan {
                     throw new IllegalStateException("extent has no outlet: hanging edge without a contract");
                 }
 
-                WatershedPlan built =
-                        new WatershedPlan(
-                                seed,
-                                coarseOriginX,
-                                coarseOriginZ,
-                                baseCopy,
-                                inner,
-                                Collections.unmodifiableList(outlets),
-                                byLocal);
+                WatershedPlan built = new WatershedPlan(
+                        seed,
+                        coarseOriginX,
+                        coarseOriginZ,
+                        baseCopy,
+                        inner,
+                        Collections.unmodifiableList(outlets),
+                        byLocal);
                 verifyLongestProfiles(built);
                 return built;
             } else {

@@ -151,16 +151,15 @@ public final class CoarseUpdateQueue {
             }
         }
         java.util.Arrays.sort(ages, 0, n);
-        String age =
-                n == 0
-                        ? "none"
-                        : String.format(
-                                java.util.Locale.ROOT,
-                                "%.1f/%.1f/%.1fms sample=%d",
-                                ages[(n - 1) / 2] / 1e6,
-                                ages[(int) ((n - 1) * .95)] / 1e6,
-                                ages[(int) ((n - 1) * .99)] / 1e6,
-                                n);
+        String age = n == 0
+                ? "none"
+                : String.format(
+                        java.util.Locale.ROOT,
+                        "%.1f/%.1f/%.1fms sample=%d",
+                        ages[(n - 1) / 2] / 1e6,
+                        ages[(int) ((n - 1) * .95)] / 1e6,
+                        ages[(int) ((n - 1) * .99)] / 1e6,
+                        n);
         return "uniqueWaiting="
                 + size()
                 + " pendingByLod="

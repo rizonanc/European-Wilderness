@@ -1,17 +1,24 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
+import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors.*;
+import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.WorkTimeline.Stage.*;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
+
+import com.github.xandergos.terraindiffusionmc.client.ClientPerformance;
 import com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfig;
 import com.github.xandergos.terraindiffusionmc.pipeline.LocalTerrainProvider;
 import com.github.xandergos.terraindiffusionmc.world.TerrainDiffusionBiomeSource;
-import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
-import com.github.xandergos.terraindiffusionmc.worldgen.preparation.PreparationProgress;
-import com.github.xandergos.terraindiffusionmc.client.ClientPerformance;
+import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors;
 import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.PerformanceDiagnostics;
-import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.WorkTimeline.Stage.*;
+import com.github.xandergos.terraindiffusionmc.worldgen.preparation.PreparationProgress;
+import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import java.util.Locale;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
@@ -19,12 +26,6 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.text.Text;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkStatus;
-import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors;
-import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors.*;
-import java.util.Locale;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.*;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
 /** Optional singleplayer/LAN-host bridge. No remote seed guessing or actual chunk generation. */
 public final class VoxyCompat {
@@ -39,7 +40,8 @@ public final class VoxyCompat {
             WorldSession ticket, net.minecraft.server.MinecraftServer server) {
         if (!ticket.id().equals(guardSession)) {
             guardSession = ticket.id();
-            realGuard = new LodChunkGuard(server.getSavePath(net.minecraft.util.WorldSavePath.ROOT).resolve("region"));
+            realGuard = new LodChunkGuard(
+                    server.getSavePath(net.minecraft.util.WorldSavePath.ROOT).resolve("region"));
         }
         return realGuard;
     }
@@ -74,15 +76,12 @@ public final class VoxyCompat {
         var loader = FabricLoader.getInstance();
         var mod = loader.getModContainer("voxy");
         if (mod.isPresent()) {
-            boolean seedGen =
-                    loader.getAllMods().stream()
-                            .anyMatch(m -> {
-                                String text =
-                                        (m.getMetadata().getId() + m.getMetadata().getName())
-                                                .toLowerCase(Locale.ROOT)
-                                                .replaceAll("[^a-z0-9]", "");
-                                return text.contains("voxyseedgen");
-                            });
+            boolean seedGen = loader.getAllMods().stream().anyMatch(m -> {
+                String text = (m.getMetadata().getId() + m.getMetadata().getName())
+                        .toLowerCase(Locale.ROOT)
+                        .replaceAll("[^a-z0-9]", "");
+                return text.contains("voxyseedgen");
+            });
             unavailable = supportProblem(mod.get().getMetadata().getVersion().getFriendlyString(), seedGen);
             apiPending = unavailable == null;
             if (!apiPending)
@@ -128,330 +127,157 @@ public final class VoxyCompat {
             var cs = chunksState;
             if (cs != null && cs.world == world) cs.controller.realChunk(chunk);
         });
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, access) ->
-                dispatcher.register(
-                        literal("td-voxy")
-                                .then(
-                                        literal("status")
-                                                .executes(c -> {
-                                                    c.getSource().sendFeedback(Text.literal(status()));
-                                                    c.getSource()
-                                                            .sendFeedback(
-                                                                    Text.literal(
-                                                                            "frames="
-                                                                                    + ClientPerformance.FRAMES
-                                                                                            .statistics()
-                                                                                    + (api == null
-                                                                                            ? ""
-                                                                                            : " transfer="
-                                                                                                    + api
-                                                                                                            .statistics())));
-                                                    if (api != null) {
-                                                        String water = VoxyWaterDiagnostics.snapshot();
-                                                        c.getSource().sendFeedback(Text.literal(water));
-                                                        c.getSource()
-                                                                .sendFeedback(Text.literal(WaterMipRebuild.status()));
-                                                        c.getSource()
-                                                                .sendFeedback(
-                                                                        Text.literal(VegetationMipRebuild.status()));
-                                                        LOG.info("{}", water);
-                                                        LOG.info("{}", VoxyWaterFrameDiagnostics.status());
-                                                    }
-                                                    return 1;
-                                                }))
-                                .then(
-                                        literal("census")
-                                                .executes(c -> {
-                                                    c.getSource().sendFeedback(Text.literal(census(8)));
-                                                    return 1;
-                                                })
-                                                .then(
-                                                        argument("radiusChunks", IntegerArgumentType.integer(1, 32))
-                                                                .executes(c -> {
-                                                                    c.getSource()
-                                                                            .sendFeedback(
-                                                                                    Text.literal(
-                                                                                            census(
-                                                                                                    IntegerArgumentType
-                                                                                                            .getInteger(
-                                                                                                                    c,
-                                                                                                                    "radiusChunks"))));
-                                                                    return 1;
-                                                                })))
-                                .then(
-                                        literal("inspect")
-                                                .then(
-                                                        argument("level", IntegerArgumentType.integer(0, 4))
-                                                                .then(
-                                                                        argument(
-                                                                                        "sx",
-                                                                                        IntegerArgumentType.integer(
-                                                                                                -1000000, 1000000))
-                                                                                .then(
-                                                                                        argument(
-                                                                                                        "sy",
-                                                                                                        IntegerArgumentType
-                                                                                                                .integer(
-                                                                                                                        -128,
-                                                                                                                        127))
-                                                                                                .then(
-                                                                                                        argument(
-                                                                                                                        "sz",
-                                                                                                                        IntegerArgumentType
-                                                                                                                                .integer(
-                                                                                                                                        -1000000,
-                                                                                                                                        1000000))
-                                                                                                                .executes(
-                                                                                                                        c -> {
-                                                                                                                            c.getSource()
-                                                                                                                                    .sendFeedback(
-                                                                                                                                            Text
-                                                                                                                                                    .literal(
-                                                                                                                                                            census(
-                                                                                                                                                                    0,
-                                                                                                                                                                    new int
-                                                                                                                                                                            [] {
-                                                                                                                                                                        IntegerArgumentType
-                                                                                                                                                                                .getInteger(
-                                                                                                                                                                                        c,
-                                                                                                                                                                                        "level"),
-                                                                                                                                                                        IntegerArgumentType
-                                                                                                                                                                                .getInteger(
-                                                                                                                                                                                        c,
-                                                                                                                                                                                        "sx"),
-                                                                                                                                                                        IntegerArgumentType
-                                                                                                                                                                                .getInteger(
-                                                                                                                                                                                        c,
-                                                                                                                                                                                        "sy"),
-                                                                                                                                                                        IntegerArgumentType
-                                                                                                                                                                                .getInteger(
-                                                                                                                                                                                        c,
-                                                                                                                                                                                        "sz")
-                                                                                                                                                                    })));
-                                                                                                                            return 1;
-                                                                                                                        }))))))
-                                .then(
-                                        literal("inspect-at")
-                                                .then(
-                                                        argument("x", IntegerArgumentType.integer(-29999984, 29999984))
-                                                                .then(
-                                                                        argument(
-                                                                                        "y",
-                                                                                        IntegerArgumentType.integer(
-                                                                                                -4096, 4096))
-                                                                                .then(
-                                                                                        argument(
-                                                                                                        "z",
-                                                                                                        IntegerArgumentType
-                                                                                                                .integer(
-                                                                                                                        -29999984,
-                                                                                                                        29999984))
-                                                                                                .then(
-                                                                                                        argument(
-                                                                                                                        "level",
-                                                                                                                        IntegerArgumentType
-                                                                                                                                .integer(
-                                                                                                                                        0,
-                                                                                                                                        4))
-                                                                                                                .executes(
-                                                                                                                        c -> {
-                                                                                                                            int
-                                                                                                                                    l =
-                                                                                                                                            IntegerArgumentType
-                                                                                                                                                    .getInteger(
-                                                                                                                                                            c,
-                                                                                                                                                            "level"),
-                                                                                                                                    x =
-                                                                                                                                            IntegerArgumentType
-                                                                                                                                                    .getInteger(
-                                                                                                                                                            c,
-                                                                                                                                                            "x"),
-                                                                                                                                    y =
-                                                                                                                                            IntegerArgumentType
-                                                                                                                                                    .getInteger(
-                                                                                                                                                            c,
-                                                                                                                                                            "y"),
-                                                                                                                                    z =
-                                                                                                                                            IntegerArgumentType
-                                                                                                                                                    .getInteger(
-                                                                                                                                                            c,
-                                                                                                                                                            "z"),
-                                                                                                                                    side =
-                                                                                                                                            32
-                                                                                                                                                    << l;
-                                                                                                                            c.getSource()
-                                                                                                                                    .sendFeedback(
-                                                                                                                                            Text
-                                                                                                                                                    .literal(
-                                                                                                                                                            census(
-                                                                                                                                                                    0,
-                                                                                                                                                                    new int
-                                                                                                                                                                            [] {
-                                                                                                                                                                        l,
-                                                                                                                                                                        Math
-                                                                                                                                                                                .floorDiv(
-                                                                                                                                                                                        x,
-                                                                                                                                                                                        side),
-                                                                                                                                                                        Math
-                                                                                                                                                                                .floorDiv(
-                                                                                                                                                                                        y,
-                                                                                                                                                                                        side),
-                                                                                                                                                                        Math
-                                                                                                                                                                                .floorDiv(
-                                                                                                                                                                                        z,
-                                                                                                                                                                                        side)
-                                                                                                                                                                    },
-                                                                                                                                                                    new int
-                                                                                                                                                                            [] {
-                                                                                                                                                                        x,
-                                                                                                                                                                        y,
-                                                                                                                                                                        z
-                                                                                                                                                                    })));
-                                                                                                                            return 1;
-                                                                                                                        }))))))
-                                .then(
-                                        literal("vegetation-rebuild")
-                                                .executes(c -> {
-                                                    c.getSource().sendFeedback(Text.literal(rebuildVegetation(32)));
-                                                    return 1;
-                                                })
-                                                .then(
-                                                        argument("radiusChunks", IntegerArgumentType.integer(1, 64))
-                                                                .executes(c -> {
-                                                                    c.getSource()
-                                                                            .sendFeedback(
-                                                                                    Text.literal(
-                                                                                            rebuildVegetation(
-                                                                                                    IntegerArgumentType
-                                                                                                            .getInteger(
-                                                                                                                    c,
-                                                                                                                    "radiusChunks"))));
-                                                                    return 1;
-                                                                })))
-                                .then(
-                                        literal("vegetation-rebuild-stop")
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, access) -> dispatcher.register(literal("td-voxy")
+                .then(literal("status").executes(c -> {
+                    c.getSource().sendFeedback(Text.literal(status()));
+                    c.getSource()
+                            .sendFeedback(Text.literal("frames="
+                                    + ClientPerformance.FRAMES.statistics()
+                                    + (api == null ? "" : " transfer=" + api.statistics())));
+                    if (api != null) {
+                        String water = VoxyWaterDiagnostics.snapshot();
+                        c.getSource().sendFeedback(Text.literal(water));
+                        c.getSource().sendFeedback(Text.literal(WaterMipRebuild.status()));
+                        c.getSource().sendFeedback(Text.literal(VegetationMipRebuild.status()));
+                        LOG.info("{}", water);
+                        LOG.info("{}", VoxyWaterFrameDiagnostics.status());
+                    }
+                    return 1;
+                }))
+                .then(literal("census")
+                        .executes(c -> {
+                            c.getSource().sendFeedback(Text.literal(census(8)));
+                            return 1;
+                        })
+                        .then(argument("radiusChunks", IntegerArgumentType.integer(1, 32))
+                                .executes(c -> {
+                                    c.getSource()
+                                            .sendFeedback(Text.literal(
+                                                    census(IntegerArgumentType.getInteger(c, "radiusChunks"))));
+                                    return 1;
+                                })))
+                .then(literal("inspect")
+                        .then(argument("level", IntegerArgumentType.integer(0, 4))
+                                .then(argument("sx", IntegerArgumentType.integer(-1000000, 1000000))
+                                        .then(argument("sy", IntegerArgumentType.integer(-128, 127))
+                                                .then(argument("sz", IntegerArgumentType.integer(-1000000, 1000000))
+                                                        .executes(c -> {
+                                                            c.getSource()
+                                                                    .sendFeedback(Text.literal(census(0, new int[] {
+                                                                        IntegerArgumentType.getInteger(c, "level"),
+                                                                        IntegerArgumentType.getInteger(c, "sx"),
+                                                                        IntegerArgumentType.getInteger(c, "sy"),
+                                                                        IntegerArgumentType.getInteger(c, "sz")
+                                                                    })));
+                                                            return 1;
+                                                        }))))))
+                .then(literal("inspect-at")
+                        .then(argument("x", IntegerArgumentType.integer(-29999984, 29999984))
+                                .then(argument("y", IntegerArgumentType.integer(-4096, 4096))
+                                        .then(argument("z", IntegerArgumentType.integer(-29999984, 29999984))
+                                                .then(argument("level", IntegerArgumentType.integer(0, 4))
+                                                        .executes(c -> {
+                                                            int l = IntegerArgumentType.getInteger(c, "level"),
+                                                                    x = IntegerArgumentType.getInteger(c, "x"),
+                                                                    y = IntegerArgumentType.getInteger(c, "y"),
+                                                                    z = IntegerArgumentType.getInteger(c, "z"),
+                                                                    side = 32 << l;
+                                                            c.getSource()
+                                                                    .sendFeedback(Text.literal(census(
+                                                                            0,
+                                                                            new int[] {
+                                                                                l,
+                                                                                Math.floorDiv(x, side),
+                                                                                Math.floorDiv(y, side),
+                                                                                Math.floorDiv(z, side)
+                                                                            },
+                                                                            new int[] {x, y, z})));
+                                                            return 1;
+                                                        }))))))
+                .then(literal("vegetation-rebuild")
+                        .executes(c -> {
+                            c.getSource().sendFeedback(Text.literal(rebuildVegetation(32)));
+                            return 1;
+                        })
+                        .then(argument("radiusChunks", IntegerArgumentType.integer(1, 64))
+                                .executes(c -> {
+                                    c.getSource()
+                                            .sendFeedback(Text.literal(rebuildVegetation(
+                                                    IntegerArgumentType.getInteger(c, "radiusChunks"))));
+                                    return 1;
+                                })))
+                .then(literal("vegetation-rebuild-stop").executes(c -> {
+                    c.getSource().sendFeedback(Text.literal(VegetationMipRebuild.stop()));
+                    return 1;
+                }))
+                .then(literal("water-trace").executes(c -> {
+                    c.getSource().sendFeedback(Text.literal(VoxyWaterFrameDiagnostics.request()));
+                    return 1;
+                }))
+                .then(literal("water-rebuild")
+                        .executes(c -> {
+                            c.getSource().sendFeedback(Text.literal(rebuildWater(16)));
+                            return 1;
+                        })
+                        .then(argument("radiusChunks", IntegerArgumentType.integer(1, 256))
+                                .executes(c -> {
+                                    c.getSource()
+                                            .sendFeedback(Text.literal(
+                                                    rebuildWater(IntegerArgumentType.getInteger(c, "radiusChunks"))));
+                                    return 1;
+                                })))
+                .then(literal("water-rebuild-stop").executes(c -> {
+                    c.getSource().sendFeedback(Text.literal(WaterMipRebuild.stop()));
+                    return 1;
+                }))
+                .then(literal("water-rebuild-at")
+                        .then(argument("x", IntegerArgumentType.integer(-30000000, 30000000))
+                                .then(argument("z", IntegerArgumentType.integer(-30000000, 30000000))
+                                        .then(argument("radiusChunks", IntegerArgumentType.integer(1, 256))
                                                 .executes(c -> {
                                                     c.getSource()
-                                                            .sendFeedback(Text.literal(VegetationMipRebuild.stop()));
+                                                            .sendFeedback(Text.literal(rebuildWaterAt(
+                                                                    IntegerArgumentType.getInteger(c, "x"),
+                                                                    IntegerArgumentType.getInteger(c, "z"),
+                                                                    IntegerArgumentType.getInteger(
+                                                                            c, "radiusChunks"))));
                                                     return 1;
-                                                }))
-                                .then(
-                                        literal("water-trace")
-                                                .executes(c -> {
-                                                    c.getSource()
-                                                            .sendFeedback(
-                                                                    Text.literal(VoxyWaterFrameDiagnostics.request()));
-                                                    return 1;
-                                                }))
-                                .then(
-                                        literal("water-rebuild")
-                                                .executes(c -> {
-                                                    c.getSource().sendFeedback(Text.literal(rebuildWater(16)));
-                                                    return 1;
-                                                })
-                                                .then(
-                                                        argument("radiusChunks", IntegerArgumentType.integer(1, 256))
-                                                                .executes(c -> {
-                                                                    c.getSource()
-                                                                            .sendFeedback(
-                                                                                    Text.literal(
-                                                                                            rebuildWater(
-                                                                                                    IntegerArgumentType
-                                                                                                            .getInteger(
-                                                                                                                    c,
-                                                                                                                    "radiusChunks"))));
-                                                                    return 1;
-                                                                })))
-                                .then(
-                                        literal("water-rebuild-stop")
-                                                .executes(c -> {
-                                                    c.getSource().sendFeedback(Text.literal(WaterMipRebuild.stop()));
-                                                    return 1;
-                                                }))
-                                .then(
-                                        literal("water-rebuild-at")
-                                                .then(
-                                                        argument("x", IntegerArgumentType.integer(-30000000, 30000000))
-                                                                .then(
-                                                                        argument(
-                                                                                        "z",
-                                                                                        IntegerArgumentType.integer(
-                                                                                                -30000000, 30000000))
-                                                                                .then(
-                                                                                        argument(
-                                                                                                        "radiusChunks",
-                                                                                                        IntegerArgumentType
-                                                                                                                .integer(
-                                                                                                                        1,
-                                                                                                                        256))
-                                                                                                .executes(c -> {
-                                                                                                    c.getSource()
-                                                                                                            .sendFeedback(
-                                                                                                                    Text
-                                                                                                                            .literal(
-                                                                                                                                    rebuildWaterAt(
-                                                                                                                                            IntegerArgumentType
-                                                                                                                                                    .getInteger(
-                                                                                                                                                            c,
-                                                                                                                                                            "x"),
-                                                                                                                                            IntegerArgumentType
-                                                                                                                                                    .getInteger(
-                                                                                                                                                            c,
-                                                                                                                                                            "z"),
-                                                                                                                                            IntegerArgumentType
-                                                                                                                                                    .getInteger(
-                                                                                                                                                            c,
-                                                                                                                                                            "radiusChunks"))));
-                                                                                                    return 1;
-                                                                                                })))))
-                                .then(
-                                        literal("start")
-                                                .then(
-                                                        argument(
-                                                                        "radius",
-                                                                        IntegerArgumentType.integer(
-                                                                                64, LodScan.MAX_RADIUS_BLOCKS))
-                                                                .executes(c -> {
-                                                                    if (TerrainDiffusionConfig.voxyNativeChunks()) {
-                                                                        enabled = true;
-                                                                        c.getSource()
-                                                                                .sendFeedback(
-                                                                                        Text.literal(
-                                                                                                "Voxy получает реальные чанки. Для явной предгенерации: /td-voxy chunky <радиус в чанках>. /chunky progress"));
-                                                                        return 1;
-                                                                    }
-                                                                    if (api == null) {
-                                                                        c.getSource()
-                                                                                .sendError(Text.literal(unavailable));
-                                                                        return 0;
-                                                                    }
-                                                                    radius =
-                                                                            IntegerArgumentType.getInteger(c, "radius");
-                                                                    manualRadius = true;
-                                                                    enabled = true;
-                                                                    generate = true;
-                                                                    if (context != null && context.closed) retire();
-                                                                    c.getSource()
-                                                                            .sendFeedback(
-                                                                                    Text.literal(
-                                                                                            "Voxy: фоновый расчёт European Wilderness и LOD включён, радиус "
-                                                                                                    + radius
-                                                                                                    + " блоков. /td-voxy status; /td-voxy stop"));
-                                                                    return 1;
-                                                                })))
-                                .then(
-                                        literal("stop")
-                                                .executes(c -> {
-                                                    enabled = false;
-                                                    generate = false;
-                                                    retire();
-                                                    retireChunksCoarse();
-                                                    c.getSource()
-                                                            .sendFeedback(
-                                                                    Text.literal(
-                                                                            "Мост Voxy остановлен; сохранённые данные оставлены."));
-                                                    return 1;
-                                                }))));
+                                                })))))
+                .then(literal("start")
+                        .then(argument("radius", IntegerArgumentType.integer(64, LodScan.MAX_RADIUS_BLOCKS))
+                                .executes(c -> {
+                                    if (TerrainDiffusionConfig.voxyNativeChunks()) {
+                                        enabled = true;
+                                        c.getSource()
+                                                .sendFeedback(
+                                                        Text.literal(
+                                                                "Voxy получает реальные чанки. Для явной предгенерации: /td-voxy chunky <радиус в чанках>. /chunky progress"));
+                                        return 1;
+                                    }
+                                    if (api == null) {
+                                        c.getSource().sendError(Text.literal(unavailable));
+                                        return 0;
+                                    }
+                                    radius = IntegerArgumentType.getInteger(c, "radius");
+                                    manualRadius = true;
+                                    enabled = true;
+                                    generate = true;
+                                    if (context != null && context.closed) retire();
+                                    c.getSource()
+                                            .sendFeedback(Text.literal(
+                                                    "Voxy: фоновый расчёт European Wilderness и LOD включён, радиус "
+                                                            + radius
+                                                            + " блоков. /td-voxy status; /td-voxy stop"));
+                                    return 1;
+                                })))
+                .then(literal("stop").executes(c -> {
+                    enabled = false;
+                    generate = false;
+                    retire();
+                    retireChunksCoarse();
+                    c.getSource().sendFeedback(Text.literal("Мост Voxy остановлен; сохранённые данные оставлены."));
+                    return 1;
+                }))));
         if (api != null)
             LOG.info(
                     "Optional Voxy 0.2.16 continuous streaming available; VoxyWorldGen 2.2.4 coordination: {}",
@@ -496,88 +322,74 @@ public final class VoxyCompat {
                     bottom = world.getBottomY(),
                     top = world.getTopYInclusive();
             var ticket = WorldSession.current();
-            String origin =
-                    "seed="
-                            + (ticket == null ? "UNKNOWN" : ticket.worldSeed())
-                            + " cameraXYZ="
-                            + player.getX()
-                            + ","
-                            + player.getY()
-                            + ","
-                            + player.getZ()
-                            + " yawPitch="
-                            + player.getYaw()
-                            + ","
-                            + player.getPitch()
-                            + "; ";
+            String origin = "seed="
+                    + (ticket == null ? "UNKNOWN" : ticket.worldSeed())
+                    + " cameraXYZ="
+                    + player.getX()
+                    + ","
+                    + player.getY()
+                    + ","
+                    + player.getZ()
+                    + " yawPitch="
+                    + player.getYaw()
+                    + ","
+                    + player.getPitch()
+                    + "; ";
             var samples = section == null ? VoxyCensus.capture(world, cx, cz) : java.util.List.<VoxyCensus.Sample>of();
             var bound = api.acquire(world);
             if (bound == null) return "Voxy census: движок недоступен";
-            boolean queued =
-                    PerformanceDiagnostics.requestSnapshot(() -> {
-                        String result;
-                        try (bound) {
-                            if (ticket != WorldSession.current()
-                                    || ticket != null && !ticket.isActive()
-                                    || !bound.active()) result = "Voxy census: отменено после смены мира";
-                            else {
-                                var reader =
-                                        new VoxyCensus.Reader() {
-                                            public int mask(int l, int x, int y, int z) throws Exception {
-                                                return bound.nonEmptyChildrenMask(l, x, y, z);
-                                            }
-
-                                            public long[] raw(int l, int x, int y, int z) throws Exception {
-                                                return bound.rawCopy(l, x, y, z);
-                                            }
-                                        };
-                                result =
-                                        section == null
-                                                ? VoxyCensus.scan(reader, samples, radiusChunks, bottom, top, cx, cz)
-                                                : VoxyCensus.inspect(
-                                                                reader, section[0], section[1], section[2], section[3])
-                                                        + "; "
-                                                        + (point == null
-                                                                ? CoarseRenderHooks.describe(
-                                                                        bound.identity(),
-                                                                        me.cortex.voxy.common.world.WorldEngine
-                                                                                .getWorldSectionId(
-                                                                                        section[0],
-                                                                                        section[1],
-                                                                                        section[2],
-                                                                                        section[3]))
-                                                                : CoarseRenderHooks.describePoint(
-                                                                        bound.identity(),
-                                                                        me.cortex.voxy.common.world.WorldEngine
-                                                                                .getWorldSectionId(
-                                                                                        section[0],
-                                                                                        section[1],
-                                                                                        section[2],
-                                                                                        section[3]),
-                                                                        point[0],
-                                                                        point[1],
-                                                                        point[2]));
+            boolean queued = PerformanceDiagnostics.requestSnapshot(() -> {
+                String result;
+                try (bound) {
+                    if (ticket != WorldSession.current() || ticket != null && !ticket.isActive() || !bound.active())
+                        result = "Voxy census: отменено после смены мира";
+                    else {
+                        var reader = new VoxyCensus.Reader() {
+                            public int mask(int l, int x, int y, int z) throws Exception {
+                                return bound.nonEmptyChildrenMask(l, x, y, z);
                             }
-                        } catch (Exception | LinkageError failure) {
-                            emit(
-                                    Code.VOX_ASYNC,
-                                    DiagnosticErrors.current("VOXY_CENSUS"),
-                                    failure,
-                                    Outcome.DEGRADED,
-                                    "Read-only census failed; world unchanged",
-                                    false);
-                            LOG.warn("Voxy census failed", failure);
-                            result = "Voxy census: ошибка " + failure.getClass().getSimpleName();
-                        }
-                        result = origin + result;
-                        LOG.info("{}", result);
-                        String message = result;
-                        client.execute(() -> {
-                            if (client.world == world && client.player != null)
-                                client.player.sendMessage(Text.literal(message), false);
-                        });
-                        return java.util.Map.of("voxy_census", result);
-                    });
+
+                            public long[] raw(int l, int x, int y, int z) throws Exception {
+                                return bound.rawCopy(l, x, y, z);
+                            }
+                        };
+                        result = section == null
+                                ? VoxyCensus.scan(reader, samples, radiusChunks, bottom, top, cx, cz)
+                                : VoxyCensus.inspect(reader, section[0], section[1], section[2], section[3])
+                                        + "; "
+                                        + (point == null
+                                                ? CoarseRenderHooks.describe(
+                                                        bound.identity(),
+                                                        me.cortex.voxy.common.world.WorldEngine.getWorldSectionId(
+                                                                section[0], section[1], section[2], section[3]))
+                                                : CoarseRenderHooks.describePoint(
+                                                        bound.identity(),
+                                                        me.cortex.voxy.common.world.WorldEngine.getWorldSectionId(
+                                                                section[0], section[1], section[2], section[3]),
+                                                        point[0],
+                                                        point[1],
+                                                        point[2]));
+                    }
+                } catch (Exception | LinkageError failure) {
+                    emit(
+                            Code.VOX_ASYNC,
+                            DiagnosticErrors.current("VOXY_CENSUS"),
+                            failure,
+                            Outcome.DEGRADED,
+                            "Read-only census failed; world unchanged",
+                            false);
+                    LOG.warn("Voxy census failed", failure);
+                    result = "Voxy census: ошибка " + failure.getClass().getSimpleName();
+                }
+                result = origin + result;
+                LOG.info("{}", result);
+                String message = result;
+                client.execute(() -> {
+                    if (client.world == world && client.player != null)
+                        client.player.sendMessage(Text.literal(message), false);
+                });
+                return java.util.Map.of("voxy_census", result);
+            });
             if (!queued) {
                 bound.close();
                 return "Voxy census: диагностическая очередь занята";
@@ -694,21 +506,19 @@ public final class VoxyCompat {
             this.world = world;
             this.ticket = ticket;
             this.engineIdentity = api.engineIdentity(world);
-            var biomes =
-                    new TerrainDiffusionBiomeSource(
-                            world.getRegistryManager().getOrThrow(net.minecraft.registry.RegistryKeys.BIOME));
+            var biomes = new TerrainDiffusionBiomeSource(
+                    world.getRegistryManager().getOrThrow(net.minecraft.registry.RegistryKeys.BIOME));
             biomes.recordedBiome((short) 1);
             this.guard = guardFor(ticket, client.getServer());
-            this.controller =
-                    new CoarseLodController(
-                            client,
-                            world,
-                            ticket,
-                            api,
-                            biomes,
-                            guard,
-                            this::current,
-                            () -> TerrainDiffusionConfig.voxyPrepareAhead() && ticket.backgroundAllowed());
+            this.controller = new CoarseLodController(
+                    client,
+                    world,
+                    ticket,
+                    api,
+                    biomes,
+                    guard,
+                    this::current,
+                    () -> TerrainDiffusionConfig.voxyPrepareAhead() && ticket.backgroundAllowed());
         }
 
         boolean current() {
@@ -732,12 +542,11 @@ public final class VoxyCompat {
         if (api == null) return unavailable == null ? "Voxy: ожидание инициализации" : unavailable;
         if (TerrainDiffusionConfig.voxyNativeChunks()) {
             var cs = chunksState;
-            String coarse =
-                    cs == null
-                            ? (TerrainDiffusionConfig.voxyCoarseExperimental()
-                                    ? " NN-LOD: ожидание условий (Voxy активен в мире TD)"
-                                    : " NN-LOD: выключен (coarse_experimental=false)")
-                            : " NN-LOD активен (renderer-only): " + cs.controller.statistics();
+            String coarse = cs == null
+                    ? (TerrainDiffusionConfig.voxyCoarseExperimental()
+                            ? " NN-LOD: ожидание условий (Voxy активен в мире TD)"
+                            : " NN-LOD: выключен (coarse_experimental=false)")
+                    : " NN-LOD активен (renderer-only): " + cs.controller.statistics();
             return "Voxy: реальные чанки. Chunky: /td-voxy chunky <радиус в чанках>; /chunky progress." + coarse;
         }
         if (!WorldGenCompat.safeToStream()) return WorldGenCompat.problem();
@@ -819,7 +628,8 @@ public final class VoxyCompat {
                 apiPending = false;
             } catch (ReflectiveOperationException | LinkageError failure) {
                 apiPending = false;
-                unavailable = "Интерфейсы Voxy недоступны: " + failure.getClass().getSimpleName();
+                unavailable =
+                        "Интерфейсы Voxy недоступны: " + failure.getClass().getSimpleName();
                 emit(
                         Code.VOX_API,
                         current("VOXY_BRIDGE_INIT"),
@@ -831,16 +641,15 @@ public final class VoxyCompat {
         if (System.nanoTime() >= nextReport) {
             nextReport = System.nanoTime() + 1_000_000_000L;
             var snapshot = WorldSession.current();
-            PerformanceDiagnostics.previewStatus(
-                    status()
-                            + " publish="
-                            + ClientPerformance.mayPublish()
-                            + " gate="
-                            + com.github.xandergos.terraindiffusionmc.client.ClientPerformance.publishGateReason()
-                            + " prepare="
-                            + (snapshot != null && snapshot.backgroundAllowed())
-                            + " frames="
-                            + ClientPerformance.FRAMES.statistics());
+            PerformanceDiagnostics.previewStatus(status()
+                    + " publish="
+                    + ClientPerformance.mayPublish()
+                    + " gate="
+                    + com.github.xandergos.terraindiffusionmc.client.ClientPerformance.publishGateReason()
+                    + " prepare="
+                    + (snapshot != null && snapshot.backgroundAllowed())
+                    + " frames="
+                    + ClientPerformance.FRAMES.statistics());
         }
         var ticket = WorldSession.current();
         var server = client.getServer();
@@ -907,13 +716,12 @@ public final class VoxyCompat {
         if (context == null || context.world != world || context.ticket != ticket) {
             retire();
             // Resolve client-side registry entries, matching Voxy's own mapper registry.
-            context =
-                    new Context(
-                            client,
-                            world,
-                            ticket,
-                            new TerrainDiffusionBiomeSource(
-                                    world.getRegistryManager().getOrThrow(net.minecraft.registry.RegistryKeys.BIOME)));
+            context = new Context(
+                    client,
+                    world,
+                    ticket,
+                    new TerrainDiffusionBiomeSource(
+                            world.getRegistryManager().getOrThrow(net.minecraft.registry.RegistryKeys.BIOME)));
         }
         var ctx = context;
         ctx.voxyAvailable = true;
@@ -1206,13 +1014,8 @@ public final class VoxyCompat {
             if (work.column == null) {
                 long trace = PerformanceDiagnostics.begin(LOD_SAMPLE);
                 try {
-                    work.column =
-                            source.sample(
-                                    work.cell.x(),
-                                    work.cell.z(),
-                                    world.getBottomY(),
-                                    world.getTopYInclusive(),
-                                    work.surface());
+                    work.column = source.sample(
+                            work.cell.x(), work.cell.z(), world.getBottomY(), world.getTopYInclusive(), work.surface());
                 } finally {
                     PerformanceDiagnostics.end(trace);
                 }
@@ -1239,22 +1042,18 @@ public final class VoxyCompat {
             long trace = PerformanceDiagnostics.begin(LOD_CLIENT_WAIT);
             Voxy016Api.Bound bound;
             try {
-                bound =
-                        client.submit(
-                                        () -> {
-                                            if (!current() || work.cancelled.get() || !ClientPerformance.mayPublish())
-                                                return null;
-                                            work.writableMask &=
-                                                    ~loadedMask(work.cell)
-                                                            & guard.unseenMask(work.cell.x(), work.cell.z());
-                                            if (work.writableMask == 0) return null;
-                                            try {
-                                                return targetApi.acquire(world);
-                                            } catch (ReflectiveOperationException e) {
-                                                throw new IllegalStateException(e);
-                                            }
-                                        })
-                                .get();
+                bound = client.submit(() -> {
+                            if (!current() || work.cancelled.get() || !ClientPerformance.mayPublish()) return null;
+                            work.writableMask &=
+                                    ~loadedMask(work.cell) & guard.unseenMask(work.cell.x(), work.cell.z());
+                            if (work.writableMask == 0) return null;
+                            try {
+                                return targetApi.acquire(world);
+                            } catch (ReflectiveOperationException e) {
+                                throw new IllegalStateException(e);
+                            }
+                        })
+                        .get();
             } finally {
                 PerformanceDiagnostics.end(trace);
             }
@@ -1269,36 +1068,33 @@ public final class VoxyCompat {
             boolean complete = true;
             try (bound) {
                 if (work.cursor == null)
-                    work.cursor =
-                            work.surface()
-                                    ? LodPublisher.Cursor.visible(column, bound.highestKnownCube(column))
-                                    : LodPublisher.Cursor.resume(column, work.resume);
+                    work.cursor = work.surface()
+                            ? LodPublisher.Cursor.visible(column, bound.highestKnownCube(column))
+                            : LodPublisher.Cursor.resume(column, work.resume);
                 if (coarse != null) coarse.exact(work.cell.x(), work.cell.z(), work.writableMask, column);
-                var sink =
-                        new LodPublisher.Sink() {
-                            public boolean active() throws Exception {
-                                return bound.active();
-                            }
+                var sink = new LodPublisher.Sink() {
+                    public boolean active() throws Exception {
+                        return bound.active();
+                    }
 
-                            // Existing cache presence cannot distinguish a partial 32-cube
-                            // from a complete one. Only unsaved/unseen 16-chunk columns are rewritten.
-                            public boolean occupied(int x, int y, int z) {
-                                return false;
-                            }
+                    // Existing cache presence cannot distinguish a partial 32-cube
+                    // from a complete one. Only unsaved/unseen 16-chunk columns are rewritten.
+                    public boolean occupied(int x, int y, int z) {
+                        return false;
+                    }
 
-                            public boolean existing(int x, int y, int z) throws Exception {
-                                return bound.occupied(x, y, z);
-                            }
+                    public boolean existing(int x, int y, int z) throws Exception {
+                        return bound.occupied(x, y, z);
+                    }
 
-                            public void write(LodColumn column, int y) throws Exception {
-                                bound.cube(column, y, biomes, work.writableMask);
-                            }
-                        };
+                    public void write(LodColumn column, int y) throws Exception {
+                        bound.cube(column, y, biomes, work.writableMask);
+                    }
+                };
                 // At most one write; cheaply skip up to eight already saved cubes.
                 for (int checks = 0; checks < 8; checks++) {
-                    var result =
-                            work.cursor.step(
-                                    sink, () -> current() && !work.cancelled.get() && ClientPerformance.mayPublish());
+                    var result = work.cursor.step(
+                            sink, () -> current() && !work.cancelled.get() && ClientPerformance.mayPublish());
                     complete = result.complete();
                     written.addAndGet(result.written());
                     skipped.addAndGet(result.skipped());
@@ -1325,13 +1121,8 @@ public final class VoxyCompat {
                 if (client.world != world) return;
                 for (int cz = 0; cz < 2; cz++)
                     for (int cx = 0; cx < 2; cx++) {
-                        var real =
-                                world.getChunkManager()
-                                        .getChunk(
-                                                work.cell.x() * 2 + cx,
-                                                work.cell.z() * 2 + cz,
-                                                ChunkStatus.FULL,
-                                                false);
+                        var real = world.getChunkManager()
+                                .getChunk(work.cell.x() * 2 + cx, work.cell.z() * 2 + cz, ChunkStatus.FULL, false);
                         if (real != null)
                             try {
                                 targetApi.reingest(real);

@@ -1,7 +1,8 @@
 package com.github.xandergos.terraindiffusionmc.config;
 
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 class ExperimentalFlagsDefaultTest {
     @Test
@@ -36,9 +37,8 @@ class ExperimentalFlagsDefaultTest {
     @Test
     void coarseMixinPluginRefusesWhileFlagIsOff() {
         var plugin = new com.github.xandergos.terraindiffusionmc.mixin.compat.CoarseVoxyMixinPlugin();
-        assertFalse(
-                plugin.shouldApplyMixin(
-                        "me.cortex.voxy.client.core.rendering.building.RenderGenerationService",
-                        "com.github.xandergos.terraindiffusionmc.mixin.compat.CoarseRenderSectionMixin"));
+        assertFalse(plugin.shouldApplyMixin(
+                "me.cortex.voxy.client.core.rendering.building.RenderGenerationService",
+                "com.github.xandergos.terraindiffusionmc.mixin.compat.CoarseRenderSectionMixin"));
     }
 }

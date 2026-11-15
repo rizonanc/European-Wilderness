@@ -1,9 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
-import java.util.concurrent.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.*;
 import java.util.function.LongPredicate;
 
 /** Worker-built evidence of exact Voxy columns, distinct from Anvil write protection. */

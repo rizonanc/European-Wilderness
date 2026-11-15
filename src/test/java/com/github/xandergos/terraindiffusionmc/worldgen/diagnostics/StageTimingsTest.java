@@ -1,8 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.diagnostics;
 
-import org.junit.jupiter.api.Test;
-import java.util.concurrent.*;
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.concurrent.*;
+import org.junit.jupiter.api.Test;
 
 class StageTimingsTest {
     @Test
@@ -45,10 +46,9 @@ class StageTimingsTest {
         try (var pool = Executors.newFixedThreadPool(4)) {
             var tasks = new java.util.ArrayList<Future<?>>();
             for (int i = 0; i < 4; i++)
-                tasks.add(
-                        pool.submit(() -> {
-                            for (int n = 0; n < 1000; n++) timings.record("stage", 20);
-                        }));
+                tasks.add(pool.submit(() -> {
+                    for (int n = 0; n < 1000; n++) timings.record("stage", 20);
+                }));
             for (var task : tasks) task.get(5, TimeUnit.SECONDS);
         }
         assertEquals(4000, timings.snapshot().get("stage").count());

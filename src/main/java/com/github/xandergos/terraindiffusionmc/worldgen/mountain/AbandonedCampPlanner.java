@@ -26,22 +26,17 @@ public final class AbandonedCampPlanner {
         if (key.seed() == seed && key.tileX() == pass.tileX() && key.tileZ() == pass.tileZ()) {
             int size = key.tileSize();
             if (size >= 96 && pass.route().size() >= 12) {
-                long identity =
-                        mix(
-                                seed
-                                        ^ pass.id()
-                                        ^ -919676771051557371L
-                                        ^ key.tileX() * -7046029254386353131L
-                                        ^ key.tileZ() * -3335678366873096957L);
+                long identity = mix(seed
+                        ^ pass.id()
+                        ^ -919676771051557371L
+                        ^ key.tileX() * -7046029254386353131L
+                        ^ key.tileZ() * -3335678366873096957L);
                 if ((identity & 1L) != 0L) {
                     return Optional.empty();
                 }
 
-                AbandonedCampPlanner.Family family =
-                        AbandonedCampPlanner.Family.values()[
-                                (int)
-                                        Long.remainderUnsigned(
-                                                identity >>> 2, AbandonedCampPlanner.Family.values().length)];
+                AbandonedCampPlanner.Family family = AbandonedCampPlanner.Family.values()[
+                        (int) Long.remainderUnsigned(identity >>> 2, AbandonedCampPlanner.Family.values().length)];
                 int tents = family == AbandonedCampPlanner.Family.EXPEDITION ? 5 : ((identity & 2L) == 0L ? 4 : 5);
                 List<MountainPassPlanner.RoutePoint> route = pass.route();
                 int baseIndex = route.size() / 2;
@@ -59,20 +54,19 @@ public final class AbandonedCampPlanner {
                         int side = (identity >>> 5 & 1L) == 0L ? 1 : -1;
                         int centerX = anchor.x() + (alongX ? 0 : side * 20);
                         int centerZ = anchor.z() + (alongX ? side * 20 : 0);
-                        Optional<AbandonedCampPlanner.CampPlan> candidate =
-                                atSite(
-                                        seed,
-                                        tile,
-                                        worldScale,
-                                        worldTopYInclusive,
-                                        identity,
-                                        family,
-                                        tents,
-                                        anchor.x(),
-                                        anchor.z(),
-                                        centerX,
-                                        centerZ,
-                                        alongX);
+                        Optional<AbandonedCampPlanner.CampPlan> candidate = atSite(
+                                seed,
+                                tile,
+                                worldScale,
+                                worldTopYInclusive,
+                                identity,
+                                family,
+                                tents,
+                                anchor.x(),
+                                anchor.z(),
+                                centerX,
+                                centerZ,
+                                alongX);
                         if (candidate.isPresent()) {
                             return candidate;
                         }
@@ -128,14 +122,13 @@ public final class AbandonedCampPlanner {
                     lastY = y;
                 }
 
-                int[][] offsets =
-                        new int[][] {
-                            {-9, -7},
-                            {9, -7},
-                            {-9, 7},
-                            {9, 7},
-                            family == AbandonedCampPlanner.Family.EXPEDITION ? new int[] {0, 0} : new int[] {0, 15}
-                        };
+                int[][] offsets = new int[][] {
+                    {-9, -7},
+                    {9, -7},
+                    {-9, 7},
+                    {9, 7},
+                    family == AbandonedCampPlanner.Family.EXPEDITION ? new int[] {0, 0} : new int[] {0, 15}
+                };
                 List<AbandonedCampPlanner.TentSite> sites = new ArrayList<>(count);
 
                 for (int index = 0; index < count; index++) {
@@ -241,9 +234,9 @@ public final class AbandonedCampPlanner {
         AbandonedCampPlanner.Material canvas =
                 switch (family) {
                     case EXPEDITION ->
-                            tentIndex == 4
-                                    ? AbandonedCampPlanner.Material.GRAY_WOOL
-                                    : AbandonedCampPlanner.Material.BROWN_WOOL;
+                        tentIndex == 4
+                                ? AbandonedCampPlanner.Material.GRAY_WOOL
+                                : AbandonedCampPlanner.Material.BROWN_WOOL;
                     case ROAD -> AbandonedCampPlanner.Material.BROWN_WOOL;
                     case SNOW_RUINED -> AbandonedCampPlanner.Material.WHITE_WOOL;
                 };
@@ -254,10 +247,9 @@ public final class AbandonedCampPlanner {
                 int z = site.z + (alongX ? width : length);
                 int roofY = site.y + site.halfWidth + 2 - Math.abs(width);
                 long wear = mix(identity ^ tentIndex * -4658895280553007687L ^ length * 41L ^ width * 73L);
-                boolean accent =
-                        family == AbandonedCampPlanner.Family.SNOW_RUINED
-                                && length == ((tentIndex & 1) == 0 ? -1 : 1)
-                                && width == 0;
+                boolean accent = family == AbandonedCampPlanner.Family.SNOW_RUINED
+                        && length == ((tentIndex & 1) == 0 ? -1 : 1)
+                        && width == 0;
                 boolean missing = family == AbandonedCampPlanner.Family.SNOW_RUINED && !accent && (wear & 7L) < 2L;
                 if (!missing) {
                     AbandonedCampPlanner.Material roof =

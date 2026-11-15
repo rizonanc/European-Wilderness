@@ -1,8 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.preparation;
 
-import org.junit.jupiter.api.Test;
-import java.util.concurrent.atomic.AtomicLong;
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.concurrent.atomic.AtomicLong;
+import org.junit.jupiter.api.Test;
 
 class FrameBudgetTest {
     @Test

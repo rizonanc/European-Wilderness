@@ -1,8 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.pipeline;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.*;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class RoiUpsamplingTest {
     @Test
@@ -81,11 +82,10 @@ class RoiUpsamplingTest {
 
     @Test
     void testDegenerateSourceEdgesFloatingPointSpecials() {
-        for (var src :
-                List.of(
-                        new float[][] {{-0.0f}},
-                        new float[][] {{0, -0.0f, Float.NaN, Float.POSITIVE_INFINITY}},
-                        new float[][] {{1}, {Float.NEGATIVE_INFINITY}}))
+        for (var src : List.of(
+                new float[][] {{-0.0f}},
+                new float[][] {{0, -0.0f, Float.NaN, Float.POSITIVE_INFINITY}},
+                new float[][] {{1}, {Float.NEGATIVE_INFINITY}}))
             same(reference(src, 19, 13, -2, 5, 30, 20), LaplacianUtils.bilinearResizeRoi(src, 19, 13, -2, 5, 30, 20));
         assertThrows(
                 IllegalArgumentException.class,

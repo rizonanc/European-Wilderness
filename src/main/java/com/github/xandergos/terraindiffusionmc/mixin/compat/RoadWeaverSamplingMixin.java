@@ -16,9 +16,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Pseudo
 @Mixin(targets = "net.shiroha233.roadweaver.pathfinding.cache.TerrainSamplingCache", remap = false)
 abstract class RoadWeaverSamplingMixin {
-    @Shadow @Final private ConcurrentHashMap<Long, Integer> heightCache;
-    @Shadow @Final private ConcurrentHashMap<Long, Integer> oceanFloorCache;
-    @Shadow @Final private ConcurrentHashMap<Long, Boolean> waterCache;
+    @Shadow
+    @Final
+    private ConcurrentHashMap<Long, Integer> heightCache;
+
+    @Shadow
+    @Final
+    private ConcurrentHashMap<Long, Integer> oceanFloorCache;
+
+    @Shadow
+    @Final
+    private ConcurrentHashMap<Long, Boolean> waterCache;
 
     @Shadow(remap = false)
     public abstract int oceanFloor(ServerWorld world, int x, int z);
@@ -30,10 +38,8 @@ abstract class RoadWeaverSamplingMixin {
         long key = td$key(x, z);
         Integer height = heightCache.get(key);
         if (height == null) {
-            height =
-                    Math.max(
-                            oceanFloor(world, x, z),
-                            RoadWeaverTerrain.waterFirstAir(session, x, z, world.getSeaLevel()));
+            height = Math.max(
+                    oceanFloor(world, x, z), RoadWeaverTerrain.waterFirstAir(session, x, z, world.getSeaLevel()));
             heightCache.put(key, height);
         }
         result.setReturnValue(height);

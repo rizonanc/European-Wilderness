@@ -1,15 +1,18 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.hydrology;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.lang.reflect.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
-import java.lang.reflect.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import static org.junit.jupiter.api.Assertions.*;
 
 class WaterWriteBehindAuditTest {
-    @TempDir Path temp;
+    @TempDir
+    Path temp;
+
     private static final WorldWaterGrid GRID = WorldWaterGrid.DEFAULT;
 
     private static WorldWaterUnit unit(short level) {
@@ -29,19 +32,18 @@ class WaterWriteBehindAuditTest {
         var writer = new WaterWriteBehind(store, 2);
         var entered = new CountDownLatch(1);
         var release = new CountDownLatch(1);
-        var delayed =
-                new ArrayBlockingQueue<Object>(2) {
-                    @Override
-                    public boolean offer(Object value) {
-                        entered.countDown();
-                        try {
-                            release.await();
-                        } catch (InterruptedException e) {
-                            throw new AssertionError(e);
-                        }
-                        return super.offer(value);
-                    }
-                };
+        var delayed = new ArrayBlockingQueue<Object>(2) {
+            @Override
+            public boolean offer(Object value) {
+                entered.countDown();
+                try {
+                    release.await();
+                } catch (InterruptedException e) {
+                    throw new AssertionError(e);
+                }
+                return super.offer(value);
+            }
+        };
         Field queue = WaterWriteBehind.class.getDeclaredField("queue");
         queue.setAccessible(true);
         queue.set(writer, delayed);
@@ -112,13 +114,12 @@ class WaterWriteBehindAuditTest {
     void testFailedWorkerClosesAdmission() throws Exception {
         var store = new WorldWaterStore(temp, 7, "fixture", 256, GRID);
         var writer = new WaterWriteBehind(store, 2);
-        var failing =
-                new ArrayBlockingQueue<Object>(2) {
-                    @Override
-                    public Object poll(long time, TimeUnit units) {
-                        throw new AssertionError("injected poll failure");
-                    }
-                };
+        var failing = new ArrayBlockingQueue<Object>(2) {
+            @Override
+            public Object poll(long time, TimeUnit units) {
+                throw new AssertionError("injected poll failure");
+            }
+        };
         Field queue = WaterWriteBehind.class.getDeclaredField("queue");
         queue.setAccessible(true);
         queue.set(writer, failing);

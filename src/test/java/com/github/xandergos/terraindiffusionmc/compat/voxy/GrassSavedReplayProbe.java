@@ -38,14 +38,13 @@ public final class GrassSavedReplayProbe {
             }
         }
         if (changedSections == 0) throw new AssertionError("Saved scene did not exercise correction");
-        String result =
-                "PASS: saved scene sections="
-                        + total
-                        + ", sections with plant-only corrections="
-                        + changedSections
-                        + ", changed L1/L2 cells="
-                        + changedCells
-                        + "; L0, terrain/water/foreign cells and far mips unchanged. Semantic block classes remapped for offline fixture; no live writes.\n";
+        String result = "PASS: saved scene sections="
+                + total
+                + ", sections with plant-only corrections="
+                + changedSections
+                + ", changed L1/L2 cells="
+                + changedCells
+                + "; L0, terrain/water/foreign cells and far mips unchanged. Semantic block classes remapped for offline fixture; no live writes.\n";
         Files.writeString(Path.of(args[1]), result);
         System.out.print(result);
     }

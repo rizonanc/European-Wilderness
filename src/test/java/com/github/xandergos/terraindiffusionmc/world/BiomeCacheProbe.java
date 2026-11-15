@@ -1,10 +1,10 @@
 package com.github.xandergos.terraindiffusionmc.world;
 
+import com.github.xandergos.terraindiffusionmc.worldgen.cache.DiskTerrainStore;
+import com.github.xandergos.terraindiffusionmc.worldgen.terrain.*;
 import java.lang.management.ManagementFactory;
 import java.nio.file.Path;
 import java.util.*;
-import com.github.xandergos.terraindiffusionmc.worldgen.cache.DiskTerrainStore;
-import com.github.xandergos.terraindiffusionmc.worldgen.terrain.*;
 
 /** Isolated warm-read cost only; does not measure total Chunky throughput. */
 public final class BiomeCacheProbe {
@@ -14,17 +14,16 @@ public final class BiomeCacheProbe {
         var store = new DiskTerrainStore(Path.of(args[0]));
         long seed = 42;
         String fingerprint = "biome-cost-probe";
-        var repo =
-                new TerrainRepository(
-                        store,
-                        key -> {
-                            short[] heights = new short[256], biomes = new short[256];
-                            for (int i = 0; i < biomes.length; i++) biomes[i] = (short) (208 + i % 3);
-                            return new TerrainTile(key, heights, biomes);
-                        },
-                        16,
-                        1048576,
-                        1073741824L);
+        var repo = new TerrainRepository(
+                store,
+                key -> {
+                    short[] heights = new short[256], biomes = new short[256];
+                    for (int i = 0; i < biomes.length; i++) biomes[i] = (short) (208 + i % 3);
+                    return new TerrainTile(key, heights, biomes);
+                },
+                16,
+                1048576,
+                1073741824L);
         for (int i = 0; i < 4; i++) repo.get(TerrainTileKey.ofTile(seed, i, 0, 16, fingerprint));
         var bean = (com.sun.management.ThreadMXBean) ManagementFactory.getThreadMXBean();
         var id = UUID.randomUUID();

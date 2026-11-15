@@ -1,19 +1,20 @@
 package com.github.xandergos.terraindiffusionmc.world;
 
-import com.github.xandergos.terraindiffusionmc.pipeline.LocalTerrainProvider.HeightmapData;
-import com.github.xandergos.terraindiffusionmc.worldgen.settings.*;
-import com.github.xandergos.terraindiffusionmc.worldgen.hydrology.*;
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.github.xandergos.terraindiffusionmc.worldgen.cache.DiskTerrainStore;
+import com.github.xandergos.terraindiffusionmc.worldgen.hydrology.*;
+import com.github.xandergos.terraindiffusionmc.worldgen.settings.*;
 import com.github.xandergos.terraindiffusionmc.worldgen.terrain.*;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;
-import static org.junit.jupiter.api.Assertions.*;
 
 class DensitySurfaceCacheTest {
-    @TempDir Path temp;
+    @TempDir
+    Path temp;
 
     @AfterEach
     void retire() {
@@ -54,19 +55,17 @@ class DensitySurfaceCacheTest {
 
     private WorldSession automatic() throws Exception {
         var session = WorldSession.activate(GenerationProfile.defaultsFor(2, "model", "cpu", "cpu"), 7);
-        session.attachRepository(
-                new TerrainRepository(
-                        new DiskTerrainStore(temp.resolve("raw")),
-                        key -> {
-                            short[] heights = new short[key.tileSize() * key.tileSize()],
-                                    biomes = new short[heights.length];
-                            Arrays.fill(heights, (short) 600);
-                            return new TerrainTile(key, heights, biomes);
-                        },
-                        256,
-                        4L * 1024 * 1024,
-                        1024L * 1024 * 1024,
-                        session));
+        session.attachRepository(new TerrainRepository(
+                new DiskTerrainStore(temp.resolve("raw")),
+                key -> {
+                    short[] heights = new short[key.tileSize() * key.tileSize()], biomes = new short[heights.length];
+                    Arrays.fill(heights, (short) 600);
+                    return new TerrainTile(key, heights, biomes);
+                },
+                256,
+                4L * 1024 * 1024,
+                1024L * 1024 * 1024,
+                session));
         session.attachAutomaticWater(DensityWaterFixture.create(session, temp.resolve("water")));
         return session;
     }
@@ -76,15 +75,14 @@ class DensitySurfaceCacheTest {
         var session = automatic();
         var sampler = new DensitySampler();
         AtomicInteger fetches = new AtomicInteger();
-        DensitySampler.Lookup lookup =
-                (z, x, ez, ex) -> {
-                    fetches.incrementAndGet();
-                    try {
-                        return DensityWindowCacheTest.data(x, z, 0, true);
-                    } catch (Exception e) {
-                        throw new AssertionError(e);
-                    }
-                };
+        DensitySampler.Lookup lookup = (z, x, ez, ex) -> {
+            fetches.incrementAndGet();
+            try {
+                return DensityWindowCacheTest.data(x, z, 0, true);
+            } catch (Exception e) {
+                throw new AssertionError(e);
+            }
+        };
         double[] expected = new double[256];
         var raw = lookup.fetch(-16, -16, 0, 0);
         for (int z = -16; z < 0; z++)
@@ -96,16 +94,15 @@ class DensitySurfaceCacheTest {
                     assertEquals(expected[(z + 16) * 16 + x + 16] - y, sampler.sample(session, lookup, x, y, z));
         assertEquals(2, fetches.get());
         AtomicInteger surface = new AtomicInteger(180);
-        session.attachRiverOverlay(
-                new WorldSession.RiverOverlay() {
-                    public int carvedHeight(int x, int z, int rawY) {
-                        return surface.get();
-                    }
+        session.attachRiverOverlay(new WorldSession.RiverOverlay() {
+            public int carvedHeight(int x, int z, int rawY) {
+                return surface.get();
+            }
 
-                    public int waterY(int x, int z) {
-                        return Integer.MIN_VALUE;
-                    }
-                });
+            public int waterY(int x, int z) {
+                return Integer.MIN_VALUE;
+            }
+        });
         assertEquals(80, sampler.sample(session, lookup, -1, 100, -1));
         surface.set(170);
         assertEquals(70, sampler.sample(session, lookup, -1, 100, -1));
@@ -121,15 +118,14 @@ class DensitySurfaceCacheTest {
         var sampler = new DensitySampler();
         var fallback = DensityWindowCacheTest.data(0, 0, 0, false);
         AtomicInteger calls = new AtomicInteger();
-        DensitySampler.Lookup lookup =
-                (z, x, ez, ex) -> {
-                    if (calls.incrementAndGet() == 1) return fallback;
-                    try {
-                        return DensityWindowCacheTest.data(x, z, 0, true);
-                    } catch (Exception e) {
-                        throw new AssertionError(e);
-                    }
-                };
+        DensitySampler.Lookup lookup = (z, x, ez, ex) -> {
+            if (calls.incrementAndGet() == 1) return fallback;
+            try {
+                return DensityWindowCacheTest.data(x, z, 0, true);
+            } catch (Exception e) {
+                throw new AssertionError(e);
+            }
+        };
         sampler.sample(session, lookup, 0, 100, 0);
         double complete = sampler.sample(session, lookup, 0, 100, 0);
         assertEquals(complete, sampler.sample(session, lookup, 0, 100, 0));

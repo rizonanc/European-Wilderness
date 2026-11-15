@@ -46,8 +46,9 @@ final class StoneLandmark {
                     var pos = new BlockPos(wx, y + rise, wz);
                     if (pos.getY() < floor || !solid(shape, u, v, Math.max(0, rise), height)) continue;
                     BlockState old = world.getBlockState(pos);
-                    if (old.isAir() || old.isIn(BlockTags.REPLACEABLE_BY_TREES) && old.getFluidState().isEmpty())
-                        changed |= world.setBlockState(pos, rock, 2);
+                    if (old.isAir()
+                            || old.isIn(BlockTags.REPLACEABLE_BY_TREES)
+                                    && old.getFluidState().isEmpty()) changed |= world.setBlockState(pos, rock, 2);
                 }
             }
         return changed;

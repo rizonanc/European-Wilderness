@@ -1,8 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.*;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class CoarseSectionComposerTest {
     private static final long[] PALETTE = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
@@ -95,16 +96,15 @@ class CoarseSectionComposerTest {
     void testRetiringProviderDoesNotChangeOrReleaseForeignSections() {
         Object engine = new Object(), section = new Object();
         assertSame(section, CoarseRenderHooks.render(engine, 0, section));
-        var p =
-                new CoarseRenderHooks.Provider() {
-                    public Object render(Object e, long pos, Object o) {
-                        return engine;
-                    }
+        var p = new CoarseRenderHooks.Provider() {
+            public Object render(Object e, long pos, Object o) {
+                return engine;
+            }
 
-                    public byte children(Object e, Object s, byte a) {
-                        return 7;
-                    }
-                };
+            public byte children(Object e, Object s, byte a) {
+                return 7;
+            }
+        };
         try {
             CoarseRenderHooks.attach(p);
             assertSame(engine, CoarseRenderHooks.render(engine, 0, section));
@@ -120,22 +120,15 @@ class CoarseSectionComposerTest {
     void testFullyExactSectionsBypassPreviewIncludingNullSky() {
         var coverage = new CoarseCoverage();
         for (int z = -2; z < 0; z++) for (int x = -2; x < 0; x++) coverage.mark(x, z);
-        assertTrue(
-                CoarseSectionComposer.fullyProtected(
-                        0, -1, -1, (x, z) -> coverage.contains(Math.floorDiv(x, 16), Math.floorDiv(z, 16))));
-        assertFalse(
-                CoarseSectionComposer.fullyProtected(
-                        1, -1, -1, (x, z) -> coverage.contains(Math.floorDiv(x, 16), Math.floorDiv(z, 16))));
+        assertTrue(CoarseSectionComposer.fullyProtected(
+                0, -1, -1, (x, z) -> coverage.contains(Math.floorDiv(x, 16), Math.floorDiv(z, 16))));
+        assertFalse(CoarseSectionComposer.fullyProtected(
+                1, -1, -1, (x, z) -> coverage.contains(Math.floorDiv(x, 16), Math.floorDiv(z, 16))));
         var calls = new java.util.concurrent.atomic.AtomicInteger();
-        assertFalse(
-                CoarseSectionComposer.fullyProtected(
-                        4,
-                        0,
-                        0,
-                        (x, z) -> {
-                            calls.incrementAndGet();
-                            return false;
-                        }));
+        assertFalse(CoarseSectionComposer.fullyProtected(4, 0, 0, (x, z) -> {
+            calls.incrementAndGet();
+            return false;
+        }));
         assertEquals(1, calls.get());
     }
 }

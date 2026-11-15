@@ -1,15 +1,17 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.hydrology;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.zip.GZIPOutputStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import static org.junit.jupiter.api.Assertions.*;
 
 class WaterfallTest {
-    @TempDir Path temp;
+    @TempDir
+    Path temp;
 
     private record Terrain(int[][] raw, int[] air, int[] water) {}
 
@@ -121,15 +123,9 @@ class WaterfallTest {
         assertArrayEquals(a.waterCopy(), loaded.waterCopy());
         Set<WaterfallPlacement.Placement> forward = new HashSet<>(), reverse = new HashSet<>();
         for (int i = 0; i < 64; i++) {
-            WaterfallPlacement.forChunk(
-                    a,
-                    i % 8 * 16,
-                    i / 8 * 16,
-                    -64,
-                    320,
-                    p -> {
-                        assertTrue(forward.add(p), "duplicate across chunk edges");
-                    });
+            WaterfallPlacement.forChunk(a, i % 8 * 16, i / 8 * 16, -64, 320, p -> {
+                assertTrue(forward.add(p), "duplicate across chunk edges");
+            });
             int j = 63 - i;
             WaterfallPlacement.forChunk(loaded, j % 8 * 16, j / 8 * 16, -64, 320, reverse::add);
         }
@@ -140,22 +136,23 @@ class WaterfallTest {
     @Test
     void ordinaryUpperAndLowerWaterStillPassContainment() {
         var a = area(0, 0, fall());
-        var columns =
-                new RiverWaterPlanning.ColumnAccess() {
-                    public boolean isAir(int x, int y, int z) {
-                        return y >= a.carvedHeight(x, z, 140);
-                    }
+        var columns = new RiverWaterPlanning.ColumnAccess() {
+            public boolean isAir(int x, int y, int z) {
+                return y >= a.carvedHeight(x, z, 140);
+            }
 
-                    public boolean isSolidDry(int x, int y, int z) {
-                        return !isAir(x, y, z);
-                    }
-                };
+            public boolean isSolidDry(int x, int y, int z) {
+                return !isAir(x, y, z);
+            }
+        };
         int expected = 0, placed = 0;
         for (int z = 0; z < 128; z++)
             for (int x = 0; x < 128; x++)
                 if (a.waterY(x, z) != PreparedWaterArea.NONE) expected += a.waterY(x, z) - a.bedY(x, z, 0);
         for (int cz = 0; cz < 8; cz++)
-            for (int cx = 0; cx < 8; cx++) placed += RiverWaterPlanning.planChunk(a, cx, cz, -64, 320, columns).size();
+            for (int cx = 0; cx < 8; cx++)
+                placed += RiverWaterPlanning.planChunk(a, cx, cz, -64, 320, columns)
+                        .size();
         assertEquals(expected, placed);
     }
 

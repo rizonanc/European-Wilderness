@@ -134,7 +134,10 @@ public final class TerrainDiffusionConfigEditor {
             Matcher match = ASSIGNMENT.matcher(line);
             if (match.matches() && draft.containsKey(match.group(2))) {
                 String key = match.group(2);
-                updated.append(match.group(1)).append(key).append('=').append(draft.get(key).trim());
+                updated.append(match.group(1))
+                        .append(key)
+                        .append('=')
+                        .append(draft.get(key).trim());
                 seen.add(key);
             } else {
                 updated.append(line);

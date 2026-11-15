@@ -1,17 +1,19 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.cache;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors;
 import com.github.xandergos.terraindiffusionmc.worldgen.terrain.*;
+import java.io.*;
 import java.nio.*;
 import java.nio.file.*;
-import java.io.*;
 import java.util.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import static org.junit.jupiter.api.Assertions.*;
 
 class CacheFailureDiagnosticsTest {
-    @TempDir Path temp;
+    @TempDir
+    Path temp;
 
     static long seen(String code) {
         var v = DiagnosticErrors.statistics().get(code);
@@ -45,12 +47,9 @@ class CacheFailureDiagnosticsTest {
         long before = seen("TD-IO-001");
         assertTrue(new DiskTerrainStore(temp).load(key).isEmpty());
         assertEquals(before, seen("TD-IO-001"));
-        var denied =
-                new DiskTerrainStore(
-                        temp,
-                        p -> {
-                            throw new AccessDeniedException("fixture read");
-                        });
+        var denied = new DiskTerrainStore(temp, p -> {
+            throw new AccessDeniedException("fixture read");
+        });
         assertTrue(denied.load(key).isEmpty());
         assertEquals(before + 1, seen("TD-IO-001"));
     }
@@ -92,13 +91,9 @@ class CacheFailureDiagnosticsTest {
     @Test
     void testFailedWritePreservesTheOriginalException() {
         var original = new IOException("fixture commit failure");
-        var store =
-                new DiskTerrainStore(
-                        temp,
-                        Files::readAllBytes,
-                        (a, b, options) -> {
-                            throw original;
-                        });
+        var store = new DiskTerrainStore(temp, Files::readAllBytes, (a, b, options) -> {
+            throw original;
+        });
         var key = DiskQuotaTest.key(0);
         long before = seen("TD-IO-002");
         assertSame(original, assertThrows(IOException.class, () -> store.store(key, DiskQuotaTest.tile(key, false))));

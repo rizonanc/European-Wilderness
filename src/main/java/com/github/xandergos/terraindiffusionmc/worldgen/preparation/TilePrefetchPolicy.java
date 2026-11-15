@@ -14,9 +14,8 @@ public final class TilePrefetchPolicy {
             if (!(distance < 2.0) && !(distance > 512.0)) {
                 double ux = deltaX / distance;
                 double uz = deltaZ / distance;
-                TilePrefetchPolicy.TileCoord current =
-                        new TilePrefetchPolicy.TileCoord(
-                                Math.floorDiv(blockX, tileSize), Math.floorDiv(blockZ, tileSize));
+                TilePrefetchPolicy.TileCoord current = new TilePrefetchPolicy.TileCoord(
+                        Math.floorDiv(blockX, tileSize), Math.floorDiv(blockZ, tileSize));
                 LinkedHashSet<TilePrefetchPolicy.TileCoord> selected = new LinkedHashSet<>();
                 int steps = distance < 8.0 ? 2 : 3;
 
@@ -57,9 +56,8 @@ public final class TilePrefetchPolicy {
             double z,
             int tileSize) {
         if (!(x < -2.1474836E9F) && !(x > 2.147483647E9) && !(z < -2.1474836E9F) && !(z > 2.147483647E9)) {
-            TilePrefetchPolicy.TileCoord candidate =
-                    new TilePrefetchPolicy.TileCoord(
-                            Math.floorDiv((int) Math.floor(x), tileSize), Math.floorDiv((int) Math.floor(z), tileSize));
+            TilePrefetchPolicy.TileCoord candidate = new TilePrefetchPolicy.TileCoord(
+                    Math.floorDiv((int) Math.floor(x), tileSize), Math.floorDiv((int) Math.floor(z), tileSize));
             if (!candidate.equals(current)) {
                 selected.add(candidate);
             }

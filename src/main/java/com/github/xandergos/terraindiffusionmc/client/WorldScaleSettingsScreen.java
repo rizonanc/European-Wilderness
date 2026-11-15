@@ -1,9 +1,10 @@
 package com.github.xandergos.terraindiffusionmc.client;
 
 import com.github.xandergos.terraindiffusionmc.config.SettingsPreferences;
+import com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfig;
+import com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfigEditor;
 import com.github.xandergos.terraindiffusionmc.explorer.ExplorerServer;
 import com.github.xandergos.terraindiffusionmc.world.SpawnChoice;
-import com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfigEditor;
 import com.github.xandergos.terraindiffusionmc.world.TerrainDiffusionBiomeSource;
 import com.github.xandergos.terraindiffusionmc.world.WorldScaleSelectionState;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldGenerationOptions;
@@ -12,7 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfig;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.world.CreateWorldScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -55,11 +55,10 @@ public final class WorldScaleSettingsScreen extends Screen {
         super(Text.translatable("terrain-diffusion-mc.world_settings.title"));
         this.parentScreen = parentScreen;
         if (parentScreen instanceof CreateWorldScreen create) {
-            var overworld =
-                    create.getWorldCreator()
-                            .getGeneratorOptionsHolder()
-                            .selectedDimensions()
-                            .getOrEmpty(DimensionOptions.OVERWORLD);
+            var overworld = create.getWorldCreator()
+                    .getGeneratorOptionsHolder()
+                    .selectedDimensions()
+                    .getOrEmpty(DimensionOptions.OVERWORLD);
             if (overworld.isPresent()
                     && overworld.get().chunkGenerator().getBiomeSource()
                             instanceof TerrainDiffusionBiomeSource source) {
@@ -86,24 +85,20 @@ public final class WorldScaleSettingsScreen extends Screen {
         });
         this.addDrawableChild(this.scaleTextField);
         this.setInitialFocus(this.scaleTextField);
-        this.addDrawableChild(
-                ButtonWidget.builder(
-                                Text.translatable("terrain-diffusion-mc.settings.world_profile", profileName),
-                                b -> openProfiles())
-                        .dimensions(centerX - 120, centerY + 14, 240, 20)
-                        .build());
-        addDrawableChild(
-                ButtonWidget.builder(spawnText("open"), b -> openSpawnPicker())
-                        .dimensions(centerX - 120, centerY + 38, 240, 20)
-                        .build());
-        this.addDrawableChild(
-                ButtonWidget.builder(Text.translatable("gui.done"), b -> this.onDonePressed())
-                        .dimensions(centerX - 85, centerY + 62, 80, 20)
-                        .build());
-        this.addDrawableChild(
-                ButtonWidget.builder(Text.translatable("gui.cancel"), b -> this.close())
-                        .dimensions(centerX + 5, centerY + 62, 80, 20)
-                        .build());
+        this.addDrawableChild(ButtonWidget.builder(
+                        Text.translatable("terrain-diffusion-mc.settings.world_profile", profileName),
+                        b -> openProfiles())
+                .dimensions(centerX - 120, centerY + 14, 240, 20)
+                .build());
+        addDrawableChild(ButtonWidget.builder(spawnText("open"), b -> openSpawnPicker())
+                .dimensions(centerX - 120, centerY + 38, 240, 20)
+                .build());
+        this.addDrawableChild(ButtonWidget.builder(Text.translatable("gui.done"), b -> this.onDonePressed())
+                .dimensions(centerX - 85, centerY + 62, 80, 20)
+                .build());
+        this.addDrawableChild(ButtonWidget.builder(Text.translatable("gui.cancel"), b -> this.close())
+                .dimensions(centerX + 5, centerY + 62, 80, 20)
+                .build());
         this.validationTextWidget = new TextWidget(0, centerY + 86, this.width, 9, Text.empty(), this.textRenderer);
         this.addDrawableChild(this.validationTextWidget);
     }
@@ -121,9 +116,10 @@ public final class WorldScaleSettingsScreen extends Screen {
                 return;
             }
             var creator = create.getWorldCreator();
-            long seed =
-                    net.minecraft.world.gen.GeneratorOptions.parseSeed(creator.getSeed())
-                            .orElseGet(() -> creator.getGeneratorOptionsHolder().generatorOptions().getSeed());
+            long seed = net.minecraft.world.gen.GeneratorOptions.parseSeed(creator.getSeed())
+                    .orElseGet(() -> creator.getGeneratorOptionsHolder()
+                            .generatorOptions()
+                            .getSeed());
             int port = ExplorerServer.startIfNotRunning();
             spawnPicker = ExplorerServer.beginSpawnPicker(seed, scale);
             net.minecraft.util.Util.getOperatingSystem()
@@ -148,20 +144,15 @@ public final class WorldScaleSettingsScreen extends Screen {
         try {
             var settings = TerrainDiffusionConfigEditor.load(TerrainDiffusionConfig.configPath());
             var prefs = SettingsPreferences.load(TerrainDiffusionConfig.menuPath());
-            client.setScreen(
-                    new SettingsProfileScreen(
-                            this,
-                            prefs,
-                            null,
-                            (label, values) -> {
-                                var merged = new HashMap<>(settings);
-                                merged.putAll(values);
-                                generationOptions = WorldGenerationOptions.fromSettings(merged);
-                                profileName = label;
-                            }));
+            client.setScreen(new SettingsProfileScreen(this, prefs, null, (label, values) -> {
+                var merged = new HashMap<>(settings);
+                merged.putAll(values);
+                generationOptions = WorldGenerationOptions.fromSettings(merged);
+                profileName = label;
+            }));
         } catch (IOException failure) {
-            validationTextWidget.setMessage(
-                    Text.translatable("terrain-diffusion-mc.settings.preferences_error").formatted(Formatting.RED));
+            validationTextWidget.setMessage(Text.translatable("terrain-diffusion-mc.settings.preferences_error")
+                    .formatted(Formatting.RED));
         }
     }
 
@@ -210,16 +201,11 @@ public final class WorldScaleSettingsScreen extends Screen {
 
     private void applyWorldHeightForScale(int selectedScale) {
         if (this.parentScreen instanceof CreateWorldScreen createWorldScreen) {
-            createWorldScreen
-                    .getWorldCreator()
-                    .applyModifier((registryManager, selectedDimensions) -> {
-                        DimensionOptionsRegistryHolder updatedDimensions =
-                                this.updateOverworldDimensionType(
-                                        registryManager.getOrThrow(RegistryKeys.DIMENSION_TYPE),
-                                        selectedDimensions,
-                                        selectedScale);
-                        return updatedDimensions == null ? selectedDimensions : updatedDimensions;
-                    });
+            createWorldScreen.getWorldCreator().applyModifier((registryManager, selectedDimensions) -> {
+                DimensionOptionsRegistryHolder updatedDimensions = this.updateOverworldDimensionType(
+                        registryManager.getOrThrow(RegistryKeys.DIMENSION_TYPE), selectedDimensions, selectedScale);
+                return updatedDimensions == null ? selectedDimensions : updatedDimensions;
+            });
         }
     }
 
@@ -227,7 +213,8 @@ public final class WorldScaleSettingsScreen extends Screen {
             Registry<DimensionType> dimensionTypeRegistry,
             DimensionOptionsRegistryHolder selectedDimensions,
             int selectedScale) {
-        DimensionOptions overworldOptions = selectedDimensions.getOrEmpty(DimensionOptions.OVERWORLD).orElse(null);
+        DimensionOptions overworldOptions =
+                selectedDimensions.getOrEmpty(DimensionOptions.OVERWORLD).orElse(null);
         if (overworldOptions == null) {
             return null;
         }

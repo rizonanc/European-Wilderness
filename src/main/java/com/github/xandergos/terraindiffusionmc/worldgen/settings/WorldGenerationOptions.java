@@ -12,25 +12,17 @@ public record WorldGenerationOptions(
         WaterGenerationOptions water,
         BiomeBalance biomeBalance,
         int climateShift) {
-    public static final Codec<WorldGenerationOptions> CODEC =
-            RecordCodecBuilder.create(instance ->
-                    instance.group(
-                                    Codec.intRange(0, 200)
-                                            .fieldOf("mountain_relief")
-                                            .forGetter(WorldGenerationOptions::mountainRelief),
-                                    Codec.intRange(0, 100)
-                                            .fieldOf("biome_variety")
-                                            .forGetter(WorldGenerationOptions::biomeVariety),
-                                    WaterGenerationOptions.CODEC
-                                            .fieldOf("water")
-                                            .forGetter(WorldGenerationOptions::water),
-                                    BiomeBalance.CODEC
-                                            .optionalFieldOf("biome_balance", BiomeBalance.DEFAULT)
-                                            .forGetter(WorldGenerationOptions::biomeBalance),
-                                    Codec.intRange(-8, 8)
-                                            .optionalFieldOf("climate_shift", 0)
-                                            .forGetter(WorldGenerationOptions::climateShift))
-                            .apply(instance, WorldGenerationOptions::new));
+    public static final Codec<WorldGenerationOptions> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                    Codec.intRange(0, 200).fieldOf("mountain_relief").forGetter(WorldGenerationOptions::mountainRelief),
+                    Codec.intRange(0, 100).fieldOf("biome_variety").forGetter(WorldGenerationOptions::biomeVariety),
+                    WaterGenerationOptions.CODEC.fieldOf("water").forGetter(WorldGenerationOptions::water),
+                    BiomeBalance.CODEC
+                            .optionalFieldOf("biome_balance", BiomeBalance.DEFAULT)
+                            .forGetter(WorldGenerationOptions::biomeBalance),
+                    Codec.intRange(-8, 8)
+                            .optionalFieldOf("climate_shift", 0)
+                            .forGetter(WorldGenerationOptions::climateShift))
+            .apply(instance, WorldGenerationOptions::new));
 
     public static WorldGenerationOptions configured() {
         return new WorldGenerationOptions(

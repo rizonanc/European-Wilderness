@@ -1,13 +1,13 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
+import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors.*;
+
 import com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfig;
 import com.github.xandergos.terraindiffusionmc.world.TerrainDiffusionBiomeSource;
+import java.lang.reflect.*;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
-import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors;
-import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors.*;
-import java.lang.reflect.*;
 
 /** Coordinates with the public 2.2.4 scheduler settings instead of launching a second generator. */
 public final class WorldGenCompat {

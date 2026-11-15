@@ -1,10 +1,10 @@
 package com.github.xandergos.terraindiffusionmc.mixin.compat;
 
 import com.github.xandergos.terraindiffusionmc.compat.voxy.VoxySupport;
+import java.util.*;
 import net.fabricmc.loader.api.FabricLoader;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.*;
-import java.util.*;
 
 public final class VoxyWaterMixinPlugin implements IMixinConfigPlugin {
     public void onLoad(String name) {}

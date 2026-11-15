@@ -23,13 +23,12 @@ public final class UpstreamTerrainAdapter {
                     if (biomeVariety != 0)
                         for (int column = 0; column < size; column++) {
                             int index = row * size + column;
-                            biomes[index] =
-                                    EuropeanEcology.varyBiome(
-                                            key.seed(),
-                                            key.blockStartX() + column,
-                                            key.blockStartZ() + row,
-                                            biomes[index],
-                                            biomeVariety);
+                            biomes[index] = EuropeanEcology.varyBiome(
+                                    key.seed(),
+                                    key.blockStartX() + column,
+                                    key.blockStartZ() + row,
+                                    biomes[index],
+                                    biomeVariety);
                         }
                 }
 

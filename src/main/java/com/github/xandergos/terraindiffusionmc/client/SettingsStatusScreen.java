@@ -5,8 +5,8 @@ import com.github.xandergos.terraindiffusionmc.compat.voxy.VegetationMipRebuild;
 import com.github.xandergos.terraindiffusionmc.compat.voxy.VoxyCompat;
 import com.github.xandergos.terraindiffusionmc.compat.voxy.WaterMipRebuild;
 import com.github.xandergos.terraindiffusionmc.world.TerrainDiffusionBiomeSource;
-import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
 import com.github.xandergos.terraindiffusionmc.worldgen.preparation.PreparationProgress;
+import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -54,40 +54,29 @@ final class SettingsStatusScreen extends Screen {
         stopVegetation = action("stop_vegetation", center + 4, 51, 146, () -> message(VegetationMipRebuild.stop()));
         reportList = addDrawableChild(new ReportList(Math.max(22, height - 141)));
         feedback = addDrawableChild(new TextWidget(0, height - 55, width, 10, Text.empty(), textRenderer));
-        cancelPrepare =
-                action(
-                        "cancel_prepare",
-                        center - 150,
-                        height - 36,
-                        103,
-                        () -> {
-                            var session = localSession();
-                            if (session != null && session.preparation() != null) session.preparation().cancel();
-                        });
-        action(
-                "copy",
-                center - 42,
-                height - 36,
-                100,
-                () -> {
-                    client.keyboard.setClipboard(String.join("\n", report.stream().map(Text::getString).toList()));
-                    feedback.setMessage(label("copied"));
-                });
-        addDrawableChild(
-                ButtonWidget.builder(Text.translatable("gui.back"), button -> close())
-                        .dimensions(center + 64, height - 36, 86, 20)
-                        .build());
+        cancelPrepare = action("cancel_prepare", center - 150, height - 36, 103, () -> {
+            var session = localSession();
+            if (session != null && session.preparation() != null)
+                session.preparation().cancel();
+        });
+        action("copy", center - 42, height - 36, 100, () -> {
+            client.keyboard.setClipboard(
+                    String.join("\n", report.stream().map(Text::getString).toList()));
+            feedback.setMessage(label("copied"));
+        });
+        addDrawableChild(ButtonWidget.builder(Text.translatable("gui.back"), button -> close())
+                .dimensions(center + 64, height - 36, 86, 20)
+                .build());
         report = List.of();
         nextRefresh = 0;
         tick();
     }
 
     private ButtonWidget action(String key, int x, int y, int width, Runnable action) {
-        return addDrawableChild(
-                ButtonWidget.builder(label(key), button -> action.run())
-                        .dimensions(x, y, width, 20)
-                        .tooltip(Tooltip.of(label(key + "_tip")))
-                        .build());
+        return addDrawableChild(ButtonWidget.builder(label(key), button -> action.run())
+                .dimensions(x, y, width, 20)
+                .tooltip(Tooltip.of(label(key + "_tip")))
+                .build());
     }
 
     private void message(String message) {
@@ -113,11 +102,10 @@ final class SettingsStatusScreen extends Screen {
     @Override
     public void tick() {
         WorldSession session = localSession();
-        boolean canRebuild =
-                session != null
-                        && client.world != null
-                        && client.world.getRegistryKey().equals(World.OVERWORLD)
-                        && VoxyCompat.usable();
+        boolean canRebuild = session != null
+                && client.world != null
+                && client.world.getRegistryKey().equals(World.OVERWORLD)
+                && VoxyCompat.usable();
         water.active = canRebuild && !WaterMipRebuild.running();
         vegetation.active = canRebuild && !VegetationMipRebuild.running();
         stopWater.active = WaterMipRebuild.running();
@@ -140,10 +128,9 @@ final class SettingsStatusScreen extends Screen {
         nextRefresh = now + 1_000_000_000L;
         if (session != null && pending == null) {
             pendingSession = session;
-            pending =
-                    CompletableFuture.supplyAsync(() -> TerrainDiffusionMc.statsReport(session))
-                            .exceptionally(
-                                    failure -> List.of("Terrain statistics: " + failure.getClass().getSimpleName()));
+            pending = CompletableFuture.supplyAsync(() -> TerrainDiffusionMc.statsReport(session))
+                    .exceptionally(failure ->
+                            List.of("Terrain statistics: " + failure.getClass().getSimpleName()));
         }
         updateReport(session);
     }
@@ -155,17 +142,19 @@ final class SettingsStatusScreen extends Screen {
         } else {
             var profile = session.profile();
             var waterOptions = profile.water();
-            lines.add(
-                    Text.translatable(
-                            PREFIX + "world_profile",
-                            profile.worldScale(),
-                            profile.mountainRelief(),
-                            profile.biomeVariety(),
-                            waterOptions.widthVariation(),
-                            waterOptions.depthVariation(),
-                            waterOptions.lakeThreshold()));
+            lines.add(Text.translatable(
+                    PREFIX + "world_profile",
+                    profile.worldScale(),
+                    profile.mountainRelief(),
+                    profile.biomeVariety(),
+                    waterOptions.widthVariation(),
+                    waterOptions.depthVariation(),
+                    waterOptions.lakeThreshold()));
             var prep = session.preparation();
-            lines.add(prep == null ? label("no_preparation") : Text.literal(prep.progress().toString()));
+            lines.add(
+                    prep == null
+                            ? label("no_preparation")
+                            : Text.literal(prep.progress().toString()));
             var automatic = session.automaticWater();
             var prepared = session.preparedWater();
             if (automatic != null) lines.add(Text.literal(automatic.status()));

@@ -1,13 +1,14 @@
 package com.github.xandergos.terraindiffusionmc.client;
 
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
+
+import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.PerformanceDiagnostics;
 import com.github.xandergos.terraindiffusionmc.worldgen.preparation.FrameBudget;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.PerformanceDiagnostics;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
-import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public final class ClientPerformance {
     public static final FrameBudget FRAMES = new FrameBudget();
@@ -34,85 +35,56 @@ public final class ClientPerformance {
     }
 
     public static void install() {
-        PerformanceDiagnostics.install(
-                MinecraftClient.getInstance()
-                        .runDirectory
-                        .toPath()
-                        .resolve("logs/european-wilderness-performance.jsonl"));
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, access) ->
-                dispatcher.register(
-                        literal("td-perf")
-                                .then(
-                                        literal("status")
-                                                .executes(c -> {
-                                                    c.getSource().sendFeedback(Text.literal(FRAMES.statistics()));
-                                                    c.getSource()
-                                                            .sendFeedback(
-                                                                    Text.literal(PerformanceDiagnostics.status()));
-                                                    return 1;
-                                                }))
-                                .then(
-                                        literal("reset-frames")
-                                                .executes(c -> {
-                                                    FRAMES.resetMeasurements();
-                                                    c.getSource()
-                                                            .sendFeedback(
-                                                                    Text.literal(
-                                                                            "Выборка кадров очищена; управление нагрузкой не изменено"));
-                                                    return 1;
-                                                }))
-                                .then(
-                                        literal("snapshot")
-                                                .executes(c -> {
-                                                    var ticket = WorldSession.current();
-                                                    boolean accepted =
-                                                            PerformanceDiagnostics.requestSnapshot(() -> {
-                                                                var report =
-                                                                        new java.util.LinkedHashMap<String, Object>();
-                                                                report.put("frames", FRAMES.measurements());
-                                                                report.put(
-                                                                        "frame_note",
-                                                                        "CPU frame gaps/render calls; recent window <=8192 events; generated display frames and GPU timings are excluded.");
-                                                                report.put(
-                                                                        "session",
-                                                                        ticket == null
-                                                                                ? "none"
-                                                                                : ticket.id().toString());
-                                                                report.put(
-                                                                        "session_active",
-                                                                        ticket != null && ticket.isActive());
-                                                                report.put(
-                                                                        "inference",
-                                                                        com.github.xandergos.terraindiffusionmc.pipeline
-                                                                                .LocalTerrainProvider
-                                                                                .inferenceSnapshot());
-                                                                report.put(
-                                                                        "generation",
-                                                                        com.github.xandergos.terraindiffusionmc.worldgen
-                                                                                .diagnostics.GenerationMetrics
-                                                                                .snapshot());
-                                                                if (ticket != null && ticket.automaticWater() != null)
-                                                                    report.put(
-                                                                            "water",
-                                                                            ticket.automaticWater().measurements());
-                                                                return report;
-                                                            });
-                                                    c.getSource()
-                                                            .sendFeedback(
-                                                                    Text.literal(
-                                                                            accepted
-                                                                                    ? "Снимок производительности заказан: logs/european-wilderness-performance.jsonl"
-                                                                                    : "Предыдущий снимок ещё ожидает записи"));
-                                                    return accepted ? 1 : 0;
-                                                }))
-                                .then(
-                                        literal("recent")
-                                                .executes(c -> {
-                                                    c.getSource()
-                                                            .sendFeedback(
-                                                                    Text.literal(PerformanceDiagnostics.recent()));
-                                                    return 1;
-                                                }))));
+        PerformanceDiagnostics.install(MinecraftClient.getInstance()
+                .runDirectory
+                .toPath()
+                .resolve("logs/european-wilderness-performance.jsonl"));
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, access) -> dispatcher.register(literal("td-perf")
+                .then(literal("status").executes(c -> {
+                    c.getSource().sendFeedback(Text.literal(FRAMES.statistics()));
+                    c.getSource().sendFeedback(Text.literal(PerformanceDiagnostics.status()));
+                    return 1;
+                }))
+                .then(literal("reset-frames").executes(c -> {
+                    FRAMES.resetMeasurements();
+                    c.getSource()
+                            .sendFeedback(Text.literal("Выборка кадров очищена; управление нагрузкой не изменено"));
+                    return 1;
+                }))
+                .then(literal("snapshot").executes(c -> {
+                    var ticket = WorldSession.current();
+                    boolean accepted = PerformanceDiagnostics.requestSnapshot(() -> {
+                        var report = new java.util.LinkedHashMap<String, Object>();
+                        report.put("frames", FRAMES.measurements());
+                        report.put(
+                                "frame_note",
+                                "CPU frame gaps/render calls; recent window <=8192 events; generated display frames and GPU timings are excluded.");
+                        report.put(
+                                "session", ticket == null ? "none" : ticket.id().toString());
+                        report.put("session_active", ticket != null && ticket.isActive());
+                        report.put(
+                                "inference",
+                                com.github.xandergos.terraindiffusionmc.pipeline.LocalTerrainProvider
+                                        .inferenceSnapshot());
+                        report.put(
+                                "generation",
+                                com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.GenerationMetrics
+                                        .snapshot());
+                        if (ticket != null && ticket.automaticWater() != null)
+                            report.put("water", ticket.automaticWater().measurements());
+                        return report;
+                    });
+                    c.getSource()
+                            .sendFeedback(Text.literal(
+                                    accepted
+                                            ? "Снимок производительности заказан: logs/european-wilderness-performance.jsonl"
+                                            : "Предыдущий снимок ещё ожидает записи"));
+                    return accepted ? 1 : 0;
+                }))
+                .then(literal("recent").executes(c -> {
+                    c.getSource().sendFeedback(Text.literal(PerformanceDiagnostics.recent()));
+                    return 1;
+                }))));
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             boolean nextPaused = client.isPaused();
             var ticket = WorldSession.current();

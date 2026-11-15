@@ -14,11 +14,21 @@ import org.spongepowered.asm.mixin.*;
 @Pseudo
 @Mixin(targets = "me.cortex.voxy.common.world.other.Mapper", remap = false)
 public abstract class VoxyWaterMapperMixin implements WaterMipMapping {
-    @Shadow @Final private ObjectArrayList<?> blockId2stateEntry;
-    @Unique private static final VarHandle ewh$cacheElement = MethodHandles.arrayElementVarHandle(byte[].class);
-    @Unique private final Object ewh$waterLock = new Object();
-    @Unique private volatile byte[] ewh$waterIds = new byte[256];
-    @Unique private volatile int ewh$sourceWaterId;
+    @Shadow
+    @Final
+    private ObjectArrayList<?> blockId2stateEntry;
+
+    @Unique
+    private static final VarHandle ewh$cacheElement = MethodHandles.arrayElementVarHandle(byte[].class);
+
+    @Unique
+    private final Object ewh$waterLock = new Object();
+
+    @Unique
+    private volatile byte[] ewh$waterIds = new byte[256];
+
+    @Unique
+    private volatile int ewh$sourceWaterId;
 
     @Override
     public boolean ewh$isWater(int id) {
@@ -64,14 +74,13 @@ public abstract class VoxyWaterMapperMixin implements WaterMipMapping {
                 cached = 2;
                 if (block.equals(Blocks.WATER.getDefaultState())) ewh$sourceWaterId = id;
             } else {
-                boolean natural =
-                        block.isIn(BlockTags.CORALS)
-                                || block.isIn(BlockTags.WALL_CORALS)
-                                || block.isOf(Blocks.SEAGRASS)
-                                || block.isOf(Blocks.TALL_SEAGRASS)
-                                || block.isOf(Blocks.KELP)
-                                || block.isOf(Blocks.KELP_PLANT)
-                                || block.isOf(Blocks.SEA_PICKLE);
+                boolean natural = block.isIn(BlockTags.CORALS)
+                        || block.isIn(BlockTags.WALL_CORALS)
+                        || block.isOf(Blocks.SEAGRASS)
+                        || block.isOf(Blocks.TALL_SEAGRASS)
+                        || block.isOf(Blocks.KELP)
+                        || block.isOf(Blocks.KELP_PLANT)
+                        || block.isOf(Blocks.SEA_PICKLE);
                 cached = (byte) (natural && block.getFluidState().isIn(FluidTags.WATER) ? 3 : 1);
             }
             ewh$cacheElement.setRelease(values, id, cached);

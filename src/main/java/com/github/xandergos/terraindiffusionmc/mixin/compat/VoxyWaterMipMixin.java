@@ -2,8 +2,8 @@ package com.github.xandergos.terraindiffusionmc.mixin.compat;
 
 import com.github.xandergos.terraindiffusionmc.compat.voxy.*;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
-import me.cortex.voxy.common.world.other.Mapper;
 import me.cortex.voxy.common.voxelization.VoxelizedSection;
+import me.cortex.voxy.common.world.other.Mapper;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;

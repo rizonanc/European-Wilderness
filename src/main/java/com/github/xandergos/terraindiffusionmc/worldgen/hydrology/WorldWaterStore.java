@@ -1,13 +1,13 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.hydrology;
 
-import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors;
 import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors.*;
+import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.WorkTimeline.Stage.*;
+
+import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.PerformanceDiagnostics;
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.zip.*;
-import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.PerformanceDiagnostics;
-import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.WorkTimeline.Stage.*;
 
 /** Frozen world plans. Version, seed, terrain identity and layout are all checked. */
 final class WorldWaterStore {
@@ -132,38 +132,28 @@ final class WorldWaterStore {
 
     void save(WorldWaterUnit unit) throws IOException {
         int version = unit.depthVariation == 100 ? 3 : VERSION;
-        write(
-                path("units", unit.cell),
-                1,
-                unit.cell,
-                version,
-                out -> {
-                    out.writeInt(unit.indices.length);
-                    out.writeInt(unit.revision);
-                    for (int i = 0; i < unit.indices.length; i++) {
-                        out.writeInt(unit.indices[i]);
-                        out.writeShort(unit.levels[i]);
-                        out.writeByte(unit.lakes[i]);
-                    }
-                    writeFalls(out, unit.falls);
-                    RiverCurrent.write(out, unit.currents);
-                    if (version >= 4) out.writeByte(unit.depthVariation);
-                });
+        write(path("units", unit.cell), 1, unit.cell, version, out -> {
+            out.writeInt(unit.indices.length);
+            out.writeInt(unit.revision);
+            for (int i = 0; i < unit.indices.length; i++) {
+                out.writeInt(unit.indices[i]);
+                out.writeShort(unit.levels[i]);
+                out.writeByte(unit.lakes[i]);
+            }
+            writeFalls(out, unit.falls);
+            RiverCurrent.write(out, unit.currents);
+            if (version >= 4) out.writeByte(unit.depthVariation);
+        });
     }
 
     void save(WorldWaterTile tile) throws IOException {
-        write(
-                path("tiles", tile.cell),
-                2,
-                tile.cell,
-                3,
-                out -> {
-                    out.writeInt(tile.revision);
-                    for (int a : tile.air) out.writeShort(a);
-                    for (int w : tile.water) out.writeShort(w == PreparedWaterArea.NONE ? Short.MIN_VALUE : w);
-                    writeFalls(out, tile.falls);
-                    RiverCurrent.write(out, tile.currents);
-                });
+        write(path("tiles", tile.cell), 2, tile.cell, 3, out -> {
+            out.writeInt(tile.revision);
+            for (int a : tile.air) out.writeShort(a);
+            for (int w : tile.water) out.writeShort(w == PreparedWaterArea.NONE ? Short.MIN_VALUE : w);
+            writeFalls(out, tile.falls);
+            RiverCurrent.write(out, tile.currents);
+        });
     }
 
     private interface Body {
@@ -178,9 +168,8 @@ final class WorldWaterStore {
             if (Files.exists(target)) throw new IOException("Frozen water plan already exists: " + target);
             Path temp = Files.createTempFile(target.getParent(), "water-", ".tmp");
             try {
-                try (var out =
-                        new DataOutputStream(
-                                new BufferedOutputStream(new GZIPOutputStream(Files.newOutputStream(temp))))) {
+                try (var out = new DataOutputStream(
+                        new BufferedOutputStream(new GZIPOutputStream(Files.newOutputStream(temp))))) {
                     out.writeInt(MAGIC);
                     out.writeInt(version);
                     out.writeInt(type);
@@ -225,16 +214,15 @@ final class WorldWaterStore {
         if (count < 0 || count > 1) throw new IOException("Invalid world waterfall count");
         List<Waterfall> falls = new ArrayList<>();
         for (int i = 0; i < count; i++)
-            falls.add(
-                    new Waterfall(
-                            in.readInt(),
-                            in.readInt(),
-                            in.readInt(),
-                            in.readInt(),
-                            in.readInt(),
-                            in.readInt(),
-                            in.readInt(),
-                            in.readInt()));
+            falls.add(new Waterfall(
+                    in.readInt(),
+                    in.readInt(),
+                    in.readInt(),
+                    in.readInt(),
+                    in.readInt(),
+                    in.readInt(),
+                    in.readInt(),
+                    in.readInt()));
         return List.copyOf(falls);
     }
 

@@ -10,65 +10,49 @@ public final class GenerationProfileState extends PersistentState {
     private record RegionalOptions(
             boolean largeIslands, Optional<Integer> climateShift, boolean slopeClimate, boolean newLandforms) {
         static final com.mojang.serialization.MapCodec<RegionalOptions> CODEC =
-                RecordCodecBuilder.mapCodec(instance ->
-                        instance.group(
-                                        Codec.BOOL
-                                                .optionalFieldOf("large_islands", false)
-                                                .forGetter(RegionalOptions::largeIslands),
-                                        Codec.intRange(-8, 8)
-                                                .optionalFieldOf("climate_shift")
-                                                .forGetter(RegionalOptions::climateShift),
-                                        Codec.BOOL
-                                                .optionalFieldOf("slope_climate", false)
-                                                .forGetter(RegionalOptions::slopeClimate),
-                                        Codec.BOOL
-                                                .optionalFieldOf("new_landforms", false)
-                                                .forGetter(RegionalOptions::newLandforms))
-                                .apply(instance, RegionalOptions::new));
+                RecordCodecBuilder.mapCodec(instance -> instance.group(
+                                Codec.BOOL
+                                        .optionalFieldOf("large_islands", false)
+                                        .forGetter(RegionalOptions::largeIslands),
+                                Codec.intRange(-8, 8)
+                                        .optionalFieldOf("climate_shift")
+                                        .forGetter(RegionalOptions::climateShift),
+                                Codec.BOOL
+                                        .optionalFieldOf("slope_climate", false)
+                                        .forGetter(RegionalOptions::slopeClimate),
+                                Codec.BOOL
+                                        .optionalFieldOf("new_landforms", false)
+                                        .forGetter(RegionalOptions::newLandforms))
+                        .apply(instance, RegionalOptions::new));
     }
 
-    static final Codec<GenerationProfileState> CODEC =
-            RecordCodecBuilder.create(instance ->
-                    instance.group(
-                                    Codec.INT.fieldOf("format_version").forGetter(s -> s.formatVersion),
-                                    Codec.INT.fieldOf("generator_version").forGetter(s -> s.generatorVersion),
-                                    Codec.INT.fieldOf("realism_level").forGetter(s -> s.realismLevel),
-                                    Codec.INT.fieldOf("world_scale").forGetter(s -> s.worldScale),
-                                    Codec.STRING.fieldOf("region").forGetter(s -> s.region),
-                                    Codec.STRING.fieldOf("model_fingerprint").forGetter(s -> s.modelFingerprint),
-                                    Codec.STRING
-                                            .optionalFieldOf("inference_device", "unknown")
-                                            .forGetter(s -> s.inferenceDevice),
-                                    Codec.STRING
-                                            .optionalFieldOf("created_backend", "unknown")
-                                            .forGetter(s -> s.createdBackend),
-                                    Codec.BOOL
-                                            .optionalFieldOf("automatic_water", false)
-                                            .forGetter(s -> s.automaticWater),
-                                    Codec.intRange(0, 200)
-                                            .optionalFieldOf("mountain_relief", 100)
-                                            .forGetter(s -> s.mountainRelief),
-                                    Codec.intRange(0, 100)
-                                            .optionalFieldOf("biome_variety", 0)
-                                            .forGetter(s -> s.biomeVariety),
-                                    WaterGenerationOptions.CODEC
-                                            .optionalFieldOf("water_generation")
-                                            .forGetter(s -> s.water),
-                                    Codec.BOOL
-                                            .optionalFieldOf("larger_landscapes", false)
-                                            .forGetter(s -> s.largerLandscapes),
-                                    BiomeBalance.CODEC
-                                            .optionalFieldOf("biome_balance", BiomeBalance.DEFAULT)
-                                            .forGetter(s -> s.biomeBalance),
-                                    Codec.BOOL
-                                            .optionalFieldOf("tropical_landforms", false)
-                                            .forGetter(s -> s.tropicalLandforms),
-                                    RegionalOptions.CODEC.forGetter(s -> s.regional))
-                            .apply(instance, GenerationProfileState::new));
+    static final Codec<GenerationProfileState> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                    Codec.INT.fieldOf("format_version").forGetter(s -> s.formatVersion),
+                    Codec.INT.fieldOf("generator_version").forGetter(s -> s.generatorVersion),
+                    Codec.INT.fieldOf("realism_level").forGetter(s -> s.realismLevel),
+                    Codec.INT.fieldOf("world_scale").forGetter(s -> s.worldScale),
+                    Codec.STRING.fieldOf("region").forGetter(s -> s.region),
+                    Codec.STRING.fieldOf("model_fingerprint").forGetter(s -> s.modelFingerprint),
+                    Codec.STRING.optionalFieldOf("inference_device", "unknown").forGetter(s -> s.inferenceDevice),
+                    Codec.STRING.optionalFieldOf("created_backend", "unknown").forGetter(s -> s.createdBackend),
+                    Codec.BOOL.optionalFieldOf("automatic_water", false).forGetter(s -> s.automaticWater),
+                    Codec.intRange(0, 200)
+                            .optionalFieldOf("mountain_relief", 100)
+                            .forGetter(s -> s.mountainRelief),
+                    Codec.intRange(0, 100).optionalFieldOf("biome_variety", 0).forGetter(s -> s.biomeVariety),
+                    WaterGenerationOptions.CODEC
+                            .optionalFieldOf("water_generation")
+                            .forGetter(s -> s.water),
+                    Codec.BOOL.optionalFieldOf("larger_landscapes", false).forGetter(s -> s.largerLandscapes),
+                    BiomeBalance.CODEC
+                            .optionalFieldOf("biome_balance", BiomeBalance.DEFAULT)
+                            .forGetter(s -> s.biomeBalance),
+                    Codec.BOOL.optionalFieldOf("tropical_landforms", false).forGetter(s -> s.tropicalLandforms),
+                    RegionalOptions.CODEC.forGetter(s -> s.regional))
+            .apply(instance, GenerationProfileState::new));
     private static volatile GenerationProfileState.PendingDefaults pendingDefaults;
-    public static final PersistentStateType<GenerationProfileState> TYPE =
-            new PersistentStateType<>(
-                    "terrain_diffusion_generation_profile", GenerationProfileState::createDefault, CODEC, null);
+    public static final PersistentStateType<GenerationProfileState> TYPE = new PersistentStateType<>(
+            "terrain_diffusion_generation_profile", GenerationProfileState::createDefault, CODEC, null);
     private final int formatVersion;
     private final int generatorVersion;
     private final int realismLevel;
@@ -96,9 +80,8 @@ public final class GenerationProfileState extends PersistentState {
             String inferenceDevice,
             String createdBackend,
             WorldGenerationOptions options) {
-        pendingDefaults =
-                new GenerationProfileState.PendingDefaults(
-                        worldScale, modelFingerprint, inferenceDevice, createdBackend, options);
+        pendingDefaults = new GenerationProfileState.PendingDefaults(
+                worldScale, modelFingerprint, inferenceDevice, createdBackend, options);
     }
 
     public static GenerationProfileState createDefault() {
@@ -166,20 +149,17 @@ public final class GenerationProfileState extends PersistentState {
     public void bindLegacyWaterOptions(WaterGenerationOptions options) {
         if (water.isEmpty()) {
             // Existing water plans predate the highland limit.
-            water =
-                    Optional.of(
-                            new WaterGenerationOptions(
-                                    options.widthVariation(), options.depthVariation(), options.lakeThreshold()));
+            water = Optional.of(new WaterGenerationOptions(
+                    options.widthVariation(), options.depthVariation(), options.lakeThreshold()));
             markDirty();
         }
     }
 
     public GenerationProfile toProfile() {
         if (this.formatVersion != 2) {
-            throw new IllegalStateException(
-                    "World was saved with an unsupported generation profile format version "
-                            + this.formatVersion
-                            + " (this build reads 2); create a new world instead of migrating silently");
+            throw new IllegalStateException("World was saved with an unsupported generation profile format version "
+                    + this.formatVersion
+                    + " (this build reads 2); create a new world instead of migrating silently");
         } else {
             return GenerationProfile.of(
                             this.realismLevel,

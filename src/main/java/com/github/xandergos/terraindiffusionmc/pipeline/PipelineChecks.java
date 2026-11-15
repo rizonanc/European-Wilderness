@@ -1,9 +1,10 @@
 package com.github.xandergos.terraindiffusionmc.pipeline;
 
+import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors.*;
+
+import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors;
 import java.util.Arrays;
 import java.util.HashSet;
-import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors;
-import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors.*;
 
 /** Validate external tensor boundaries; no full production tensor scan on each Run. */
 final class PipelineChecks {

@@ -1,8 +1,9 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.github.xandergos.terraindiffusionmc.infinitetensor.FloatTensor;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class CoarseSeamParityTest {
     private CoarseLodPatch patch(int x, int z) {
@@ -49,20 +50,19 @@ class CoarseSeamParityTest {
                     for (int y : new int[] {0, 16}) {
                         int unit = 1 << level, wx = x * unit + unit / 2, wz = z * unit + unit / 2, wy = y * unit;
                         long[] raw = new long[32768];
-                        var result =
-                                CoarseSectionComposer.fill(
-                                        level,
-                                        0,
-                                        0,
-                                        0,
-                                        wy,
-                                        wy + unit - 1,
-                                        CoarseSectionComposerTest.flat(wy + 1),
-                                        null,
-                                        raw,
-                                        (px, pz) -> px != wx || pz != wz,
-                                        b -> palette,
-                                        v -> v == 0);
+                        var result = CoarseSectionComposer.fill(
+                                level,
+                                0,
+                                0,
+                                0,
+                                wy,
+                                wy + unit - 1,
+                                CoarseSectionComposerTest.flat(wy + 1),
+                                null,
+                                raw,
+                                (px, pz) -> px != wx || pz != wz,
+                                b -> palette,
+                                v -> v == 0);
                         int bit = (int) index.invoke(null, x >> 4, y >> 4, z >> 4);
                         assertEquals(1 << bit, Byte.toUnsignedInt(result.children()));
                         assertEquals(1, result.nonAir());

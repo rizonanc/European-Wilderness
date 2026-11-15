@@ -69,10 +69,9 @@ final class TreeTerrainView {
                 seed,
                 fingerprint,
                 loader,
-                (x, z, metres) ->
-                        MountainHeightField.sampleForWorld(
-                                        seed, x, z, metres, scale, WorldHeightProfile.surfaceCapY(worldTopYInclusive))
-                                .surfaceY());
+                (x, z, metres) -> MountainHeightField.sampleForWorld(
+                                seed, x, z, metres, scale, WorldHeightProfile.surfaceCapY(worldTopYInclusive))
+                        .surfaceY());
     }
 
     private static TreeTerrainView.SurfaceHeightResolver adapt(IntUnaryOperator heightConverter) {
@@ -82,49 +81,43 @@ final class TreeTerrainView {
 
     TreeTerrainView.Sample sample(int x, int z) {
         long column = pack(x, z);
-        return this.samples.computeIfAbsent(
-                column,
-                ignored -> {
-                    TerrainTile tile = this.tile(x, z);
-                    if (!tile.hasClimate()) {
-                        throw new IllegalStateException("Tree generation requires climate for " + tile.key());
-                    }
+        return this.samples.computeIfAbsent(column, ignored -> {
+            TerrainTile tile = this.tile(x, z);
+            if (!tile.hasClimate()) {
+                throw new IllegalStateException("Tree generation requires climate for " + tile.key());
+            }
 
-                    int localX = tile.key().localX(x);
-                    int localZ = tile.key().localZ(z);
-                    short height = this.heightMeters(x, z);
-                    return new TreeTerrainView.Sample(
-                            height,
-                            tile.biomeAt(localX, localZ),
-                            tile.climateAt(0, localX, localZ),
-                            tile.climateAt(1, localX, localZ),
-                            tile.climateAt(2, localX, localZ),
-                            tile.climateAt(3, localX, localZ));
-                });
+            int localX = tile.key().localX(x);
+            int localZ = tile.key().localZ(z);
+            short height = this.heightMeters(x, z);
+            return new TreeTerrainView.Sample(
+                    height,
+                    tile.biomeAt(localX, localZ),
+                    tile.climateAt(0, localX, localZ),
+                    tile.climateAt(1, localX, localZ),
+                    tile.climateAt(2, localX, localZ),
+                    tile.climateAt(3, localX, localZ));
+        });
     }
 
     short heightMeters(int x, int z) {
-        return this.heightsMeters.computeIfAbsent(
-                pack(x, z),
-                ignored -> {
-                    TerrainTile tile = this.tile(x, z);
-                    return tile.heightAt(tile.key().localX(x), tile.key().localZ(z));
-                });
+        return this.heightsMeters.computeIfAbsent(pack(x, z), ignored -> {
+            TerrainTile tile = this.tile(x, z);
+            return tile.heightAt(tile.key().localX(x), tile.key().localZ(z));
+        });
     }
 
     int firstAir(int x, int z) {
-        return this.firstAir.computeIfAbsent(
-                pack(x, z),
-                ignored -> {
-                    int raw = this.heightResolver.surfaceY(x, z, this.heightMeters(x, z));
-                    var session = com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession.current();
-                    return session != null
-                                    && session.worldSeed() == seed
-                                    && session.fingerprint().equals(fingerprint)
-                                    && session.riverOverlay() != null
-                            ? session.riverOverlay().carvedHeight(x, z, raw)
-                            : raw;
-                });
+        return this.firstAir.computeIfAbsent(pack(x, z), ignored -> {
+            int raw = this.heightResolver.surfaceY(x, z, this.heightMeters(x, z));
+            var session = com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession.current();
+            return session != null
+                            && session.worldSeed() == seed
+                            && session.fingerprint().equals(fingerprint)
+                            && session.riverOverlay() != null
+                    ? session.riverOverlay().carvedHeight(x, z, raw)
+                    : raw;
+        });
     }
 
     private com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession.RiverOverlay waterOverlay() {
@@ -138,15 +131,13 @@ final class TreeTerrainView {
     }
 
     int waterY(int x, int z) {
-        return waterLevels.computeIfAbsent(
-                pack(x, z),
-                ignored -> {
-                    var overlay = waterOverlay();
-                    if (overlay == null) return Integer.MIN_VALUE;
-                    int level = overlay.waterY(x, z);
-                    var fall = overlay.waterfallAt(x, z);
-                    return fall != null && fall.curtain(x, z) ? Math.max(level, fall.upperY()) : level;
-                });
+        return waterLevels.computeIfAbsent(pack(x, z), ignored -> {
+            var overlay = waterOverlay();
+            if (overlay == null) return Integer.MIN_VALUE;
+            int level = overlay.waterY(x, z);
+            var fall = overlay.waterfallAt(x, z);
+            return fall != null && fall.curtain(x, z) ? Math.max(level, fall.upperY()) : level;
+        });
     }
 
     int clearanceFirstAir(int x, int z) {
@@ -175,19 +166,15 @@ final class TreeTerrainView {
 
     private TerrainTile tile(int x, int z) {
         TerrainTileKey key = TerrainTileKey.forBlock(x, z, this.tileSize, this.seed, this.fingerprint);
-        return this.tiles.computeIfAbsent(
-                key,
-                requested -> {
-                    TerrainTile tile =
-                            Objects.requireNonNull(
-                                    this.loader.apply(requested),
-                                    () -> "Terrain loader returned null for " + requested);
-                    if (!requested.equals(tile.key())) {
-                        throw new IllegalStateException("Terrain loader returned foreign data for " + requested);
-                    } else {
-                        return tile;
-                    }
-                });
+        return this.tiles.computeIfAbsent(key, requested -> {
+            TerrainTile tile = Objects.requireNonNull(
+                    this.loader.apply(requested), () -> "Terrain loader returned null for " + requested);
+            if (!requested.equals(tile.key())) {
+                throw new IllegalStateException("Terrain loader returned foreign data for " + requested);
+            } else {
+                return tile;
+            }
+        });
     }
 
     private static long pack(int x, int z) {

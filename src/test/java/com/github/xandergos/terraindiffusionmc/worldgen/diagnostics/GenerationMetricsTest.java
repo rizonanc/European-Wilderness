@@ -1,7 +1,8 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.diagnostics;
 
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 class GenerationMetricsTest {
     @Test

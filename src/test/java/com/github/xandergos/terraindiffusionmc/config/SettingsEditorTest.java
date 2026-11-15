@@ -1,15 +1,17 @@
 package com.github.xandergos.terraindiffusionmc.config;
 
-import java.nio.file.*;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import com.google.gson.*;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.google.gson.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
+import java.util.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
 class SettingsEditorTest {
-    @TempDir Path temp;
+    @TempDir
+    Path temp;
 
     private Map<String, String> defaults() throws Exception {
         return TerrainDiffusionConfigEditor.load(temp.resolve("missing.properties"));
@@ -31,7 +33,10 @@ class SettingsEditorTest {
         assertEquals("auto", draft.get("compat.voxy.radius_mode"));
         assertEquals("true", draft.get("compat.roadweaver.enabled"));
         for (String key : draft.keySet())
-            assertTrue(TerrainSettingsCatalog.PAGES.get(TerrainSettingsCatalog.pageFor(key)).keys().contains(key));
+            assertTrue(TerrainSettingsCatalog.PAGES
+                    .get(TerrainSettingsCatalog.pageFor(key))
+                    .keys()
+                    .contains(key));
     }
 
     @Test
@@ -58,18 +63,17 @@ class SettingsEditorTest {
 
     @Test
     void testNewRangesAndChoicesRejectInvalidValues() throws Exception {
-        Map<String, String[]> invalid =
-                Map.of(
-                        "inference.gpu_session_cache",
-                        new String[] {"0", "4", "x"},
-                        "compat.voxy.radius_blocks",
-                        new String[] {"63", "32769"},
-                        "compat.voxy.detail_radius_blocks",
-                        new String[] {"255", "8193"},
-                        "compat.voxy.radius_mode",
-                        new String[] {"512", "invalid"},
-                        "performance.water_prefetch",
-                        new String[] {"true"});
+        Map<String, String[]> invalid = Map.of(
+                "inference.gpu_session_cache",
+                new String[] {"0", "4", "x"},
+                "compat.voxy.radius_blocks",
+                new String[] {"63", "32769"},
+                "compat.voxy.detail_radius_blocks",
+                new String[] {"255", "8193"},
+                "compat.voxy.radius_mode",
+                new String[] {"512", "invalid"},
+                "performance.water_prefetch",
+                new String[] {"true"});
         for (var entry : invalid.entrySet())
             for (String value : entry.getValue()) {
                 var draft = defaults();
@@ -111,9 +115,8 @@ class SettingsEditorTest {
         for (String language : List.of("en_us", "ru_ru"))
             try (var input =
                     getClass().getResourceAsStream("/assets/terrain-diffusion-mc/lang/" + language + ".json")) {
-                var json =
-                        JsonParser.parseString(new String(input.readAllBytes(), StandardCharsets.UTF_8))
-                                .getAsJsonObject();
+                var json = JsonParser.parseString(new String(input.readAllBytes(), StandardCharsets.UTF_8))
+                        .getAsJsonObject();
                 String prefix = "terrain-diffusion-mc.settings.";
                 for (String key : TerrainSettingsCatalog.KEYS) {
                     assertTrue(json.has(prefix + "field." + key), language + " " + key);
@@ -125,16 +128,15 @@ class SettingsEditorTest {
                     assertTrue(json.has(prefix + "page." + page.name()));
                     assertTrue(json.has(prefix + "bounds." + page.name()));
                 }
-                for (String status :
-                        List.of(
-                                "roadweaver.missing",
-                                "roadweaver.supported",
-                                "roadweaver.unsupported",
-                                "mod_missing",
-                                "mod_version",
-                                "water.new_world",
-                                "water.automatic",
-                                "water.prepared")) assertTrue(json.has(prefix + status), language + " " + status);
+                for (String status : List.of(
+                        "roadweaver.missing",
+                        "roadweaver.supported",
+                        "roadweaver.unsupported",
+                        "mod_missing",
+                        "mod_version",
+                        "water.new_world",
+                        "water.automatic",
+                        "water.prepared")) assertTrue(json.has(prefix + status), language + " " + status);
                 for (String action : List.of("open_voxy", "open_iris", "photon_clear", "photon_normal")) {
                     assertTrue(json.has(prefix + action));
                     assertTrue(json.has(prefix + action + ".tip"));
@@ -147,7 +149,9 @@ class SettingsEditorTest {
         var defaults = defaults();
         var draft = new SettingsDraft(defaults, defaults);
         draft.apply(Map.of("rivers.depth_variation", "125", "terrain.mountain_relief", "175"));
-        draft.reset(TerrainSettingsCatalog.PAGES.get(TerrainSettingsCatalog.pageFor("rivers.depth_variation")).keys());
+        draft.reset(TerrainSettingsCatalog.PAGES
+                .get(TerrainSettingsCatalog.pageFor("rivers.depth_variation"))
+                .keys());
         assertEquals(List.of("terrain.mountain_relief"), draft.changedKeys());
         draft.undo();
         assertEquals("125", draft.get("rivers.depth_variation"));
@@ -190,9 +194,8 @@ class SettingsEditorTest {
 
     @Test
     void testPhotonFogOnlyChangesItsTwoOptions() {
-        Map<String, String> queue =
-                new LinkedHashMap<>(
-                        Map.of("COLORED_LIGHTS", "true", "NETHER_FOG_INTENSITY", "1.50", "CUSTOM_USER_OPTION", "keep"));
+        Map<String, String> queue = new LinkedHashMap<>(
+                Map.of("COLORED_LIGHTS", "true", "NETHER_FOG_INTENSITY", "1.50", "CUSTOM_USER_OPTION", "keep"));
         PhotonFogPreset.queue(queue, true);
         assertEquals("0.10", queue.get("OVERWORLD_FOG_INTENSITY"));
         assertEquals("false", queue.get("BORDER_FOG"));

@@ -1,16 +1,16 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
-import com.github.xandergos.terraindiffusionmc.pipeline.*;
 import com.github.xandergos.terraindiffusionmc.client.ClientPerformance;
+import com.github.xandergos.terraindiffusionmc.pipeline.*;
 import com.github.xandergos.terraindiffusionmc.world.TerrainDiffusionBiomeSource;
+import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors;
 import com.github.xandergos.terraindiffusionmc.worldgen.mountain.WorldHeightProfile;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
-import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.world.ClientWorld;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.world.ClientWorld;
 
 /** Single bounded producer of neural coarse data, independent of exact water planning. */
 public final class CoarseLodController implements AutoCloseable {
@@ -61,17 +61,16 @@ public final class CoarseLodController implements AutoCloseable {
         cache = new CoarseLodCache(span, 64);
         try (var bound = api.acquire(world)) {
             if (bound == null) throw new IllegalStateException("Voxy engine is not active");
-            renderer =
-                    new CoarseVoxyRenderer(
-                            bound.identity(),
-                            cache,
-                            coverage,
-                            guard,
-                            this::current,
-                            bound.coarsePalette(biomes),
-                            world.getBottomY(),
-                            world.getTopYInclusive(),
-                            corrections);
+            renderer = new CoarseVoxyRenderer(
+                    bound.identity(),
+                    cache,
+                    coverage,
+                    guard,
+                    this::current,
+                    bound.coarsePalette(biomes),
+                    world.getBottomY(),
+                    world.getTopYInclusive(),
+                    corrections);
         }
         CoarseRenderHooks.attach(renderer);
         var worker = new Thread(this::run, "terrain-voxy-coarse");
@@ -130,9 +129,9 @@ public final class CoarseLodController implements AutoCloseable {
         var cursor = new net.minecraft.util.math.BlockPos.Mutable();
         for (int dz : new int[] {0, 8, 15})
             for (int dx : new int[] {0, 8, 15}) {
-                int y =
-                        chunk.getHeightmap(net.minecraft.world.Heightmap.Type.MOTION_BLOCKING_NO_LEAVES).get(dx, dz)
-                                - 1;
+                int y = chunk.getHeightmap(net.minecraft.world.Heightmap.Type.MOTION_BLOCKING_NO_LEAVES)
+                                .get(dx, dz)
+                        - 1;
                 for (int checked = 0; checked < 64 && y >= world.getBottomY(); checked++, y--) {
                     cursor.set(pos.getStartX() + dx, y, pos.getStartZ() + dz);
                     var state = chunk.getBlockState(cursor);
@@ -227,17 +226,15 @@ public final class CoarseLodController implements AutoCloseable {
         var ready = renderer.waiting.select(limit, renderer::within, renderer::readyForQueue);
         if (ready.isEmpty()) return;
         try {
-            var bound =
-                    client.submit(
-                                    () -> {
-                                        if (!current() || !ClientPerformance.mayPublish()) return null;
-                                        try {
-                                            return api.acquire(world);
-                                        } catch (ReflectiveOperationException failure) {
-                                            throw new IllegalStateException(failure);
-                                        }
-                                    })
-                            .get();
+            var bound = client.submit(() -> {
+                        if (!current() || !ClientPerformance.mayPublish()) return null;
+                        try {
+                            return api.acquire(world);
+                        } catch (ReflectiveOperationException failure) {
+                            throw new IllegalStateException(failure);
+                        }
+                    })
+                    .get();
             if (bound == null) return;
             try (bound) {
                 if (!bound.active()) return;
@@ -306,36 +303,33 @@ public final class CoarseLodController implements AutoCloseable {
                 // Each window yields to foreground. A cold 68-square slice at origin
                 // intersects nine windows; neighboring patches can share cached windows.
                 for (int guard = 0; guard < CoarseLodPatch.GRID; guard++) {
-                    int step =
-                            LocalTerrainProvider.prepareCoarseLodWindowStep(
-                                    i0,
-                                    j0,
-                                    i0 + CoarseLodPatch.GRID,
-                                    j0 + CoarseLodPatch.GRID,
-                                    ticket,
-                                    () -> current() && allowed.getAsBoolean());
+                    int step = LocalTerrainProvider.prepareCoarseLodWindowStep(
+                            i0,
+                            j0,
+                            i0 + CoarseLodPatch.GRID,
+                            j0 + CoarseLodPatch.GRID,
+                            ticket,
+                            () -> current() && allowed.getAsBoolean());
                     if (step <= 0) break; // slice complete (0) or deferred (-1): yield the claim
                     windows++;
                     steps++;
                 }
-                var result =
-                        LocalTerrainProvider.prepareCoarseLodStep(
-                                i0,
-                                j0,
-                                i0 + CoarseLodPatch.GRID,
-                                j0 + CoarseLodPatch.GRID,
-                                ticket,
-                                () -> current() && allowed.getAsBoolean());
+                var result = LocalTerrainProvider.prepareCoarseLodStep(
+                        i0,
+                        j0,
+                        i0 + CoarseLodPatch.GRID,
+                        j0 + CoarseLodPatch.GRID,
+                        ticket,
+                        () -> current() && allowed.getAsBoolean());
                 steps++;
                 if (result != null && current())
-                    cache.put(
-                            new CoarseLodPatch(
-                                    target,
-                                    scale,
-                                    compression,
-                                    ticket.worldSeed(),
-                                    WorldHeightProfile.surfaceCapYForScale(scale),
-                                    result));
+                    cache.put(new CoarseLodPatch(
+                            target,
+                            scale,
+                            compression,
+                            ticket.worldSeed(),
+                            WorldHeightProfile.surfaceCapYForScale(scale),
+                            result));
             } catch (InterruptedException interrupted) {
                 Thread.currentThread().interrupt();
                 close();
@@ -367,9 +361,8 @@ public final class CoarseLodController implements AutoCloseable {
                 for (int x : new int[] {0, anchor.middle, anchor.edge}) {
                     var base = cache.surface(anchor.x + x, anchor.z + z);
                     if (base != null && anchor.heights[n] != Integer.MIN_VALUE)
-                        samples.add(
-                                new CoarseLodCorrections.Anchor(
-                                        anchor.x + x, anchor.z + z, anchor.heights[n] - base.firstAir()));
+                        samples.add(new CoarseLodCorrections.Anchor(
+                                anchor.x + x, anchor.z + z, anchor.heights[n] - base.firstAir()));
                     n++;
                 }
             corrections.add(samples);

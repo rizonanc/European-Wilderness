@@ -7,15 +7,13 @@ public record BiomeBalance(int mountains, int oceans, int deserts, int forests, 
     public static final BiomeBalance DEFAULT = new BiomeBalance(100, 100, 100, 100, 100);
     private static final Codec<Integer> AMOUNT = Codec.intRange(0, 200);
 
-    public static final Codec<BiomeBalance> CODEC =
-            RecordCodecBuilder.create(instance ->
-                    instance.group(
-                                    AMOUNT.optionalFieldOf("mountains", 100).forGetter(BiomeBalance::mountains),
-                                    AMOUNT.optionalFieldOf("oceans", 100).forGetter(BiomeBalance::oceans),
-                                    AMOUNT.optionalFieldOf("deserts", 100).forGetter(BiomeBalance::deserts),
-                                    AMOUNT.optionalFieldOf("forests", 100).forGetter(BiomeBalance::forests),
-                                    AMOUNT.optionalFieldOf("fields", 100).forGetter(BiomeBalance::fields))
-                            .apply(instance, BiomeBalance::new));
+    public static final Codec<BiomeBalance> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                    AMOUNT.optionalFieldOf("mountains", 100).forGetter(BiomeBalance::mountains),
+                    AMOUNT.optionalFieldOf("oceans", 100).forGetter(BiomeBalance::oceans),
+                    AMOUNT.optionalFieldOf("deserts", 100).forGetter(BiomeBalance::deserts),
+                    AMOUNT.optionalFieldOf("forests", 100).forGetter(BiomeBalance::forests),
+                    AMOUNT.optionalFieldOf("fields", 100).forGetter(BiomeBalance::fields))
+            .apply(instance, BiomeBalance::new));
 
     public float adjustElevation(float metres) {
         if (oceans != 100) {

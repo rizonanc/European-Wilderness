@@ -157,11 +157,10 @@ public final class CoarseMixinProbe {
         var transformer = service.transformer();
         String base = "me.cortex.voxy.client.core.rendering.";
         Map<String, Integer> calls = new LinkedHashMap<>();
-        for (String target :
-                List.of(
-                        base + "building.RenderGenerationService",
-                        base + "building.RenderDataFactory",
-                        base + "hierachical.AsyncNodeManager")) {
+        for (String target : List.of(
+                base + "building.RenderGenerationService",
+                base + "building.RenderDataFactory",
+                base + "hierachical.AsyncNodeManager")) {
             var node = service.getClassNode(target);
             var writer = new ClassWriter(0);
             node.accept(writer);
@@ -196,33 +195,31 @@ public final class CoarseMixinProbe {
                                         "com/github/xandergos/terraindiffusionmc/compat/voxy/CoarseRenderHooks")
                                 && call.name.equals("meshCurrent")) revisionChecks++;
                 if (revisionChecks != 3)
-                    throw new AssertionError(
-                            "Expected stale guards before/after generateMesh and result delivery, got "
-                                    + revisionChecks);
+                    throw new AssertionError("Expected stale guards before/after generateMesh and result delivery, got "
+                            + revisionChecks);
                 if (after.methods.stream()
-                        .noneMatch(m ->
-                                m.name.equals("getTaskCount")
-                                        && m.desc.equals("()I")
-                                        && (m.access & Opcodes.ACC_PUBLIC) != 0))
+                        .noneMatch(m -> m.name.equals("getTaskCount")
+                                && m.desc.equals("()I")
+                                && (m.access & Opcodes.ACC_PUBLIC) != 0))
                     throw new AssertionError("Public Voxy queue ABI missing");
             }
             if (target.endsWith("RenderDataFactory")) {
-                long redirects =
-                        after.methods.stream()
-                                .filter(m -> m.name.equals("acquireNeighborData"))
-                                .flatMap(m -> {
-                                    List<MethodInsnNode> list = new ArrayList<>();
-                                    for (var i : m.instructions)
-                                        if (i instanceof MethodInsnNode call && call.name.contains("ewh$neighbor"))
-                                            list.add(call);
-                                    return list.stream();
-                                })
-                                .count();
+                long redirects = after.methods.stream()
+                        .filter(m -> m.name.equals("acquireNeighborData"))
+                        .flatMap(m -> {
+                            List<MethodInsnNode> list = new ArrayList<>();
+                            for (var i : m.instructions)
+                                if (i instanceof MethodInsnNode call && call.name.contains("ewh$neighbor"))
+                                    list.add(call);
+                            return list.stream();
+                        })
+                        .count();
                 if (redirects != 6) throw new AssertionError("Expected six neighbor redirects, got " + redirects);
             }
             calls.put(target, count);
         }
-        String json = new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(calls);
+        String json =
+                new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(calls);
         if (args.length > 0) Files.writeString(Path.of(args[0]), json + "\n");
         System.out.println(json);
     }

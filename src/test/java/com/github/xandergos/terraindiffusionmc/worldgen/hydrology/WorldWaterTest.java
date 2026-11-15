@@ -1,19 +1,22 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.hydrology;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import com.github.xandergos.terraindiffusionmc.worldgen.cache.DiskTerrainStore;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.*;
 import com.github.xandergos.terraindiffusionmc.worldgen.terrain.*;
-import com.github.xandergos.terraindiffusionmc.worldgen.cache.DiskTerrainStore;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.io.TempDir;
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.io.TempDir;
 
 class WorldWaterTest {
-    @TempDir Path temp;
+    @TempDir
+    Path temp;
+
     private static final int NONE = PreparedWaterArea.NONE;
     private static final WorldWaterGrid SMALL = new WorldWaterGrid(64, 32, 128);
 
@@ -35,7 +38,11 @@ class WorldWaterTest {
         var a = WorldWaterUnit.plan(7, SMALL, new WorldWaterGrid.Cell(0, 0), raw(-32, -32, 128));
         var b = WorldWaterUnit.plan(7, SMALL, new WorldWaterGrid.Cell(1, 0), raw(32, -32, 128));
         assertTrue(a.indices.length > 0);
-        assertEquals(0, java.util.stream.IntStream.range(0, b.lakes.length).filter(i -> b.lakes[i] != 0).count());
+        assertEquals(
+                0,
+                java.util.stream.IntStream.range(0, b.lakes.length)
+                        .filter(i -> b.lakes[i] != 0)
+                        .count());
         int[] water = new int[128 * 128];
         Arrays.fill(water, NONE);
         boolean[] lake = new boolean[water.length];
@@ -84,24 +91,21 @@ class WorldWaterTest {
 
     private WorldSession session(AtomicInteger calls, TerrainRepository.TileLoader custom) {
         var s = WorldSession.activate(GenerationProfile.defaultsFor(2, "model", "cpu", "cpu"), 7);
-        TerrainRepository.TileLoader loader =
-                custom != null
-                        ? custom
-                        : key -> {
-                            calls.incrementAndGet();
-                            int side = key.tileSize();
-                            short[] heights = new short[side * side], biomes = new short[heights.length];
-                            for (int z = 0; z < side; z++)
-                                for (int x = 0; x < side; x++) {
-                                    int wx = key.blockStartX() + x, wz = key.blockStartZ() + z;
-                                    heights[z * side + x] =
-                                            (short) (wx >= 48 && wx < 82 && wz >= 16 && wz < 48 ? 300 : 600);
-                                }
-                            return new TerrainTile(key, heights, biomes);
-                        };
-        s.attachRepository(
-                new TerrainRepository(
-                        new DiskTerrainStore(temp.resolve("raw")), loader, 256, 1024 * 1024, 1024L * 1024 * 1024, s));
+        TerrainRepository.TileLoader loader = custom != null
+                ? custom
+                : key -> {
+                    calls.incrementAndGet();
+                    int side = key.tileSize();
+                    short[] heights = new short[side * side], biomes = new short[heights.length];
+                    for (int z = 0; z < side; z++)
+                        for (int x = 0; x < side; x++) {
+                            int wx = key.blockStartX() + x, wz = key.blockStartZ() + z;
+                            heights[z * side + x] = (short) (wx >= 48 && wx < 82 && wz >= 16 && wz < 48 ? 300 : 600);
+                        }
+                    return new TerrainTile(key, heights, biomes);
+                };
+        s.attachRepository(new TerrainRepository(
+                new DiskTerrainStore(temp.resolve("raw")), loader, 256, 1024 * 1024, 1024L * 1024 * 1024, s));
         return s;
     }
 
@@ -115,9 +119,8 @@ class WorldWaterTest {
         int[] index = indices.stream().mapToInt(Integer::intValue).toArray();
         short[] levels = new short[index.length];
         Arrays.fill(levels, (short) 100);
-        var unit =
-                new WorldWaterUnit(
-                        grid, new WorldWaterGrid.Cell(0, 0), index, levels, new byte[index.length], List.of(), 4);
+        var unit = new WorldWaterUnit(
+                grid, new WorldWaterGrid.Cell(0, 0), index, levels, new byte[index.length], List.of(), 4);
         int refSide = 512, origin = -192;
         int[] air = new int[refSide * refSide], water = new int[air.length];
         Arrays.fill(air, 105);
@@ -234,15 +237,13 @@ class WorldWaterTest {
         int side = SMALL.unitSide();
         int[][] valley = new int[side][side];
         for (int z = 0; z < side; z++) for (int x = 0; x < side; x++) valley[z][x] = 180 - 2 * x + Math.abs(z - 64) * 3;
-        var unit =
-                WorldWaterUnit.plan(
-                        4,
-                        SMALL,
-                        cell,
-                        valley,
-                        6,
-                        new com.github.xandergos.terraindiffusionmc.worldgen.settings.WaterGenerationOptions(
-                                0, 190, 100));
+        var unit = WorldWaterUnit.plan(
+                4,
+                SMALL,
+                cell,
+                valley,
+                6,
+                new com.github.xandergos.terraindiffusionmc.worldgen.settings.WaterGenerationOptions(0, 190, 100));
         var store = new WorldWaterStore(temp, 4, "water-shape", 256, SMALL);
         store.save(unit);
         var saved = store.loadUnit(cell);
@@ -354,11 +355,10 @@ class WorldWaterTest {
                 var pool = Executors.newFixedThreadPool(6)) {
             List<Future<Integer>> readers = new ArrayList<>();
             for (int i = 0; i < 6; i++)
-                readers.add(
-                        pool.submit(() -> {
-                            barrier.await();
-                            return c.waterY(60, 32);
-                        }));
+                readers.add(pool.submit(() -> {
+                    barrier.await();
+                    return c.waterY(60, 32);
+                }));
             for (var r : readers) assertEquals(102, r.get(30, TimeUnit.SECONDS));
             assertEquals(1, c.computedTiles());
             try (var files = Files.list(temp.resolve("water/units"))) {
@@ -371,14 +371,11 @@ class WorldWaterTest {
     void closeDuringRawComputationCannotPublishAPlan() throws Exception {
         var entered = new CountDownLatch(1);
         var release = new CountDownLatch(1);
-        var s =
-                session(
-                        new AtomicInteger(),
-                        key -> {
-                            entered.countDown();
-                            if (!release.await(10, TimeUnit.SECONDS)) throw new IOException("timeout");
-                            return new TerrainTile(key, new short[65536], new short[65536]);
-                        });
+        var s = session(new AtomicInteger(), key -> {
+            entered.countDown();
+            if (!release.await(10, TimeUnit.SECONDS)) throw new IOException("timeout");
+            return new TerrainTile(key, new short[65536], new short[65536]);
+        });
         try (var c = controller(s, 1);
                 var pool = Executors.newSingleThreadExecutor()) {
             var future = pool.submit(() -> c.ensureColumn(0, 0));
@@ -401,16 +398,14 @@ class WorldWaterTest {
         var barrier = new CyclicBarrier(2);
         try (var c = controller(s, 2);
                 var pool = Executors.newFixedThreadPool(2)) {
-            var left =
-                    pool.submit(() -> {
-                        barrier.await();
-                        return c.waterY(63, 32);
-                    });
-            var right =
-                    pool.submit(() -> {
-                        barrier.await();
-                        return c.waterY(64, 32);
-                    });
+            var left = pool.submit(() -> {
+                barrier.await();
+                return c.waterY(63, 32);
+            });
+            var right = pool.submit(() -> {
+                barrier.await();
+                return c.waterY(64, 32);
+            });
             assertEquals(102, left.get(30, TimeUnit.SECONDS));
             assertEquals(102, right.get(30, TimeUnit.SECONDS));
             assertEquals(2, c.computedTiles());
@@ -426,7 +421,8 @@ class WorldWaterTest {
         String fp = "7d73c789d6b92225ca49fc0b8087c3353eecad582fcc0c92f4b6c0062eeee577";
         for (int tz = 14; tz < 18; tz++)
             for (int tx = 14; tx < 18; tx++) {
-                var tile = source.load(TerrainTileKey.ofTile(12345, tx, tz, 256, fp)).orElseThrow();
+                var tile = source.load(TerrainTileKey.ofTile(12345, tx, tz, 256, fp))
+                        .orElseThrow();
                 for (int z = 0; z < 256; z++)
                     for (int x = 0; x < 256; x++)
                         raw[(tz - 14) * 256 + z][(tx - 14) * 256 + x] =
@@ -580,12 +576,10 @@ class WorldWaterTest {
             ahead.ensureColumn(0, 0);
             assertEquals(before, calls.get());
             demand.ensureColumn(0, 0);
-            var a =
-                    new WorldWaterStore(temp.resolve("water"), 7, s.fingerprint(), 256, SMALL)
-                            .loadTile(new WorldWaterGrid.Cell(0, 0));
-            var b =
-                    new WorldWaterStore(temp.resolve("demand"), 7, s.fingerprint(), 256, SMALL)
-                            .loadTile(new WorldWaterGrid.Cell(0, 0));
+            var a = new WorldWaterStore(temp.resolve("water"), 7, s.fingerprint(), 256, SMALL)
+                    .loadTile(new WorldWaterGrid.Cell(0, 0));
+            var b = new WorldWaterStore(temp.resolve("demand"), 7, s.fingerprint(), 256, SMALL)
+                    .loadTile(new WorldWaterGrid.Cell(0, 0));
             assertArrayEquals(a.air, b.air);
             assertArrayEquals(a.water, b.water);
             assertEquals(a.falls, b.falls);
@@ -597,18 +591,15 @@ class WorldWaterTest {
         var entered = new CountDownLatch(1);
         var release = new CountDownLatch(1);
         var calls = new AtomicInteger();
-        var s =
-                session(
-                        calls,
-                        key -> {
-                            if (calls.incrementAndGet() == 1) {
-                                entered.countDown();
-                                if (!release.await(10, TimeUnit.SECONDS)) throw new IOException("timeout");
-                            }
-                            short[] heights = new short[65536];
-                            Arrays.fill(heights, (short) 600);
-                            return new TerrainTile(key, heights, new short[65536]);
-                        });
+        var s = session(calls, key -> {
+            if (calls.incrementAndGet() == 1) {
+                entered.countDown();
+                if (!release.await(10, TimeUnit.SECONDS)) throw new IOException("timeout");
+            }
+            short[] heights = new short[65536];
+            Arrays.fill(heights, (short) 600);
+            return new TerrainTile(key, heights, new short[65536]);
+        });
         try (var c = controller(s, 2);
                 var pool = Executors.newFixedThreadPool(2)) {
             var bg = pool.submit(() -> c.prepareAheadStep(0, 0, () -> true));
@@ -733,14 +724,13 @@ class WorldWaterTest {
         }
         Map<Path, byte[]> old = new HashMap<>();
         try (var files = Files.walk(temp.resolve("water"))) {
-            files.filter(Files::isRegularFile)
-                    .forEach(p -> {
-                        try {
-                            old.put(p, Files.readAllBytes(p));
-                        } catch (IOException e) {
-                            throw new UncheckedIOException(e);
-                        }
-                    });
+            files.filter(Files::isRegularFile).forEach(p -> {
+                try {
+                    old.put(p, Files.readAllBytes(p));
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
         }
         try (var updated = new WorldWaterController(s, temp.resolve("water"), 300, SMALL, 2, 4, 2)) {
             updated.ensureColumn(0, 0);
@@ -757,24 +747,21 @@ class WorldWaterTest {
     @Test
     void lodSourceCopiesFourSmallRawTilesWithCorrectNegativeCoordinates() throws Exception {
         var s = WorldSession.activate(GenerationProfile.defaultsFor(2, "small-tiles", "cpu", "cpu"), 9);
-        s.attachRepository(
-                new TerrainRepository(
-                        new DiskTerrainStore(temp.resolve("raw-small")),
-                        key -> {
-                            short[] heights = new short[256], biomes = new short[256];
-                            Arrays.fill(heights, (short) 600);
-                            for (int z = 0; z < 16; z++)
-                                for (int x = 0; x < 16; x++)
-                                    biomes[z * 16 + x] =
-                                            (short)
-                                                    (Math.floorMod(key.blockStartX() + x, 32)
-                                                            + 32 * Math.floorMod(key.blockStartZ() + z, 32));
-                            return new TerrainTile(key, heights, biomes);
-                        },
-                        16,
-                        1024 * 1024,
-                        1024L * 1024 * 1024,
-                        s));
+        s.attachRepository(new TerrainRepository(
+                new DiskTerrainStore(temp.resolve("raw-small")),
+                key -> {
+                    short[] heights = new short[256], biomes = new short[256];
+                    Arrays.fill(heights, (short) 600);
+                    for (int z = 0; z < 16; z++)
+                        for (int x = 0; x < 16; x++)
+                            biomes[z * 16 + x] = (short) (Math.floorMod(key.blockStartX() + x, 32)
+                                    + 32 * Math.floorMod(key.blockStartZ() + z, 32));
+                    return new TerrainTile(key, heights, biomes);
+                },
+                16,
+                1024 * 1024,
+                1024L * 1024 * 1024,
+                s));
         try (var c = new WorldWaterController(s, temp.resolve("small-water"), 300, SMALL, 2, 4)) {
             s.attachAutomaticWater(c);
             c.ensureColumn(-1, -1);
@@ -807,24 +794,23 @@ class WorldWaterTest {
     void testLodForestReadsFrozenHaloOnly() throws Exception {
         var calls = new AtomicInteger();
         var s = WorldSession.activate(GenerationProfile.defaultsFor(2, "forest-probe", "cpu", "cpu"), 7);
-        s.attachRepository(
-                new TerrainRepository(
-                        new DiskTerrainStore(temp.resolve("forest-raw")),
-                        key -> {
-                            calls.incrementAndGet();
-                            int n = key.tileSize() * key.tileSize();
-                            short[] air = new short[n], biome = new short[n];
-                            float[] climate = new float[n * 4];
-                            Arrays.fill(air, (short) 600);
-                            Arrays.fill(biome, (short) 215);
-                            Arrays.fill(climate, 0, n, 12);
-                            Arrays.fill(climate, n * 2, n * 3, 900);
-                            return new TerrainTile(key, air, biome, climate);
-                        },
-                        256,
-                        32L * 1024 * 1024,
-                        1024L * 1024 * 1024,
-                        s));
+        s.attachRepository(new TerrainRepository(
+                new DiskTerrainStore(temp.resolve("forest-raw")),
+                key -> {
+                    calls.incrementAndGet();
+                    int n = key.tileSize() * key.tileSize();
+                    short[] air = new short[n], biome = new short[n];
+                    float[] climate = new float[n * 4];
+                    Arrays.fill(air, (short) 600);
+                    Arrays.fill(biome, (short) 215);
+                    Arrays.fill(climate, 0, n, 12);
+                    Arrays.fill(climate, n * 2, n * 3, 900);
+                    return new TerrainTile(key, air, biome, climate);
+                },
+                256,
+                32L * 1024 * 1024,
+                1024L * 1024 * 1024,
+                s));
         try (var c = new WorldWaterController(s, temp.resolve("forest-water"), 300, SMALL, 8, 16)) {
             s.attachAutomaticWater(c);
             c.ensureColumn(96, 96);

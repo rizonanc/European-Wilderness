@@ -1,8 +1,8 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.hydrology;
 
+import com.github.xandergos.terraindiffusionmc.pipeline.InferenceDemand;
 import java.util.*;
 import java.util.concurrent.*;
-import com.github.xandergos.terraindiffusionmc.pipeline.InferenceDemand;
 
 /** Bounded resident plans, with one computation per key and no IO under the LRU lock. */
 final class WaterPlanCache<K, V> {
@@ -40,20 +40,20 @@ final class WaterPlanCache<K, V> {
                 return v;
             }
         }
-        PendingPlan task =
-                new PendingPlan(() -> {
-                    synchronized (ready) {
-                        V v = ready.get(key);
-                        if (v != null) return v;
-                    }
-                    loads.increment();
-                    V value = Objects.requireNonNull(load.call());
-                    synchronized (ready) {
-                        ready.put(key, value);
-                        while (ready.size() > capacity) ready.remove(ready.keySet().iterator().next());
-                    }
-                    return value;
-                });
+        PendingPlan task = new PendingPlan(() -> {
+            synchronized (ready) {
+                V v = ready.get(key);
+                if (v != null) return v;
+            }
+            loads.increment();
+            V value = Objects.requireNonNull(load.call());
+            synchronized (ready) {
+                ready.put(key, value);
+                while (ready.size() > capacity)
+                    ready.remove(ready.keySet().iterator().next());
+            }
+            return value;
+        });
         PendingPlan flight = pending.putIfAbsent(key, task);
         boolean own = flight == null;
         if (own) {

@@ -12,22 +12,14 @@ public record WaterGenerationOptions(
         this(widthVariation, depthVariation, lakeThreshold, true);
     }
 
-    public static final Codec<WaterGenerationOptions> CODEC =
-            RecordCodecBuilder.create(instance ->
-                    instance.group(
-                                    Codec.intRange(0, 200)
-                                            .fieldOf("width_variation")
-                                            .forGetter(WaterGenerationOptions::widthVariation),
-                                    Codec.intRange(0, 200)
-                                            .fieldOf("depth_variation")
-                                            .forGetter(WaterGenerationOptions::depthVariation),
-                                    Codec.intRange(25, 400)
-                                            .fieldOf("lake_threshold")
-                                            .forGetter(WaterGenerationOptions::lakeThreshold),
-                                    Codec.BOOL
-                                            .optionalFieldOf("mountain_rivers", true)
-                                            .forGetter(WaterGenerationOptions::mountainRivers))
-                            .apply(instance, WaterGenerationOptions::new));
+    public static final Codec<WaterGenerationOptions> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                    Codec.intRange(0, 200).fieldOf("width_variation").forGetter(WaterGenerationOptions::widthVariation),
+                    Codec.intRange(0, 200).fieldOf("depth_variation").forGetter(WaterGenerationOptions::depthVariation),
+                    Codec.intRange(25, 400).fieldOf("lake_threshold").forGetter(WaterGenerationOptions::lakeThreshold),
+                    Codec.BOOL
+                            .optionalFieldOf("mountain_rivers", true)
+                            .forGetter(WaterGenerationOptions::mountainRivers))
+            .apply(instance, WaterGenerationOptions::new));
 
     public WaterGenerationOptions {
         if (widthVariation < 0

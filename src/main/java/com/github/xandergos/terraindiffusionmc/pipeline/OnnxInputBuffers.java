@@ -39,7 +39,9 @@ final class OnnxInputBuffers implements AutoCloseable {
                 }
                 if (slot == null) {
                     long bytes = (long) data.length * Float.BYTES;
-                    var buffer = ByteBuffer.allocateDirect((int) bytes).order(ByteOrder.nativeOrder()).asFloatBuffer();
+                    var buffer = ByteBuffer.allocateDirect((int) bytes)
+                            .order(ByteOrder.nativeOrder())
+                            .asFloatBuffer();
                     long[] ownedShape = shape.clone();
                     slot = new Slot(ownedShape, buffer, OnnxTensor.createTensor(env, buffer, ownedShape), bytes);
                     created++;

@@ -1,7 +1,7 @@
 package com.github.xandergos.terraindiffusionmc.pipeline;
 
-import com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors;
 import static com.github.xandergos.terraindiffusionmc.worldgen.diagnostics.DiagnosticErrors.*;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -26,24 +26,23 @@ public final class PipelineModels implements AutoCloseable {
                 loadStarted = true;
                 loadFailure = null;
                 loadDone = new CountDownLatch(1);
-                Thread t =
-                        new Thread(
-                                () -> {
-                                    try {
-                                        LOG.info("Loading European Wilderness ML models (background)...");
-                                        long start = System.currentTimeMillis();
-                                        INSTANCE = new PipelineModels();
-                                        long elapsed = System.currentTimeMillis() - start;
-                                        LOG.info("European Wilderness ML models loaded in {} ms", elapsed);
-                                    } catch (Throwable e) {
-                                        loadFailure = e;
-                                        loadStarted = false;
-                                        failed(Code.MOD_INVALID, "MODEL_BACKGROUND_LOAD", e);
-                                    } finally {
-                                        loadDone.countDown();
-                                    }
-                                },
-                                "terrain-diffusion-models");
+                Thread t = new Thread(
+                        () -> {
+                            try {
+                                LOG.info("Loading European Wilderness ML models (background)...");
+                                long start = System.currentTimeMillis();
+                                INSTANCE = new PipelineModels();
+                                long elapsed = System.currentTimeMillis() - start;
+                                LOG.info("European Wilderness ML models loaded in {} ms", elapsed);
+                            } catch (Throwable e) {
+                                loadFailure = e;
+                                loadStarted = false;
+                                failed(Code.MOD_INVALID, "MODEL_BACKGROUND_LOAD", e);
+                            } finally {
+                                loadDone.countDown();
+                            }
+                        },
+                        "terrain-diffusion-models");
                 t.setDaemon(true);
                 t.start();
             }

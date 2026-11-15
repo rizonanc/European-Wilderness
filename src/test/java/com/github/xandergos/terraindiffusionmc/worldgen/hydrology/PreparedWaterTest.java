@@ -1,19 +1,21 @@
 package com.github.xandergos.terraindiffusionmc.worldgen.hydrology;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import com.github.xandergos.terraindiffusionmc.worldgen.cache.DiskTerrainStore;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.*;
-import net.minecraft.util.math.BlockPos;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.io.TempDir;
+import com.github.xandergos.terraindiffusionmc.worldgen.terrain.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
-import com.github.xandergos.terraindiffusionmc.worldgen.terrain.*;
-import com.github.xandergos.terraindiffusionmc.worldgen.cache.DiskTerrainStore;
-import static org.junit.jupiter.api.Assertions.*;
+import net.minecraft.util.math.BlockPos;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.io.TempDir;
 
 class PreparedWaterTest {
-    @TempDir Path temp;
+    @TempDir
+    Path temp;
 
     private static int[][] bowl(int size) {
         int[][] height = new int[size][size];
@@ -64,7 +66,8 @@ class PreparedWaterTest {
         int[][] raw = new int[1024][1024];
         for (int tz = 14; tz < 18; tz++)
             for (int tx = 14; tx < 18; tx++) {
-                var tile = store.load(TerrainTileKey.ofTile(12345, tx, tz, 256, fp)).orElseThrow();
+                var tile = store.load(TerrainTileKey.ofTile(12345, tx, tz, 256, fp))
+                        .orElseThrow();
                 for (int z = 0; z < 256; z++)
                     for (int x = 0; x < 256; x++) {
                         int wx = tx * 256 + x, wz = tz * 256 + z;
@@ -102,17 +105,16 @@ class PreparedWaterTest {
                         3584 + cz * 16,
                         -64,
                         1887,
-                        d ->
-                                details.append(d.x())
-                                        .append(',')
-                                        .append(d.y())
-                                        .append(',')
-                                        .append(d.z())
-                                        .append(',')
-                                        .append(d.kind())
-                                        .append(',')
-                                        .append(d.waterlogged())
-                                        .append('\n'));
+                        d -> details.append(d.x())
+                                .append(',')
+                                .append(d.y())
+                                .append(',')
+                                .append(d.z())
+                                .append(',')
+                                .append(d.kind())
+                                .append(',')
+                                .append(d.waterlogged())
+                                .append('\n'));
         Files.writeString(shore.resolveSibling("details.csv"), details);
         StringBuilder falls = new StringBuilder("x,z,dx,dz,upper,lower,width,run\n");
         for (var f : area.waterfalls())
@@ -247,16 +249,15 @@ class PreparedWaterTest {
     @Test
     void wholeLakeFillsAcrossChunkBordersRegardlessOfOrder() {
         var a = PreparedWaterArea.plan(7, 0, 0, bowl(64));
-        var columns =
-                new RiverWaterPlanning.ColumnAccess() {
-                    public boolean isAir(int x, int y, int z) {
-                        return y >= a.carvedHeight(x, z, 101);
-                    }
+        var columns = new RiverWaterPlanning.ColumnAccess() {
+            public boolean isAir(int x, int y, int z) {
+                return y >= a.carvedHeight(x, z, 101);
+            }
 
-                    public boolean isSolidDry(int x, int y, int z) {
-                        return !isAir(x, y, z);
-                    }
-                };
+            public boolean isSolidDry(int x, int y, int z) {
+                return !isAir(x, y, z);
+            }
+        };
         Set<BlockPos> forward = new HashSet<>(), backward = new HashSet<>();
         for (int z = 0; z < 4; z++)
             for (int x = 0; x < 4; x++) forward.addAll(RiverWaterPlanning.planChunk(a, x, z, -64, 320, columns));
@@ -274,21 +275,22 @@ class PreparedWaterTest {
     @Test
     void existingWaterDoesNotLeaveHolesOnRepeatedNeighbourDecoration() {
         var a = PreparedWaterArea.plan(7, 0, 0, bowl(64));
-        var columns =
-                new RiverWaterPlanning.ColumnAccess() {
-                    public boolean isAir(int x, int y, int z) {
-                        return y > 100;
-                    }
+        var columns = new RiverWaterPlanning.ColumnAccess() {
+            public boolean isAir(int x, int y, int z) {
+                return y > 100;
+            }
 
-                    public boolean isWater(int x, int y, int z) {
-                        return a.waterY(x, z) != PreparedWaterArea.NONE && y >= 86 && y <= 100;
-                    }
+            public boolean isWater(int x, int y, int z) {
+                return a.waterY(x, z) != PreparedWaterArea.NONE && y >= 86 && y <= 100;
+            }
 
-                    public boolean isSolidDry(int x, int y, int z) {
-                        return y < a.carvedHeight(x, z, 101);
-                    }
-                };
-        assertEquals(chunkWaterVolume(a, 16, 16), RiverWaterPlanning.planChunk(a, 1, 1, -64, 320, columns).size());
+            public boolean isSolidDry(int x, int y, int z) {
+                return y < a.carvedHeight(x, z, 101);
+            }
+        };
+        assertEquals(
+                chunkWaterVolume(a, 16, 16),
+                RiverWaterPlanning.planChunk(a, 1, 1, -64, 320, columns).size());
     }
 
     @Test
@@ -305,27 +307,17 @@ class PreparedWaterTest {
                 }
         assertNotEquals(0, wx);
         final int holeX = wx - 1;
-        var columns =
-                new RiverWaterPlanning.ColumnAccess() {
-                    public boolean isAir(int x, int y, int z) {
-                        return y >= a.carvedHeight(x, z, 101);
-                    }
+        var columns = new RiverWaterPlanning.ColumnAccess() {
+            public boolean isAir(int x, int y, int z) {
+                return y >= a.carvedHeight(x, z, 101);
+            }
 
-                    public boolean isSolidDry(int x, int y, int z) {
-                        return x != holeX && !isAir(x, y, z);
-                    }
-                };
-        assertFalse(
-                FluidContainment.canPlace(
-                        FluidContainment.Fluid.WATER,
-                        a,
-                        wx,
-                        wz,
-                        a.bedY(wx, wz, 0),
-                        a.waterY(wx, wz),
-                        -64,
-                        320,
-                        columns));
+            public boolean isSolidDry(int x, int y, int z) {
+                return x != holeX && !isAir(x, y, z);
+            }
+        };
+        assertFalse(FluidContainment.canPlace(
+                FluidContainment.Fluid.WATER, a, wx, wz, a.bedY(wx, wz, 0), a.waterY(wx, wz), -64, 320, columns));
     }
 
     @Test
@@ -335,13 +327,12 @@ class PreparedWaterTest {
             session.attachPreparedWater(controller);
             assertThrows(
                     IllegalStateException.class,
-                    () ->
-                            controller.start(
-                                    new PreparedWaterController.Bounds(1024, 1024, 512),
-                                    () -> {
-                                        throw new IllegalStateException("already generated");
-                                    },
-                                    Runnable::run));
+                    () -> controller.start(
+                            new PreparedWaterController.Bounds(1024, 1024, 512),
+                            () -> {
+                                throw new IllegalStateException("already generated");
+                            },
+                            Runnable::run));
             assertEquals(321, controller.carvedHeight(1, 1, 321));
         } finally {
             WorldSession.deactivate(session);
@@ -369,17 +360,18 @@ class PreparedWaterTest {
                 lining.contains(new BlockPos(15, a.bedY(15, 16, 0), 16)),
                 "neighbouring chunk floor must also be sealed");
         assertTrue(lining.stream().allMatch(p -> p.getX() >= 15 && p.getX() <= 32 && p.getZ() >= 15 && p.getZ() <= 32));
-        var columns =
-                new RiverWaterPlanning.ColumnAccess() {
-                    public boolean isAir(int x, int y, int z) {
-                        return y >= a.carvedHeight(x, z, 101) || y == a.bedY(x, z, 0);
-                    }
+        var columns = new RiverWaterPlanning.ColumnAccess() {
+            public boolean isAir(int x, int y, int z) {
+                return y >= a.carvedHeight(x, z, 101) || y == a.bedY(x, z, 0);
+            }
 
-                    public boolean isSolidDry(int x, int y, int z) {
-                        return lining.contains(new BlockPos(x, y, z)) || !isAir(x, y, z);
-                    }
-                };
-        assertEquals(chunkWaterVolume(a, 16, 16), RiverWaterPlanning.planChunk(a, 1, 1, -64, 320, columns).size());
+            public boolean isSolidDry(int x, int y, int z) {
+                return lining.contains(new BlockPos(x, y, z)) || !isAir(x, y, z);
+            }
+        };
+        assertEquals(
+                chunkWaterVolume(a, 16, 16),
+                RiverWaterPlanning.planChunk(a, 1, 1, -64, 320, columns).size());
     }
 
     private static int chunkWaterVolume(PreparedWaterArea area, int baseX, int baseZ) {
@@ -400,16 +392,15 @@ class PreparedWaterTest {
         water[16 * 64 + 16] = 100;
         air[16 * 64 + 16] = 98;
         var a = new PreparedWaterArea(0, 0, 64, air, water);
-        var columns =
-                new RiverWaterPlanning.ColumnAccess() {
-                    public boolean isAir(int x, int y, int z) {
-                        return y >= a.carvedHeight(x, z, 110);
-                    }
+        var columns = new RiverWaterPlanning.ColumnAccess() {
+            public boolean isAir(int x, int y, int z) {
+                return y >= a.carvedHeight(x, z, 110);
+            }
 
-                    public boolean isSolidDry(int x, int y, int z) {
-                        return !isAir(x, y, z);
-                    }
-                };
+            public boolean isSolidDry(int x, int y, int z) {
+                return !isAir(x, y, z);
+            }
+        };
         assertTrue(RiverWaterPlanning.planChunk(a, 0, 1, -64, 320, columns).contains(new BlockPos(15, 105, 16)));
         assertTrue(RiverWaterPlanning.planChunk(a, 1, 1, -64, 320, columns).contains(new BlockPos(16, 100, 16)));
     }
@@ -425,44 +416,40 @@ class PreparedWaterTest {
 
     @Test
     void testGeneratedChunkGuardRejectsInFlightChunks() throws Exception {
-        assertFalse(
-                GeneratedChunkGuard.check(
-                                temp,
-                                0,
-                                0,
-                                (x, z) ->
-                                        x == 1 && z == 1
-                                                ? GeneratedChunkGuard.RuntimeState.PRESENT_OR_IN_FLIGHT
-                                                : GeneratedChunkGuard.RuntimeState.ABSENT)
-                        .safeToPublish());
+        assertFalse(GeneratedChunkGuard.check(
+                        temp,
+                        0,
+                        0,
+                        (x, z) -> x == 1 && z == 1
+                                ? GeneratedChunkGuard.RuntimeState.PRESENT_OR_IN_FLIGHT
+                                : GeneratedChunkGuard.RuntimeState.ABSENT)
+                .safeToPublish());
         byte[] header = new byte[8192];
         header[3] = 1;
         Files.write(temp.resolve("r.0.0.mca"), header);
-        assertFalse(
-                GeneratedChunkGuard.check(temp, 0, 0, (x, z) -> GeneratedChunkGuard.RuntimeState.ABSENT)
-                        .safeToPublish());
+        assertFalse(GeneratedChunkGuard.check(temp, 0, 0, (x, z) -> GeneratedChunkGuard.RuntimeState.ABSENT)
+                .safeToPublish());
     }
 
     private WorldSession syntheticSession() throws Exception {
         var s = WorldSession.activate(GenerationProfile.defaultsFor(2, "model", "cpu", "cpu"), 7);
-        var repo =
-                new TerrainRepository(
-                        new DiskTerrainStore(temp.resolve("terrain")),
-                        key -> {
-                            int ts = key.tileSize();
-                            short[] heights = new short[ts * ts], biomes = new short[ts * ts];
-                            for (int z = 0; z < ts; z++)
-                                for (int x = 0; x < ts; x++) {
-                                    int wx = key.blockStartX() + x, wz = key.blockStartZ() + z;
-                                    heights[z * ts + x] =
-                                            (short) (wx >= 1120 && wz >= 1120 && wx < 1440 && wz < 1440 ? 300 : 600);
-                                }
-                            return new TerrainTile(key, heights, biomes);
-                        },
-                        256,
-                        16 * 1024 * 1024,
-                        1024L * 1024 * 1024,
-                        s);
+        var repo = new TerrainRepository(
+                new DiskTerrainStore(temp.resolve("terrain")),
+                key -> {
+                    int ts = key.tileSize();
+                    short[] heights = new short[ts * ts], biomes = new short[ts * ts];
+                    for (int z = 0; z < ts; z++)
+                        for (int x = 0; x < ts; x++) {
+                            int wx = key.blockStartX() + x, wz = key.blockStartZ() + z;
+                            heights[z * ts + x] =
+                                    (short) (wx >= 1120 && wz >= 1120 && wx < 1440 && wz < 1440 ? 300 : 600);
+                        }
+                    return new TerrainTile(key, heights, biomes);
+                },
+                256,
+                16 * 1024 * 1024,
+                1024L * 1024 * 1024,
+                s);
         s.attachRepository(repo);
         return s;
     }
@@ -496,9 +483,8 @@ class PreparedWaterTest {
                         102, restored.waterY(1200, 1200), "shutdown must not change terrain while chunk work drains");
                 assertThrows(
                         IllegalStateException.class,
-                        () ->
-                                restored.start(
-                                        new PreparedWaterController.Bounds(4096, 4096, 512), () -> {}, Runnable::run));
+                        () -> restored.start(
+                                new PreparedWaterController.Bounds(4096, 4096, 512), () -> {}, Runnable::run));
             }
         } finally {
             WorldSession.deactivate(s);

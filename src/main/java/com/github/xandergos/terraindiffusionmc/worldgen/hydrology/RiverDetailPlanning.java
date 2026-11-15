@@ -64,14 +64,13 @@ public final class RiverDetailPlanning {
             // Lower the cap itself, rather than adding another half block on
             // top. A cap at the waterline must retain water inside the slab.
             if (bed <= shoreLevel + 1 && BankCaps.isolated(overlay, x, z, bed)) {
-                Kind cap =
-                        bed <= shoreLevel
-                                ? Kind.SAND_SLAB
-                                : switch (RiverShorePalette.material(seed, x, z, shoreDistance)) {
-                                    case SAND -> Kind.SAND_SLAB;
-                                    case GRASS -> Kind.TURF_SLAB;
-                                    default -> Kind.DIRT_SLAB;
-                                };
+                Kind cap = bed <= shoreLevel
+                        ? Kind.SAND_SLAB
+                        : switch (RiverShorePalette.material(seed, x, z, shoreDistance)) {
+                            case SAND -> Kind.SAND_SLAB;
+                            case GRASS -> Kind.TURF_SLAB;
+                            default -> Kind.DIRT_SLAB;
+                        };
                 return new Detail(x, bed, z, cap, bed <= shoreLevel);
             }
         }
@@ -93,12 +92,11 @@ public final class RiverDetailPlanning {
             Kind kind = Kind.SAND_SLAB;
             if (!wet) {
                 var material = RiverShorePalette.material(seed, x, z, shoreDistance);
-                kind =
-                        switch (material) {
-                            case SAND -> Kind.SAND_SLAB;
-                            case GRASS -> Kind.TURF_SLAB;
-                            default -> Kind.DIRT_SLAB;
-                        };
+                kind = switch (material) {
+                    case SAND -> Kind.SAND_SLAB;
+                    case GRASS -> Kind.TURF_SLAB;
+                    default -> Kind.DIRT_SLAB;
+                };
                 if (random(seed ^ 0x431b8fL, x, z) < .035) kind = Kind.STONE_SLAB;
             }
             return new Detail(x, bed, z, kind, wet);
@@ -110,10 +108,9 @@ public final class RiverDetailPlanning {
         if (stillWater && depth >= 2 && depth <= 8) {
             double density = .12 + Math.max(0, RiverBanks.relief(seed ^ 0x41be32L, x, z)) * .2;
             if (random(seed ^ 0x917ad3L, x, z) < density) {
-                Kind kind =
-                        depth >= 3 && y + 1 <= top && random(seed ^ 0xf5a96bL, x, z) < .18
-                                ? Kind.TALL_SEAGRASS
-                                : Kind.SEAGRASS;
+                Kind kind = depth >= 3 && y + 1 <= top && random(seed ^ 0xf5a96bL, x, z) < .18
+                        ? Kind.TALL_SEAGRASS
+                        : Kind.SEAGRASS;
                 return new Detail(x, y, z, kind, true);
             }
         }

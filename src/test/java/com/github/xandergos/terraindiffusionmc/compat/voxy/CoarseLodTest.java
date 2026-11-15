@@ -1,14 +1,16 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.github.xandergos.terraindiffusionmc.infinitetensor.FloatTensor;
+import java.nio.file.Path;
 import java.util.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import java.nio.file.Path;
-import static org.junit.jupiter.api.Assertions.*;
 
 class CoarseLodTest {
-    @TempDir Path temp;
+    @TempDir
+    Path temp;
 
     static CoarseLodPatch patch(int x, int z) {
         int side = CoarseLodPatch.GRID, n = side * side;
@@ -18,10 +20,9 @@ class CoarseLodTest {
                 int p = row * side + col;
                 float weight = .25f + (p % 7) * .1f;
                 tensor.data[6 * n + p] = weight;
-                float elevation =
-                        10
-                                + (x * CoarseLodPatch.SIDE + col - CoarseLodPatch.HALO) * .01f
-                                + (z * CoarseLodPatch.SIDE + row - CoarseLodPatch.HALO) * .02f;
+                float elevation = 10
+                        + (x * CoarseLodPatch.SIDE + col - CoarseLodPatch.HALO) * .01f
+                        + (z * CoarseLodPatch.SIDE + row - CoarseLodPatch.HALO) * .02f;
                 tensor.data[p] = elevation * weight;
                 tensor.data[2 * n + p] = 10 * weight;
                 tensor.data[4 * n + p] = 600 * weight;
@@ -48,9 +49,8 @@ class CoarseLodTest {
     void testBadShapesMissingWeights() {
         assertThrows(
                 IllegalArgumentException.class,
-                () ->
-                        new CoarseLodPatch(
-                                new CoarseLodPatch.Key(0, 0), 2, 8, 0, 1871, new FloatTensor(new int[] {7, 1, 1})));
+                () -> new CoarseLodPatch(
+                        new CoarseLodPatch.Key(0, 0), 2, 8, 0, 1871, new FloatTensor(new int[] {7, 1, 1})));
         var data = new FloatTensor(new int[] {7, CoarseLodPatch.GRID, CoarseLodPatch.GRID});
         assertThrows(
                 IllegalArgumentException.class,

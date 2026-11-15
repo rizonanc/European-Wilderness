@@ -1,7 +1,8 @@
 package com.github.xandergos.terraindiffusionmc.compat.voxy;
 
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 class ChunksCoarseIsolationTest {
     @Test
@@ -13,10 +14,9 @@ class ChunksCoarseIsolationTest {
     }
 
     private static byte[] classBytes(String internalName) {
-        try (var input =
-                CoarseVoxyRenderer.class
-                        .getClassLoader()
-                        .getResourceAsStream(internalName.replace('.', '/') + ".class")) {
+        try (var input = CoarseVoxyRenderer.class
+                .getClassLoader()
+                .getResourceAsStream(internalName.replace('.', '/') + ".class")) {
             assertNotNull(input, "compiled class present");
             return input.readAllBytes();
         } catch (Exception failure) {

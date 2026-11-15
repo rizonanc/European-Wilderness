@@ -2,10 +2,10 @@ package com.github.xandergos.terraindiffusionmc.mixin.compat;
 
 import com.github.xandergos.terraindiffusionmc.compat.voxy.VoxySupport;
 import com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfig;
+import java.util.*;
 import net.fabricmc.loader.api.FabricLoader;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.*;
-import java.util.*;
 
 public final class CoarseVoxyMixinPlugin implements IMixinConfigPlugin {
     public void onLoad(String name) {}
@@ -19,7 +19,8 @@ public final class CoarseVoxyMixinPlugin implements IMixinConfigPlugin {
         return TerrainDiffusionConfig.voxyCoarseExperimental()
                 && FabricLoader.getInstance()
                         .getModContainer("voxy")
-                        .map(m -> VoxySupport.problem(m.getMetadata().getVersion().getFriendlyString(), false) == null)
+                        .map(m ->
+                                VoxySupport.problem(m.getMetadata().getVersion().getFriendlyString(), false) == null)
                         .orElse(false);
     }
 
