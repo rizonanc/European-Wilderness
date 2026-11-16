@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.xandergos.terraindiffusionmc.world.SpawnChoice;
 import java.util.Arrays;
+import net.minecraft.util.math.BlockPos;
 import org.junit.jupiter.api.Test;
 
 class SelectedSpawnTest {
@@ -21,6 +22,8 @@ class SelectedSpawnTest {
         assertEquals(84, spawn.getY());
         assertTrue(spawn.getX() != 100 || spawn.getZ() != -100);
         assertNull(SpawnSelector.findNearby(requested, data, 2, 300, (x, z) -> false));
-        assertNull(SpawnSelector.findNearby(new SpawnChoice(100, -100, "coast", 6), data, 2, 300, (x, z) -> true));
+        var valley = new SpawnChoice(5504, -6850, "valley", 6);
+        var nearby = SpawnSelector.findNearby(valley, data, 2, 300, (x, z) -> true);
+        assertEquals(new BlockPos(5504, 84, -6850), nearby);
     }
 }
