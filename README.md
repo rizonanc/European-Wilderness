@@ -1,12 +1,54 @@
 # European Wilderness
 
-European Wilderness adds a Minecraft world type with high mountain ranges, forests, flowing rivers and rugged coastlines. Rivers carry boats and dropped items. Snowy passes have stone cairns, and the terrain includes fjords, skerries, limestone sinkholes, desert oases and tropical archipelagos.
+European Wilderness is a fork of Alexander Goslin's Terrain Diffusion MC. I made it for players who enjoy the look of Terrain Diffusion and want more to discover as they travel. You can cross dense forests and snowy passes, follow a river down a valley, or set out to find islands.
 
-## Install
+You can tailor a new world to your liking. Choose how common mountains are, how pronounced their relief is, and how much space open fields, forests and other landscapes take up. If you'd rather start with a preset, try Alps or Scandinavia.
 
-Use Minecraft 1.21.11, Fabric Loader 0.18.1 or newer, Fabric API and Java 21 on Windows x64. Drop the JAR into `mods/` and choose **European Wilderness** when creating a world. The first launch downloads and verifies about 2.3 GB of terrain models. The Windows build ships with ONNX Runtime and DirectML support.
+The mod uses ONNX models from Terrain Diffusion MC to generate terrain and climate data. European Wilderness uses that foundation to shape biomes and add trees with custom trunks and crowns. While exploring, you can find fjords, rocky islands, archipelagos and oases.
 
-Adjust terrain and biome proportions during world creation, or choose a starting area in European Wilderness Explorer. Mod Menu gives you access to the mod settings. Voxy, Road Weaver and Wilder Wild are optional. The Voxy and Road Weaver integrations were tested with Voxy 0.2.16-beta and Road Weaver 2.2.0 for Minecraft 1.21.11.
+The original Terrain Diffusion MC does not support Streams Reflowing. That is why I built a separate hydrology system for European Wilderness. River currents can carry boats and dropped items, and you can turn them on or off in the mod settings. I'm still working on rivers, lakes and waterfalls. If you find a bug or have an idea for a future update, I'd like to hear about it. [GitHub Issues](https://github.com/rizonanc/European-Wilderness/issues)
+
+If you enjoy mods about rivers, I also recommend [Streams Reflowing](https://www.curseforge.com/minecraft/mc-mods/streams-reflowing).
+
+You can choose where to spawn using Explorer, a feature inherited from Terrain Diffusion MC.
+
+The screenshots use the Alps preset. Some were taken with shaders and some without. A few were taken at a render distance of 32 chunks with Voxy disabled.
+
+### Screenshots
+
+![River valley](docs/screenshots/river-valley.png)
+
+2048 Voxy Render Distance, Complementary Reimagined ( Visual Style: Unbound )
+
+![Snowy mountain slopes](docs/screenshots/snowy-slopes.png)
+
+32 Render Distance, No shaders
+
+![Village on the plains](docs/screenshots/plains-village.png)
+
+2048 Voxy Render Distance, Complementary Reimagined ( Visual Style: Unbound )
+
+![Snowy forest from above](docs/screenshots/snowy-forest.png)
+
+2048 Voxy Render Distance, Complementary Reimagined ( Visual Style: Unbound )
+
+![Aurora over the mountains](docs/screenshots/mountain-aurora.png)
+
+ 2048 Voxy Render Distance, Complementary Reimagined ( Visual Style: Unbound )
+
+### Requirements and installation
+
+You'll need Windows x64, Java 21, a DirectML-capable GPU, Minecraft 1.21.11, Fabric Loader 0.18.1 or newer, and Fabric API. Put the JAR in your `mods` folder and choose **European Wilderness** as the world type when creating a new world. On first launch, the mod downloads and verifies about 2.3 GB of terrain models from Hugging Face.
+
+### Compatibility
+
+The mod integrates with Road Weaver and supports selected decorations from Wilder Wild and Geophilic. These mods are optional and installed separately, as are Voxy and Mod Menu. [Road Weaver](https://www.curseforge.com/minecraft/mc-mods/roadweaver) · [Wilder Wild](https://www.curseforge.com/minecraft/mc-mods/wilder-wild) · [Geophilic](https://www.curseforge.com/minecraft/mc-mods/geophilic) · [Iris Shaders](https://www.curseforge.com/minecraft/mc-mods/irisshaders)
+
+I recommend Voxy for longer views and [Chunky](https://www.curseforge.com/minecraft/mc-mods/chunky-pregenerator) for pre-generating chunks. If you'd like more variety in vegetation and ground decoration, try Wilder Wild and Geophilic.
+
+### Credits
+
+Thanks to Alexander Goslin for Terrain Diffusion MC and its terrain models, and to Joao for DirectML support in the original project. European Wilderness is distributed under the MIT license. [Terrain Diffusion MC](https://github.com/xandergos/terrain-diffusion-mc) · [Terrain models](https://huggingface.co/xandergos/terrain-diffusion-30m-onnx) · [Joao](https://github.com/batata1-jg)
 
 ## Upgrade
 
@@ -21,6 +63,4 @@ Run `./gradlew build` with JDK 21, or `gradlew.bat build` on Windows. The JAR is
 - `./gradlew spotlessApply`
 - `./gradlew check`
 
-## License and credits
-
-European Wilderness is distributed under the [MIT license](LICENSE.txt). It builds on Alexander Goslin's [Terrain Diffusion MC](https://github.com/xandergos/terrain-diffusion-mc) and [ONNX terrain models](https://huggingface.co/xandergos/terrain-diffusion-30m-onnx). Thanks to [Joao](https://github.com/batata1-jg) for upstream DirectML support. See the [third-party notices](licenses/).
+[MIT license](LICENSE.txt) · [Third-party notices](licenses/)
