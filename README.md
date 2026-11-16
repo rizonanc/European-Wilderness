@@ -6,7 +6,7 @@ You can tailor a new world to your liking. Choose how common mountains are, how 
 
 The mod uses ONNX models from Terrain Diffusion MC to generate terrain and climate data. European Wilderness uses that foundation to shape biomes and add trees with custom trunks and crowns. While exploring, you can find fjords, rocky islands, archipelagos and oases.
 
-European Wilderness has its own hydrology. River currents can carry boats and dropped items, and you can turn them on or off in the mod settings. I'm still working on rivers, lakes and waterfalls. If you find a bug or have an idea for a future update, I'd like to hear about it. [GitHub Issues](https://github.com/rizonanc/European-Wilderness/issues)
+The original Terrain Diffusion MC does not support Streams Reflowing. That is why I built a separate hydrology system for European Wilderness. River currents can carry boats and dropped items, and you can turn them on or off in the mod settings. I'm still working on rivers, lakes and waterfalls. If you find a bug or have an idea for a future update, I'd like to hear about it. [GitHub Issues](https://github.com/rizonanc/European-Wilderness/issues)
 
 If you enjoy mods about rivers, I also recommend [Streams Reflowing](https://www.curseforge.com/minecraft/mc-mods/streams-reflowing).
 
