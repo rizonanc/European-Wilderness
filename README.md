@@ -64,3 +64,5 @@ Run `./gradlew build` with JDK 21, or `gradlew.bat build` on Windows. The JAR is
 - `./gradlew check`
 
 [MIT license](LICENSE.txt) · [Third-party notices](licenses/)
+
+**This mod was developed with AI assistance.**
