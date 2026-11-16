@@ -81,7 +81,7 @@ public final class SpawnSelector {
                 maxY,
                 (x, z) -> water == null || water.waterY(x, z) == Integer.MIN_VALUE && water.waterfallAt(x, z) == null);
         if (selected != null) return selected;
-        LOG.warn("Selected spawn {} did not match safe terrain within 32 blocks; using normal search", choice);
+        LOG.warn("Selected spawn {} has no safe terrain within 32 blocks; using normal search", choice);
         return findSpawnBlockPos();
     }
 
@@ -93,6 +93,7 @@ public final class SpawnSelector {
     static BlockPos findNearby(
             SpawnChoice choice, LocalTerrainProvider.HeightmapData data, int scale, int maxY, DryColumn dry) {
         int offset = 48;
+        BlockPos safeFallback = null;
         for (int radius = 0; radius <= 32; radius += 4) {
             for (int dz = -radius; dz <= radius; dz += 4)
                 for (int dx = -radius; dx <= radius; dx += 4) {
@@ -109,6 +110,8 @@ public final class SpawnSelector {
                             high = Math.max(high, height);
                         }
                     if (high - low > 3) continue;
+                    var candidate = new BlockPos(x, y + 1, z);
+                    if (safeFallback == null) safeFallback = candidate;
                     if (choice.matches(
                             y,
                             data.surfaceYAt(ix - 16, iz, scale),
@@ -116,11 +119,11 @@ public final class SpawnSelector {
                             data.surfaceYAt(ix, iz - 16, scale),
                             data.surfaceYAt(ix, iz + 16, scale),
                             biome)) {
-                        return new BlockPos(x, y + 1, z);
+                        return candidate;
                     }
                 }
         }
-        return null;
+        return safeFallback;
     }
 
     private static int heightmapY(int blockX, int blockZ, WorldSession session, int scale) {

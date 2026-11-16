@@ -18,7 +18,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Environment(EnvType.CLIENT)
 @Mixin(targets = "net/minecraft/client/gui/screen/world/CreateWorldScreen$WorldTab")
@@ -41,20 +40,6 @@ public abstract class CreateWorldScreenWorldTabMixin {
         }
     }
 
-    @Inject(method = "method_48680()Z", at = @At("HEAD"), cancellable = true)
-    private void terrainDiffusionMc$forceCustomizeAvailable(CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
-        if (this.isTerrainDiffusionWorldTypeSelected()) {
-            callbackInfoReturnable.setReturnValue(true);
-        }
-    }
-
-    @Inject(method = "method_48681()Z", at = @At("HEAD"), cancellable = true)
-    private void terrainDiffusionMc$forceCustomizeVisible(CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
-        if (this.isTerrainDiffusionWorldTypeSelected()) {
-            callbackInfoReturnable.setReturnValue(true);
-        }
-    }
-
     @Inject(method = "openCustomizeScreen()V", at = @At("HEAD"), cancellable = true)
     private void terrainDiffusionMc$openTerrainScaleScreen(CallbackInfo callbackInfo) {
         if (this.isTerrainDiffusionWorldTypeSelected()) {
@@ -68,18 +53,12 @@ public abstract class CreateWorldScreenWorldTabMixin {
 
     private boolean isTerrainDiffusionWorldTypeSelected() {
         WorldCreator worldCreator = this.field_42182.getWorldCreator();
-        if (worldCreator == null) {
-            return false;
-        } else {
-            WorldType worldType = worldCreator.getWorldType();
-            if (worldType == null) {
-                return false;
-            } else {
-                return TERRAIN_DIFFUSION_PRESET_KEY.equals(worldType.preset())
-                        ? true
-                        : "terrain diffusion"
-                                .equalsIgnoreCase(worldType.getName().getString());
-            }
-        }
+        return worldCreator != null && isTerrainDiffusionWorldTypeSelected(worldCreator.getWorldType());
+    }
+
+    private static boolean isTerrainDiffusionWorldTypeSelected(WorldType worldType) {
+        return worldType != null
+                && worldType.preset() != null
+                && worldType.preset().matchesKey(TERRAIN_DIFFUSION_PRESET_KEY);
     }
 }
