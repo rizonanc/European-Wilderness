@@ -1,28 +1,66 @@
 # European Wilderness
 
-European Wilderness is a world-generation mod for Minecraft that builds European-inspired landscapes with high mountain ranges, flowing rivers, broad forests, and detailed coastlines.
+European Wilderness is a fork of Alexander Goslin's Terrain Diffusion MC. I made it for players who enjoy the look of Terrain Diffusion and want more to discover as they travel. You can cross dense forests and snowy passes, follow a river down a valley, or set out to find islands.
 
-- Follow rivers from inland valleys to lakes, waterfalls, and the sea. Currents can carry boats and dropped items.
-- Explore snowy summits, marked mountain passes, limestone sinkholes, fjords, and rocky skerries.
-- Find tropical archipelagos and desert oases with palms.
-- Tune terrain and biome proportions when creating a world, or choose your starting area in European Wilderness Explorer.
+You can tailor a new world to your liking. Choose how common mountains are, how pronounced their relief is, and how much space open fields, forests and other landscapes take up. If you'd rather start with a preset, try Alps or Scandinavia.
 
-## Installation
+The mod uses ONNX models from Terrain Diffusion MC to generate terrain and climate data. European Wilderness uses that foundation to shape biomes and add trees with custom trunks and crowns. While exploring, you can find fjords, rocky islands, archipelagos and oases.
 
-**Minecraft 1.21.11 · Fabric Loader 0.18.1 or newer · Fabric API · Java 21 · Windows x64**
+European Wilderness has its own hydrology. River currents can carry boats and dropped items, and you can turn them on or off in the mod settings. I'm still working on rivers, lakes and waterfalls. If you find a bug or have an idea for a future update, I'd like to hear about it. [GitHub Issues](https://github.com/rizonanc/European-Wilderness/issues)
 
-Put the European Wilderness JAR in `mods/` alongside Fabric API, then select **European Wilderness** as the world type when creating a world. The first launch needs an internet connection and roughly 2.3 GB of disk space for the terrain models. The Windows build includes ONNX Runtime with DirectML support.
+If you enjoy mods about rivers, I also recommend [Streams Reflowing](https://www.curseforge.com/minecraft/mc-mods/streams-reflowing).
 
-Mod Menu is optional and provides access to the settings screen. Voxy, Road Weaver and Wilder Wild are optional. The tested integration targets are Voxy 0.2.16-beta and Road Weaver 2.2.0 for Minecraft 1.21.11.
+You can choose where to spawn using Explorer, a feature inherited from Terrain Diffusion MC.
 
-## Upgrading
+The screenshots use the Alps preset. Some were taken with shaders and some without. A few were taken at a render distance of 32 chunks with Voxy disabled.
 
-Replace the previous mod JAR with European Wilderness. It keeps the same internal mod and world-generation IDs for existing saves. Older configuration and menu preferences are copied to `config/european-wilderness.properties` and `config/european-wilderness-menu.json` on first use. An existing model directory is reused. Back up your world before updating a world-generation mod.
+### Screenshots
 
-## Build from source
+![River valley](docs/screenshots/river-valley.png)
 
-Use JDK 21 and run `./gradlew build` (Windows: `gradlew.bat build`). The JAR is written to `build/libs/`. The build resolves the pinned Voxy compile dependency from Modrinth if a local copy is unavailable. The build's DirectML runtime matches the one shipped in the original upstream Windows mod.
+2048 Voxy Render Distance, Complementary Reimagined ( Visual Style: Unbound )
 
-## Credits and license
+![Snowy mountain slopes](docs/screenshots/snowy-slopes.png)
 
-European Wilderness extends [Terrain Diffusion MC by Alexander Goslin](https://github.com/xandergos/terrain-diffusion-mc) and uses [his ONNX terrain models](https://huggingface.co/xandergos/terrain-diffusion-30m-onnx). Thanks to [Joao](https://github.com/batata1-jg) for upstream DirectML support. See [the MIT license](LICENSE.txt) and [third-party notices](licenses/).
+32 Render Distance, No shaders
+
+![Village on the plains](docs/screenshots/plains-village.png)
+
+2048 Voxy Render Distance, Complementary Reimagined ( Visual Style: Unbound )
+
+![Snowy forest from above](docs/screenshots/snowy-forest.png)
+
+2048 Voxy Render Distance, Complementary Reimagined ( Visual Style: Unbound )
+
+![Aurora over the mountains](docs/screenshots/mountain-aurora.png)
+
+ 2048 Voxy Render Distance, Complementary Reimagined ( Visual Style: Unbound )
+
+### Requirements and installation
+
+You'll need Windows x64, Java 21, a DirectML-capable GPU, Minecraft 1.21.11, Fabric Loader 0.18.1 or newer, and Fabric API. Put the JAR in your `mods` folder and choose **European Wilderness** as the world type when creating a new world. On first launch, the mod downloads and verifies about 2.3 GB of terrain models from Hugging Face.
+
+### Compatibility
+
+The mod integrates with Road Weaver and supports selected decorations from Wilder Wild and Geophilic. These mods are optional and installed separately, as are Voxy and Mod Menu. [Road Weaver](https://www.curseforge.com/minecraft/mc-mods/roadweaver) · [Wilder Wild](https://www.curseforge.com/minecraft/mc-mods/wilder-wild) · [Geophilic](https://www.curseforge.com/minecraft/mc-mods/geophilic) · [Iris Shaders](https://www.curseforge.com/minecraft/mc-mods/irisshaders)
+
+I recommend Voxy for longer views and [Chunky](https://www.curseforge.com/minecraft/mc-mods/chunky-pregenerator) for pre-generating chunks. If you'd like more variety in vegetation and ground decoration, try Wilder Wild and Geophilic.
+
+### Credits
+
+Thanks to Alexander Goslin for Terrain Diffusion MC and its terrain models, and to Joao for DirectML support in the original project. European Wilderness is distributed under the MIT license. [Terrain Diffusion MC](https://github.com/xandergos/terrain-diffusion-mc) · [Terrain models](https://huggingface.co/xandergos/terrain-diffusion-30m-onnx) · [Joao](https://github.com/batata1-jg)
+
+## Upgrade
+
+Replace the old mod JAR. Existing worlds keep their mod and world-generation IDs. On first use, the mod copies older settings to `config/european-wilderness.properties` and menu preferences to `config/european-wilderness-menu.json`. It reuses any existing model directory. Back up your world before updating.
+
+## Build
+
+Run `./gradlew build` with JDK 21, or `gradlew.bat build` on Windows. The JAR is in `build/libs/`. The build bundles the upstream Windows DirectML runtime.
+
+## Development
+
+- `./gradlew spotlessApply`
+- `./gradlew check`
+
+[MIT license](LICENSE.txt) · [Third-party notices](licenses/)
