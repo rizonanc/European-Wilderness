@@ -1,14 +1,15 @@
 package com.github.xandergos.terraindiffusionmc.config;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class ConfigBrandMigrationTest {
-    @Test void copiesOldSettingsOnceAndKeepsBothFiles(@TempDir Path directory) throws Exception {
+    @Test
+    void copiesOldSettingsOnceAndKeepsBothFiles(@TempDir Path directory) throws Exception {
         String oldName = "terrain-diffusion-menu.json";
         String newName = "european-wilderness-menu.json";
         Path original = directory.resolve(oldName);

@@ -1,19 +1,19 @@
 package com.github.xandergos.terraindiffusionmc.compat.roadweaver;
 
-import com.github.xandergos.terraindiffusionmc.pipeline.InferenceDemand;
 import com.github.xandergos.terraindiffusionmc.config.TerrainDiffusionConfig;
+import com.github.xandergos.terraindiffusionmc.pipeline.InferenceDemand;
 import com.github.xandergos.terraindiffusionmc.world.TerrainDiffusionBiomeSource;
 import com.github.xandergos.terraindiffusionmc.world.TerrainDiffusionDensityFunction;
 import com.github.xandergos.terraindiffusionmc.world.WorldSessionBinding;
 import com.github.xandergos.terraindiffusionmc.worldgen.hydrology.PreparedWaterArea;
 import com.github.xandergos.terraindiffusionmc.worldgen.settings.WorldSession;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.StructureWorldAccess;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 
 public final class RoadWeaverTerrain {
     public static final String SUPPORTED_VERSION = "2.2.0-1.21.11";
@@ -21,8 +21,10 @@ public final class RoadWeaverTerrain {
     private RoadWeaverTerrain() {}
 
     public static String installedVersion() {
-        return FabricLoader.getInstance().getModContainer("roadweaver")
-                .map(mod -> mod.getMetadata().getVersion().getFriendlyString()).orElse(null);
+        return FabricLoader.getInstance()
+                .getModContainer("roadweaver")
+                .map(mod -> mod.getMetadata().getVersion().getFriendlyString())
+                .orElse(null);
     }
 
     public static boolean supports(String version) {
@@ -35,9 +37,11 @@ public final class RoadWeaverTerrain {
         private static MethodHandle bind() {
             if (!supports(installedVersion()) || !TerrainDiffusionConfig.roadWeaverEnabled()) return null;
             try {
-                return MethodHandles.publicLookup().findStatic(
-                    Class.forName("net.shiroha233.roadweaver.persistence.RoadPositionQuery"),
-                    "isOnRoad", MethodType.methodType(boolean.class, StructureWorldAccess.class, BlockPos.class));
+                return MethodHandles.publicLookup()
+                        .findStatic(
+                                Class.forName("net.shiroha233.roadweaver.persistence.RoadPositionQuery"),
+                                "isOnRoad",
+                                MethodType.methodType(boolean.class, StructureWorldAccess.class, BlockPos.class));
             } catch (ReflectiveOperationException e) {
                 throw new IllegalStateException("Cannot bind Road Weaver road lookup", e);
             }
@@ -62,7 +66,8 @@ public final class RoadWeaverTerrain {
 
     public static WorldSession session(ServerWorld world) {
         if (!WorldSessionBinding.ownsSession(world.getRegistryKey())
-                || !(world.getChunkManager().getChunkGenerator().getBiomeSource() instanceof TerrainDiffusionBiomeSource)) {
+                || !(world.getChunkManager().getChunkGenerator().getBiomeSource()
+                        instanceof TerrainDiffusionBiomeSource)) {
             return null;
         }
         var session = WorldSession.current();
@@ -108,7 +113,8 @@ public final class RoadWeaverTerrain {
         if (Math.max(from.getY(), to.getY()) < 125 || from.getY() == to.getY()) return 0;
         var session = session(world);
         return session != null && session.profile().newLandforms()
-            ? mountainGradeCost(to.getX() - from.getX(), to.getY() - from.getY(), to.getZ() - from.getZ()) : 0;
+                ? mountainGradeCost(to.getX() - from.getX(), to.getY() - from.getY(), to.getZ() - from.getZ())
+                : 0;
     }
 
     public static int bridgeComparisonFloor(ServerWorld world, int x, int z, int original) {

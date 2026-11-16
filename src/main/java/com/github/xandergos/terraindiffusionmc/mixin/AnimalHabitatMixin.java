@@ -16,10 +16,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(SpawnRestriction.class)
 abstract class AnimalHabitatMixin {
     @Inject(method = "canSpawn", at = @At("RETURN"), cancellable = true)
-    private static void td$preferHabitat(EntityType<?> type, ServerWorldAccess world, SpawnReason reason,
-                                        BlockPos pos, Random random, CallbackInfoReturnable<Boolean> result) {
-        if (result.getReturnValueZ() && type.getSpawnGroup() == SpawnGroup.CREATURE
-            && (reason == SpawnReason.NATURAL || reason == SpawnReason.CHUNK_GENERATION)
-            && !AnimalHabitat.allows(type, world, pos, random)) result.setReturnValue(false);
+    private static void td$preferHabitat(
+            EntityType<?> type,
+            ServerWorldAccess world,
+            SpawnReason reason,
+            BlockPos pos,
+            Random random,
+            CallbackInfoReturnable<Boolean> result) {
+        if (result.getReturnValueZ()
+                && type.getSpawnGroup() == SpawnGroup.CREATURE
+                && (reason == SpawnReason.NATURAL || reason == SpawnReason.CHUNK_GENERATION)
+                && !AnimalHabitat.allows(type, world, pos, random)) result.setReturnValue(false);
     }
 }

@@ -12,7 +12,8 @@ public final class AnimalHabitat {
     private AnimalHabitat() {}
 
     public static boolean allows(EntityType<?> type, ServerWorldAccess world, BlockPos pos, Random random) {
-        if (!(world.toServerWorld().getChunkManager().getChunkGenerator().getBiomeSource() instanceof TerrainDiffusionBiomeSource)) return true;
+        if (!(world.toServerWorld().getChunkManager().getChunkGenerator().getBiomeSource()
+                instanceof TerrainDiffusionBiomeSource)) return true;
         if (!usesHabitat(type)) return true;
         var biomeEntry = world.getBiome(pos);
         String biome = biomeEntry.getKey().map(key -> key.getValue().getPath()).orElse("");
@@ -22,7 +23,7 @@ public final class AnimalHabitat {
         if (type == EntityType.FROG || type == EntityType.TURTLE) {
             for (var candidate : BlockPos.iterateOutwards(pos.down(), 4, 2, 4)) {
                 if (world.isChunkLoaded(candidate.getX() >> 4, candidate.getZ() >> 4)
-                    && world.getFluidState(candidate).isIn(FluidTags.WATER)) {
+                        && world.getFluidState(candidate).isIn(FluidTags.WATER)) {
                     nearWater = true;
                     break;
                 }
@@ -32,14 +33,24 @@ public final class AnimalHabitat {
     }
 
     private static boolean usesHabitat(EntityType<?> type) {
-        return type == EntityType.GOAT || type == EntityType.FROG || type == EntityType.TURTLE
-            || type == EntityType.WOLF || type == EntityType.FOX || type == EntityType.COW
-            || type == EntityType.HORSE || type == EntityType.DONKEY || type == EntityType.PIG
-            || type == EntityType.CHICKEN || type == EntityType.SHEEP || type == EntityType.RABBIT;
+        return type == EntityType.GOAT
+                || type == EntityType.FROG
+                || type == EntityType.TURTLE
+                || type == EntityType.WOLF
+                || type == EntityType.FOX
+                || type == EntityType.COW
+                || type == EntityType.HORSE
+                || type == EntityType.DONKEY
+                || type == EntityType.PIG
+                || type == EntityType.CHICKEN
+                || type == EntityType.SHEEP
+                || type == EntityType.RABBIT;
     }
 
     static float chance(EntityType<?> type, String biome, int altitude, boolean cold, boolean water) {
-        boolean forest = biome.contains("forest") || biome.contains("taiga") || biome.startsWith("european_") && !biome.endsWith("meadow");
+        boolean forest = biome.contains("forest")
+                || biome.contains("taiga")
+                || biome.startsWith("european_") && !biome.endsWith("meadow");
         if (type == EntityType.GOAT) return altitude >= 55 ? 1 : 0.05F;
         if (type == EntityType.FROG || type == EntityType.TURTLE) return water && !cold && altitude < 20 ? 1 : 0;
         if (type == EntityType.WOLF) return forest ? 1 : 0.14F;

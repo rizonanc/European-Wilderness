@@ -8,13 +8,13 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 
 @Environment(EnvType.CLIENT)
 public class TerrainDiffusionMcClient implements ClientModInitializer {
-   public void onInitializeClient() {
-      ClientPlayNetworking.registerGlobalReceiver(BoatCurrentPayload.ID,(payload,context)->{
-         var boat=context.player().getVehicle();
-         if(boat instanceof BoatCurrentPayload.Receiver receiver&&boat.getId()==payload.entityId())
-            receiver.terrainDiffusion$receiveBoatCurrent(payload.flow());
-      });
-      ClientPerformance.install();
-      com.github.xandergos.terraindiffusionmc.compat.voxy.VoxyCompat.install();
-   }
+    public void onInitializeClient() {
+        ClientPlayNetworking.registerGlobalReceiver(BoatCurrentPayload.ID, (payload, context) -> {
+            var boat = context.player().getVehicle();
+            if (boat instanceof BoatCurrentPayload.Receiver receiver && boat.getId() == payload.entityId())
+                receiver.terrainDiffusion$receiveBoatCurrent(payload.flow());
+        });
+        ClientPerformance.install();
+        com.github.xandergos.terraindiffusionmc.compat.voxy.VoxyCompat.install();
+    }
 }

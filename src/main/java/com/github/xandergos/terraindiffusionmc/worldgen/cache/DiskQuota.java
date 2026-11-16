@@ -34,9 +34,13 @@ final class DiskQuota {
     private boolean initialized;
     private long used, reserved, scans, sizeQueries;
 
-    private DiskQuota(Path root) { this.root = root; }
+    private DiskQuota(Path root) {
+        this.root = root;
+    }
 
-    synchronized void invalidate() { initialized = false; }
+    synchronized void invalidate() {
+        initialized = false;
+    }
 
     synchronized long usedBytes() throws IOException {
         if (!initialized) reconcile();
@@ -50,11 +54,15 @@ final class DiskQuota {
         initialized = false;
         scans++;
         boolean present;
-        try { Files.readAttributes(root, java.nio.file.attribute.BasicFileAttributes.class); present = true; }
-        catch (NoSuchFileException absent) { present = false; }
+        try {
+            Files.readAttributes(root, java.nio.file.attribute.BasicFileAttributes.class);
+            present = true;
+        } catch (NoSuchFileException absent) {
+            present = false;
+        }
         if (present) {
             try (var files = Files.list(root)) {
-                for (var iterator = files.iterator(); iterator.hasNext();) {
+                for (var iterator = files.iterator(); iterator.hasNext(); ) {
                     Path file = iterator.next();
                     String name = file.getFileName().toString();
                     if ((!name.endsWith(".ewt") && !name.contains(".ewt.tmp-")) || writing.contains(file)) continue;
@@ -64,14 +72,20 @@ final class DiskQuota {
                 }
             }
         }
-        sizes.clear(); sizes.putAll(found); used = bytes; initialized = true;
+        sizes.clear();
+        sizes.putAll(found);
+        used = bytes;
+        initialized = true;
         return used;
     }
 
     private long size(Path file) throws IOException {
         sizeQueries++;
-        try { return Files.size(file); }
-        catch (NoSuchFileException removed) { return 0; }
+        try {
+            return Files.size(file);
+        } catch (NoSuchFileException removed) {
+            return 0;
+        }
     }
 
     synchronized DiskTerrainStore.Reservation reserve(long bytes, long limit) throws IOException {
@@ -83,10 +97,14 @@ final class DiskQuota {
     }
 
     synchronized void release(DiskTerrainStore.Reservation reservation) {
-        if (!reservation.closed) { reserved -= reservation.bytes; reservation.closed = true; }
+        if (!reservation.closed) {
+            reserved -= reservation.bytes;
+            reservation.closed = true;
+        }
     }
 
-    synchronized void beginWrite(DiskTerrainStore.Reservation reservation, Path temporary, long bytes) throws IOException {
+    synchronized void beginWrite(DiskTerrainStore.Reservation reservation, Path temporary, long bytes)
+            throws IOException {
         if (reservation.quota != this || reservation.closed || reservation.bytes < bytes)
             throw new IllegalArgumentException("Foreign, closed or undersized disk reservation");
         usedBytes();
@@ -94,11 +112,15 @@ final class DiskQuota {
     }
 
     // Called under this monitor around the filesystem mutation, never around encoding/inference.
-    void refresh(Path file) throws IOException { setSize(file, size(file)); }
+    void refresh(Path file) throws IOException {
+        setSize(file, size(file));
+    }
+
     void setSize(Path file, long bytes) {
         Long previous = bytes == 0 ? sizes.remove(file) : sizes.put(file, bytes);
         used = Math.addExact(used - (previous == null ? 0 : previous), bytes);
     }
+
     void finishWrite(Path temporary) throws IOException {
         writing.remove(temporary);
         // Includes a failed-to-delete partial write in subsequent quota checks.

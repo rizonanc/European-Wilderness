@@ -9,8 +9,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /** A solo integrated client already ingests its real chunks; do not serialize them a second time. */
 @Pseudo
-@Mixin(targets="com.ethan.voxyworldgenv2.event.ServerEventHandler",remap=false)
+@Mixin(targets = "com.ethan.voxyworldgenv2.event.ServerEventHandler", remap = false)
 public abstract class WorldGenLoadedChunkMixin {
-    @Inject(method="onChunkLoad",at=@At("HEAD"),cancellable=true,remap=false)
-    private static void ewh$skipDuplicate(ServerWorld world,WorldChunk chunk,CallbackInfo ci){if(WorldGenCompat.skipDuplicateBroadcast(world)) ci.cancel();}
+    @Inject(method = "onChunkLoad", at = @At("HEAD"), cancellable = true, remap = false)
+    private static void ewh$skipDuplicate(ServerWorld world, WorldChunk chunk, CallbackInfo ci) {
+        if (WorldGenCompat.skipDuplicateBroadcast(world)) ci.cancel();
+    }
 }

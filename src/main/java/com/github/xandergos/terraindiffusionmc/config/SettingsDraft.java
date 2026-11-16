@@ -22,10 +22,21 @@ public final class SettingsDraft {
         values = new LinkedHashMap<>(original);
     }
 
-    public String get(String key) { return values.get(key); }
-    public Map<String, String> values() { return Map.copyOf(values); }
-    public boolean changed(String key) { return !original.get(key).equals(values.get(key)); }
-    public boolean canUndo() { return !undo.isEmpty(); }
+    public String get(String key) {
+        return values.get(key);
+    }
+
+    public Map<String, String> values() {
+        return Map.copyOf(values);
+    }
+
+    public boolean changed(String key) {
+        return !original.get(key).equals(values.get(key));
+    }
+
+    public boolean canUndo() {
+        return !undo.isEmpty();
+    }
 
     public List<String> changedKeys() {
         var result = new ArrayList<String>();

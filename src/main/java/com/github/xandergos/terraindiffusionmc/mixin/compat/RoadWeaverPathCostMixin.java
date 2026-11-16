@@ -14,8 +14,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(targets = "net.shiroha233.roadweaver.pathfinding.impl.PathfindingHelper", remap = false)
 abstract class RoadWeaverPathCostMixin {
     @Inject(method = "oceanFloorSampler", at = @At("RETURN"), cancellable = true)
-    private static void td$localDepth(@Coerce Object cache, int x, int z, ServerWorld world,
-            CallbackInfoReturnable<Integer> result) {
+    private static void td$localDepth(
+            @Coerce Object cache, int x, int z, ServerWorld world, CallbackInfoReturnable<Integer> result) {
         var session = RoadWeaverTerrain.session(world);
         if (session == null) return;
         int sea = world.getSeaLevel();
@@ -28,14 +28,25 @@ abstract class RoadWeaverPathCostMixin {
 }
 
 @Pseudo
-@Mixin(targets = {
-    "net.shiroha233.roadweaver.pathfinding.impl.BasicAStarPathfinder",
-    "net.shiroha233.roadweaver.pathfinding.impl.BidirectionalAStarPathfinder"
-}, remap = false)
+@Mixin(
+        targets = {
+            "net.shiroha233.roadweaver.pathfinding.impl.BasicAStarPathfinder",
+            "net.shiroha233.roadweaver.pathfinding.impl.BidirectionalAStarPathfinder"
+        },
+        remap = false)
 abstract class RoadWeaverMountainCostMixin {
     @Inject(method = "computeMoveCost", at = @At("RETURN"), cancellable = true)
-    private void td$preferGentlerSlopes(BlockPos from, BlockPos to, BlockPos previous, int[] offset, int step,
-            BlockPos start, BlockPos goal, ServerWorld world, @Coerce Object cache, @Coerce Object config,
+    private void td$preferGentlerSlopes(
+            BlockPos from,
+            BlockPos to,
+            BlockPos previous,
+            int[] offset,
+            int step,
+            BlockPos start,
+            BlockPos goal,
+            ServerWorld world,
+            @Coerce Object cache,
+            @Coerce Object config,
             CallbackInfoReturnable<Double> result) {
         double cost = RoadWeaverTerrain.mountainGradeCost(world, from, to);
         if (cost > 0) result.setReturnValue(result.getReturnValueD() + cost);
@@ -46,9 +57,19 @@ abstract class RoadWeaverMountainCostMixin {
 @Mixin(targets = "net.shiroha233.roadweaver.pathfinding.impl.PotentialFieldPathfinder", remap = false)
 abstract class RoadWeaverPotentialFieldCostMixin {
     @Inject(method = "computeMoveCost", at = @At("RETURN"), cancellable = true)
-    private void td$preferGentlerSlopes(BlockPos from, BlockPos to, BlockPos previous, int[] offset, int step,
-            double[] gradient, double magnitude, double[] contour, ServerWorld world, @Coerce Object cache,
-            @Coerce Object config, CallbackInfoReturnable<Double> result) {
+    private void td$preferGentlerSlopes(
+            BlockPos from,
+            BlockPos to,
+            BlockPos previous,
+            int[] offset,
+            int step,
+            double[] gradient,
+            double magnitude,
+            double[] contour,
+            ServerWorld world,
+            @Coerce Object cache,
+            @Coerce Object config,
+            CallbackInfoReturnable<Double> result) {
         double cost = RoadWeaverTerrain.mountainGradeCost(world, from, to);
         if (cost > 0) result.setReturnValue(result.getReturnValueD() + cost);
     }

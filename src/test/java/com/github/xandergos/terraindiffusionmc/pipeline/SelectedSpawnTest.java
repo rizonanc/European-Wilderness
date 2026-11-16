@@ -1,16 +1,18 @@
 package com.github.xandergos.terraindiffusionmc.pipeline;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.github.xandergos.terraindiffusionmc.world.SpawnChoice;
 import java.util.Arrays;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class SelectedSpawnTest {
-    @Test void choosesNearestDryForestGroundAndRejectsUnsuitableTerrain() {
+    @Test
+    void testChoosesNearestDryForestGround() {
         short[][] height = new short[97][97], biome = new short[97][97];
         for (int i = 0; i < 97; i++) {
-            Arrays.fill(height[i], (short)300);
-            Arrays.fill(biome[i], (short)208);
+            Arrays.fill(height[i], (short) 300);
+            Arrays.fill(biome[i], (short) 208);
         }
         var data = new LocalTerrainProvider.HeightmapData(height, biome, 97, 97);
         var requested = new SpawnChoice(100, -100, "forest", 6);

@@ -35,7 +35,10 @@ final class BiomeColumnCache {
         int cx = Math.floorDiv(quartX, 4), cz = Math.floorDiv(quartZ, 4);
         int slot = -1;
         for (int i = 0; i < 4; i++) {
-            if (valid[i] != 0 && xs[i] == cx && zs[i] == cz) {slot = i; break;}
+            if (valid[i] != 0 && xs[i] == cx && zs[i] == cz) {
+                slot = i;
+                break;
+            }
         }
         if (slot == -1) {
             slot = next;

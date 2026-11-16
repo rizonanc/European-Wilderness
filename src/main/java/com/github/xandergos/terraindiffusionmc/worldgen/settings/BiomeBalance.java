@@ -8,12 +8,12 @@ public record BiomeBalance(int mountains, int oceans, int deserts, int forests, 
     private static final Codec<Integer> AMOUNT = Codec.intRange(0, 200);
 
     public static final Codec<BiomeBalance> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        AMOUNT.optionalFieldOf("mountains", 100).forGetter(BiomeBalance::mountains),
-        AMOUNT.optionalFieldOf("oceans", 100).forGetter(BiomeBalance::oceans),
-        AMOUNT.optionalFieldOf("deserts", 100).forGetter(BiomeBalance::deserts),
-        AMOUNT.optionalFieldOf("forests", 100).forGetter(BiomeBalance::forests),
-        AMOUNT.optionalFieldOf("fields", 100).forGetter(BiomeBalance::fields)
-    ).apply(instance, BiomeBalance::new));
+                    AMOUNT.optionalFieldOf("mountains", 100).forGetter(BiomeBalance::mountains),
+                    AMOUNT.optionalFieldOf("oceans", 100).forGetter(BiomeBalance::oceans),
+                    AMOUNT.optionalFieldOf("deserts", 100).forGetter(BiomeBalance::deserts),
+                    AMOUNT.optionalFieldOf("forests", 100).forGetter(BiomeBalance::forests),
+                    AMOUNT.optionalFieldOf("fields", 100).forGetter(BiomeBalance::fields))
+            .apply(instance, BiomeBalance::new));
 
     public float adjustElevation(float metres) {
         if (oceans != 100) {
@@ -28,8 +28,13 @@ public record BiomeBalance(int mountains, int oceans, int deserts, int forests, 
         return metres;
     }
 
-    public double desertAridityLimit() { return 0.32 + (deserts - 100) * 0.0018; }
-    public double desertMaskThreshold() { return 0.55 - (deserts - 100) * 0.004; }
+    public double desertAridityLimit() {
+        return 0.32 + (deserts - 100) * 0.0018;
+    }
+
+    public double desertMaskThreshold() {
+        return 0.55 - (deserts - 100) * 0.004;
+    }
 
     public double fieldMaskThreshold() {
         return Math.clamp(0.148 + (fields - forests) * 0.00148, 0.0, 0.444);

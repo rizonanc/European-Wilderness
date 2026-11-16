@@ -1,5 +1,7 @@
 package com.github.xandergos.terraindiffusionmc.pipeline;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.sun.net.httpserver.HttpServer;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -13,12 +15,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import static org.junit.jupiter.api.Assertions.*;
 
 class ModelAssetDownloadTest {
-    @TempDir Path directory;
+    @TempDir
+    Path directory;
 
-    @Test void decompressesGzipAndBoundsTheInstalledSize() throws Exception {
+    @Test
+    void decompressesGzipAndBoundsTheInstalledSize() throws Exception {
         byte[] model = {1, 2, 3};
         var compressed = new ByteArrayOutputStream();
         try (var gzip = new GZIPOutputStream(compressed)) {
@@ -38,14 +41,16 @@ class ModelAssetDownloadTest {
             Path file = directory.resolve("asset.tmp");
             ModelAssetManager.downloadBody(uri, file, "test", 3, 2000, 2000, true);
             assertArrayEquals(model, Files.readAllBytes(file));
-            assertThrows(IOException.class, () -> ModelAssetManager.downloadBody(uri, file, "test", 2, 2000, 2000, true));
+            assertThrows(
+                    IOException.class, () -> ModelAssetManager.downloadBody(uri, file, "test", 2, 2000, 2000, true));
             assertTrue(Files.size(file) <= 2);
         } finally {
             server.stop(0);
         }
     }
 
-    @Test void enforcesManifestSizeForChunkedResponses() throws Exception {
+    @Test
+    void enforcesManifestSizeForChunkedResponses() throws Exception {
         var server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         server.createContext("/", exchange -> {
             try (exchange) {
@@ -66,7 +71,8 @@ class ModelAssetDownloadTest {
         }
     }
 
-    @Test void timesOutWhenBodyStopsAfterHeaders() throws Exception {
+    @Test
+    void timesOutWhenBodyStopsAfterHeaders() throws Exception {
         var release = new CountDownLatch(1);
         var server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         server.createContext("/", exchange -> {

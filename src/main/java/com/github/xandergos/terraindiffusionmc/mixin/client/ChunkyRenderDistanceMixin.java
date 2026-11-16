@@ -12,8 +12,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 abstract class ChunkyRenderDistanceMixin {
     @Inject(method = "triggerRdCycle()V", at = @At("HEAD"), cancellable = true, require = 0)
     private static void terrainDiffusion$preserveRenderDistance(CallbackInfo ci) {
-        FabricLoader.getInstance().getModContainer("chunkypregen")
-            .filter(mod -> mod.getMetadata().getVersion().getFriendlyString().equals("2.2.0"))
-            .ifPresent(mod -> ci.cancel());
+        FabricLoader.getInstance()
+                .getModContainer("chunkypregen")
+                .filter(mod ->
+                        mod.getMetadata().getVersion().getFriendlyString().equals("2.2.0"))
+                .ifPresent(mod -> ci.cancel());
     }
 }
