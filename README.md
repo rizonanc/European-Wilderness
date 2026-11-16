@@ -16,23 +16,23 @@ The screenshots use the Alps preset. Some were taken with shaders and some witho
 
 ### Screenshots
 
-![River valley](docs/screenshots/river-valley.png)
+![River valley](docs/screenshots/river-valley.jpg)
 
 2048 Voxy Render Distance, Complementary Reimagined ( Visual Style: Unbound )
 
-![Snowy mountain slopes](docs/screenshots/snowy-slopes.png)
+![Snowy mountain slopes](docs/screenshots/snowy-slopes.jpg)
 
 32 Render Distance, No shaders
 
-![Village on the plains](docs/screenshots/plains-village.png)
+![Village on the plains](docs/screenshots/plains-village.jpg)
 
 2048 Voxy Render Distance, Complementary Reimagined ( Visual Style: Unbound )
 
-![Snowy forest from above](docs/screenshots/snowy-forest.png)
+![Snowy forest from above](docs/screenshots/snowy-forest.jpg)
 
 2048 Voxy Render Distance, Complementary Reimagined ( Visual Style: Unbound )
 
-![Aurora over the mountains](docs/screenshots/mountain-aurora.png)
+![Aurora over the mountains](docs/screenshots/mountain-aurora.jpg)
 
  2048 Voxy Render Distance, Complementary Reimagined ( Visual Style: Unbound )
 
